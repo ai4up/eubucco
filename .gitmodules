@@ -1,0 +1,3 @@
+[submodule "eubucco/ufo"]
+	path = eubucco/ufo
+	url = git@github.com:ai4up/ufo-map.git
