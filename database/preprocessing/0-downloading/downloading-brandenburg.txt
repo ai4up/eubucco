@@ -1,0 +1,21 @@
+# make sure that you create a directory (where you want to download the data in) in advance and that you have enough memory for the downolad (~ 50 GB).
+# navigate to the directory and proceed with the following steps:
+
+# 1. download all .zip files (source: https://stackoverflow.com/questions/13533217/how-to-download-all-links-to-zip-files-on-a-given-web-page-using-wget-curl)
+
+wget -r -np -l 1 -A zip https://data.geobasis-bb.de/geobasis/daten/3d_gebaeude/lod2_gml/
+
+#-r,  --recursive          specify recursive download.
+#-np, --no-parent          don't ascend to the parent directory.
+#-l,  --level=NUMBER       maximum recursion depth (inf or 0 for infinite).
+#-A,  --accept=LIST        comma-separated list of accepted extensions.
+
+
+# 2. unzip all files in folder (source: https://stackoverflow.com/questions/2374772/unzip-all-files-in-a-directory/29248777)
+#    if not yet installed, you need to install the package unzip via: sudo apt install unzip
+
+unzip \*.zip
+
+# 3. remove all files except .gml files (source https://www.tecmint.com/delete-all-files-in-directory-except-one-few-file-extensions/), while displaying what is being done (-v).
+
+rm -v !(*.gml)
