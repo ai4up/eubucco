@@ -1,6 +1,6 @@
 # EUBUCCO
 
-This is the code repository to create the scientific database __EUBUCCO__ (__EU__ropean __BU__ilding stock __C__haracteristics in a __C__ommon and __O__pen database for 206 million individual buildings).
+This is the code repository to create the scientific database __EUBUCCO__ (**EU**ropean **BU**ilding stock **C**haracteristics in a **C**ommon and **O**pen database for 206 million individual buildings).
 
 
 _Disclaimer: This repository and the associated database are currently in a beta version (version 0.1). This work is under review with the journal Scientific Data. Some aspects of the code and the data may still contain errors and bugs. Please contact us by email or by creating an issue if you spot any bug or error._
