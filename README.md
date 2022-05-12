@@ -24,7 +24,7 @@ This repository contains all the code that was used to create the database. The 
 
 ## Data
 
-The associated data can be found on Zenodo: [https://zenodo.org/record/6524781#.YnzjZ1xBygo]. 
+The associated data can be found on Zenodo: https://zenodo.org/record/6524781#.YnzjZ1xBygo. 
 
 
 ## Associated publications and documentation
@@ -43,7 +43,7 @@ All the content of this repository is licensed under the MIT license. For licens
 
 Citation:
 
-> Milojevic-Dupont, Nikola, and Wagner, Felix, Hu, Jiawei, Zumwald, Marius, Nachtigall, Florian, Biljecki, Filip, Heeren, Niko, Kaack, Lynn, Pichler, Peter-Paul, & Creutzig, Felix. (2022). EUBUCCO (v0.1). Zenodo. [https://doi.org/10.5281/zenodo.6524781]
+> Milojevic-Dupont, Nikola, and Wagner, Felix, Hu, Jiawei, Zumwald, Marius, Nachtigall, Florian, Biljecki, Filip, Heeren, Niko, Kaack, Lynn, Pichler, Peter-Paul, & Creutzig, Felix. (2022). EUBUCCO (v0.1). Zenodo. https://doi.org/10.5281/zenodo.6524781
 
 
 Bibtex: 
