@@ -24,29 +24,50 @@ This repository contains all the code that was used to create the database. The 
 
 ## Data
 
-The associated data can be found on Zenodo: XXX
+The associated data can be found on Zenodo: [https://zenodo.org/record/6524781#.YnzjZ1xBygo]. 
 
 
 ## Associated publications and documentation
 
-This work is associated to a Data Descriptor paper currently under review with the journal Scientific Data. The preprint is available [here](XXX) and the source code of the manuscript including the `.tex` file, the figures and the files to create them is available as a submodule [eubucco-manuscript](https://github.com/ai4up/eubucco-manuscript). 
+This work is associated to a Data Descriptor paper currently under review with the journal Scientific Data. The manuscript, which provides extensive documentation on the database content and methodology, as well as the source code of the manuscript, including the `.tex` file, the figures and the files to create them, are available as a submodule [eubucco-manuscript](https://github.com/ai4up/eubucco-manuscript). 
 
 
 ## License
 
 
-All the content of this repository is licensed under the MIT license, which means you can freely reuse all materials given appropriate attribution. Please use the citation below to cite this work. For license information about the data, please refer to the [Zenodo repository](XXX).
+All the content of this repository is licensed under the MIT license. For license information about the data, please refer to the [Zenodo repository](https://zenodo.org/record/6524781#.YnzjZ1xBygo).
 
 
 ## Citation
 
 
-Citation XXX.
+Citation:
+
+> Milojevic-Dupont, Nikola, and Wagner, Felix, Hu, Jiawei, Zumwald, Marius, Nachtigall, Florian, Biljecki, Filip, Heeren, Niko, Kaack, Lynn, Pichler, Peter-Paul, & Creutzig, Felix. (2022). EUBUCCO (v0.1). Zenodo. [https://doi.org/10.5281/zenodo.6524781]
 
 
 Bibtex: 
+
 ```
-XXX
+@dataset{eubucco_v0.1_2022_dataset,
+  author       = {{Milojevic-Dupont, Nikola and
+                  Wagner, Felix} and
+                  Hu, Jiawei and
+                  Zumwald, Marius and
+                  Nachtigall, Florian and
+                  Biljecki, Filip and
+                  Heeren, Niko and
+                  Kaack, Lynn and
+                  Pichler, Peter-Paul and
+                  Creutzig, Felix},
+  title        = {{EUBUCCO v0.1}},
+  month        = may,
+  year         = 2022,
+  publisher    = {Zenodo},
+  version      = {v0.1},
+  doi          = {10.5281/zenodo.6524781},
+  url          = {https://doi.org/10.5281/zenodo.6524781}
+}
 ```
 
 ## Contact
