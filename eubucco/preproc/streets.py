@@ -7,8 +7,9 @@ from ufo_map.Preprocessing.preproc_streets import *
 from ufo_map.Utils.helpers import import_csv_w_wkt_to_gdf,save_csv_wkt,get_all_paths,get_stats,arg_parser
 from preproc.db_set_up import fetch_GADM_info_country
 
+CRS_UNI = 'EPSG:3035'
 
-def download_osm_streets(gadm_country_code,
+def download_osm_streets(country_name,
                          path_stats='/p/projects/eubucco/stats/6-streets'):
     '''
         Downloads OpenStreetMap street network for a country at a city-level and saves a city-level
@@ -18,12 +19,11 @@ def download_osm_streets(gadm_country_code,
 
         Returns: None
     '''
-    _,country_name,_,local_crs = fetch_GADM_info_country(gadm_country_code)
 
     print(country_name)
 
-    paths_in = get_all_paths(country_name,'boundary')
-    paths_out = get_all_paths(country_name,'streets')
+    paths_in = get_all_paths(country_name,'/p/projects/eubucco/data/2-database-city-level-v0_1','boundary')
+    paths_out = get_all_paths(country_name,'/p/projects/eubucco/data/2-database-city-level-v0_1','streets')
 
     n_streets = 0
 
@@ -33,7 +33,7 @@ def download_osm_streets(gadm_country_code,
 
         print(path_out)
 
-        boundary = import_csv_w_wkt_to_gdf(path_in,local_crs,geometry_col='boundary_GADM_2k_buffer').to_crs(4326).geometry.iloc[0]
+        boundary = import_csv_w_wkt_to_gdf(path_in,CRS_UNI,geometry_col='boundary_GADM_2k_buffer').to_crs(4326).geometry.iloc[0]
 
         city_network = ox.graph_from_polygon(boundary, 
                                          simplify=True, 
@@ -43,7 +43,7 @@ def download_osm_streets(gadm_country_code,
                                        nodes=False, 
                                        edges=True,
                                        node_geometry=False, 
-                                       fill_edge_geometry=True).to_crs(local_crs)[['osmid','highway','length','geometry']]
+                                       fill_edge_geometry=True).to_crs(CRS_UNI)[['osmid','highway','length','geometry']]
 
         n_streets += len(city_streets)
 
@@ -96,7 +96,7 @@ def create_sbb(streets,path_sbb):
 
 
 
-def parse_streets(gadm_country_code,left_over=False):
+def parse_streets(country_name,left_over=False):
     '''
         Parses Openstreetmap street network to create an updated <city>_streets.csv with computed network centrality metrics,
         a <city>_intersections.csv file and a <city>_sbb.csv with street-based blocks created by polygonizing the street linestrings.
@@ -105,7 +105,6 @@ def parse_streets(gadm_country_code,left_over=False):
 
         Returns: None
     '''
-    _,country_name,_,crs = fetch_GADM_info_country(gadm_country_code)
 
     args = arg_parser(['i'])
     print(args.i)
@@ -115,16 +114,16 @@ def parse_streets(gadm_country_code,left_over=False):
     paths = {}
     for file in ['streets','geom','intersections','sbb']:
         if left_over==False:
-            paths[file] = get_all_paths(country_name,file)[args.i]
+            paths[file] = get_all_paths(country_name,'/p/projects/eubucco/data/2-database-city-level-v0_1',file)[args.i]
         else:
-            paths[file] = get_all_paths(country_name,file,left_over)[args.i]
+            paths[file] = get_all_paths(country_name,'/p/projects/eubucco/data/2-database-city-level-v0_1',file,left_over)[args.i]
 
     path_stats = os.path.join('/p/projects/eubucco/data/2-database-city-level',
                               country_name,
                               'stats-parts-str')
  
-    streets = import_csv_w_wkt_to_gdf(paths['streets'],crs)
-    buildings = import_csv_w_wkt_to_gdf(paths['geom'],crs)
+    streets = import_csv_w_wkt_to_gdf(paths['streets'],CRS_UNI)
+    buildings = import_csv_w_wkt_to_gdf(paths['geom'],CRS_UNI)
 
     streets, n_streets, n_int = create_streets_and_intersections(streets,buildings,paths['streets'],paths['intersections']) 
 
