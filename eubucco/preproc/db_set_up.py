@@ -199,9 +199,9 @@ def get_city_paths(list_city_paths,dataset_name,country_name):
 """
 
 def fetch_GADM_info_country(country_name,
-                         levels=None,
-                         path_sheet = 'gadm_table.csv',
-                         path_root_folder = '/p/projects/eubucco/data/0-raw-data/gadm'):
+                            levels=None,
+                            path_sheet = 'gadm_table.csv',
+                            path_root_folder = '/p/projects/eubucco/data/0-raw-data/gadm'):
     '''
         Goes in the GADM sheet and picks up the info.
         
@@ -217,8 +217,7 @@ def fetch_GADM_info_country(country_name,
 
     # filter by country name
     GADM_country = GADM_sheet[GADM_sheet['country_name'] == country_name]
-    print(GADM_country)
-
+    
     # get GADM city file
     GADM_file = gpd.read_file(os.path.join(path_root_folder,
                             GADM_country.country_name.iloc[0],
