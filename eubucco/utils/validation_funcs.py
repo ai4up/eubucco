@@ -5,8 +5,8 @@ import os
 import geopandas as gpd
 from shapely import wkt
 
-from ufo.ufo_map.Utils.helpers import *
-from ufo.ufo_map.Preprocessing.parsing import *
+from ufo_map.Utils.helpers import *
+from ufo_map.Preprocessing.parsing import *
 from preproc.parsing import get_params
 
 

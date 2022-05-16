@@ -8,9 +8,9 @@ from datetime import date
 import glob
 import ast
 
-from ufo.ufo_map.Utils.helpers import *
-from ufo.ufo_map.Preprocessing.parsing import *
-from ufo.ufo_map.Feature_engineering.urban_atlas import building_in_ua
+from ufo_map.Utils.helpers import *
+from ufo_map.Preprocessing.parsing import *
+from ufo_map.Feature_engineering.urban_atlas import building_in_ua
 from preproc.parsing import get_params
 from utils.extra_cases import average_flanders_dupls
 

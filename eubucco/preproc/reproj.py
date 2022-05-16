@@ -4,8 +4,8 @@ import time
 import os
 
 from preproc.parsing import get_params
-from ufo.ufo_map.Utils.helpers import *
-from ufo.ufo_map.Preprocessing.parsing import *
+from ufo_map.Utils.helpers import *
+from ufo_map.Preprocessing.parsing import *
 
 
 

@@ -7,7 +7,7 @@ sys.path.append(PROJECT_SRC_PATH)
 
 from preproc.create_overview import get_paths_dataset
 from preproc.attribs import *
-from ufo.ufo_map.Utils.helpers import arg_parser
+from ufo_map.Utils.helpers import arg_parser
 
 # get the relevant files that should be mapped
 path_cities,dataset_name = get_paths_dataset(arg_parser(['i']).i-1,'attrib')

@@ -3,8 +3,8 @@ import time
 import osmnx as ox
 import momepy
 
-from ufo.ufo_map.Preprocessing.preproc_streets import *
-from ufo.ufo_map.Utils.helpers import import_csv_w_wkt_to_gdf,save_csv_wkt,get_all_paths,get_stats,arg_parser
+from ufo_map.Preprocessing.preproc_streets import *
+from ufo_map.Utils.helpers import import_csv_w_wkt_to_gdf,save_csv_wkt,get_all_paths,get_stats,arg_parser
 from preproc.db_set_up import fetch_GADM_info_country
 
 
