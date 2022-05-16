@@ -2,7 +2,7 @@ import os
 import glob
 import pandas as pd
 
-from ufo.ufo_map.Utils.helpers import *
+from ufo_map.Utils.helpers import *
 from preproc.parsing import get_params
 
 

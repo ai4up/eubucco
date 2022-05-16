@@ -3,7 +3,7 @@ import pandas as pd
 import psutil
 import ast
 
-from ufo.ufo_map.Utils.helpers import get_all_paths, arg_parser
+from ufo_map.Utils.helpers import get_all_paths, arg_parser
 from preproc.db_set_up import fetch_GADM_info_country
 from preproc.parsing import get_params
 

@@ -1,5 +1,5 @@
 [submodule "eubucco/ufo"]
-	path = eubucco/ufo
+	path = ufo-map
 	url = git@github.com:ai4up/ufo-map.git
 [submodule "manuscript"]
 	path = manuscript

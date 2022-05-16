@@ -14,8 +14,8 @@ from pyrosm.data import sources
 import subprocess
 from pathlib import Path
 
-from ufo.ufo_map.Utils.helpers import *
-from ufo.ufo_map.Preprocessing.parsing import *
+from ufo_map.Utils.helpers import *
+from ufo_map.Preprocessing.parsing import *
 
 pd.options.mode.chained_assignment = None
 

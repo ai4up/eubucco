@@ -7,7 +7,7 @@ from shapely import wkt
 import geopandas as gpd
 import ast
 
-from ufo.ufo_map.Utils.helpers import get_all_paths, arg_parser
+from ufo_map.Utils.helpers import get_all_paths, arg_parser
 from preproc.parsing import get_params
 
 # Declare global variables

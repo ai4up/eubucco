@@ -9,7 +9,7 @@ import rioxarray as rxr
 import rasterio
 from rasterio.features import shapes
 
-from ufo.ufo_map.Utils.helpers import import_csv_w_wkt_to_gdf, save_csv_wkt, arg_parser, get_all_paths, get_stats
+from ufo_map.Utils.helpers import import_csv_w_wkt_to_gdf, save_csv_wkt, arg_parser, get_all_paths, get_stats
 from preproc.db_set_up import fetch_GADM_info_country, clean_GADM_city_names
 
 
