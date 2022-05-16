@@ -6,5 +6,5 @@ sys.path.append(PROJECT_SRC_PATH)
 
 from preproc.streets import download_osm_streets
 
-download_osm_streets('NLD')
+download_osm_streets('spain')
 

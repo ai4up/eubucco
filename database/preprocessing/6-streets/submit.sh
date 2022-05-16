@@ -9,12 +9,12 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --output=ddl_street_out-%A_%a.txt
 #SBATCH --error=ddl_street_err-%A_%a.txt
-#SBATCH --workdir=/p/tmp/nikolami
+#SBATCH --workdir=/p/tmp/fewagner/v0_2-db/streets
 
 pwd; hostname; date
 
 module load anaconda
 
-source activate ox112
+source activate /home/nikolami/.conda/envs/ox112
 
-python -u downloading-streets.py 
+python -u /p/projects/eubucco/git-eubucco/database/preprocessing/6-streets/downloading-streets.py 
