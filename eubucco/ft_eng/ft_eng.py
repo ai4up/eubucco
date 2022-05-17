@@ -26,7 +26,7 @@ def create_features(country_name,
                     left_over=False,
                     ua_mode=False,
                     path_stats='/p/projects/eubucco/stats/5-ft-eng',
-                    data_dir='/p/projects/eubucco/data/2-database-city-level'
+                    data_dir='/p/projects/eubucco/data/2-database-city-level-v0_1'
                     ):
     '''
         Creates features and saves them as csv files <city>_<ft-type>_fts.csv

@@ -1,16 +1,16 @@
-import os
 import time
 
 import osmnx as ox
 import momepy
 
 from ufo_map.Preprocessing.preproc_streets import *
-from ufo_map.Utils.helpers import import_csv_w_wkt_to_gdf, save_csv_wkt, get_all_paths, write_stats, arg_parser
+from ufo_map.Utils.helpers import import_csv_w_wkt_to_gdf, save_csv_wkt, get_all_paths, write_stats
 
 CRS_UNI = 'EPSG:3035'
 
 
 def download_osm_streets(country_name,
+                         data_dir='/p/projects/eubucco/data/2-database-city-level-v0_1',
                          path_stats='/p/projects/eubucco/stats/6-streets'):
     '''
         Downloads OpenStreetMap street network for a country at a city-level and saves a city-level
@@ -23,8 +23,8 @@ def download_osm_streets(country_name,
 
     print(country_name)
 
-    paths_in = get_all_paths(country_name, '/p/projects/eubucco/data/2-database-city-level-v0_1', 'boundary')
-    paths_out = get_all_paths(country_name, '/p/projects/eubucco/data/2-database-city-level-v0_1', 'streets')
+    paths_in = get_all_paths(country_name, data_dir, 'boundary')
+    paths_out = get_all_paths(country_name, data_dir, 'streets')
 
     n_streets = 0
 
@@ -96,7 +96,11 @@ def create_sbb(streets, path_sbb):
     return(len(sbb))
 
 
-def parse_streets(country_name, left_over=False, path_stats='/p/projects/eubucco/stats/6-streets'):
+def parse_streets(country_name,
+                  city_idx,
+                  left_over=False,
+                  data_dir='/p/projects/eubucco/data/2-database-city-level-v0_1',
+                  path_stats='/p/projects/eubucco/stats/6-streets'):
     '''
         Parses Openstreetmap street network to create an updated <city>_streets.csv with computed network centrality metrics,
         a <city>_intersections.csv file and a <city>_sbb.csv with street-based blocks created by polygonizing the street linestrings.
@@ -106,15 +110,12 @@ def parse_streets(country_name, left_over=False, path_stats='/p/projects/eubucco
         Returns: None
     '''
 
-    city_idx = arg_parser(['i']).i
-    print(city_idx)
-
     start = time.time()
 
     paths = {}
     for file in ['streets', 'geom', 'intersections', 'sbb']:
         paths[file] = get_all_paths(
-            country_name, '/p/projects/eubucco/data/2-database-city-level-v0_1', file, left_over)[city_idx]
+            country_name, data_dir, file, left_over)[city_idx]
 
     streets = import_csv_w_wkt_to_gdf(paths['streets'], CRS_UNI)
     buildings = import_csv_w_wkt_to_gdf(paths['geom'], CRS_UNI)

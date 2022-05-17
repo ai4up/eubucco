@@ -8,11 +8,15 @@ PROJECT_SRC_PATH = os.path.realpath(os.path.join(__file__, '..', '..', '..', 'eu
 sys.path.append(PROJECT_SRC_PATH)
 
 # utilize Slurm's concurrent job scheduling by mapping SLURM_ARRAY_TASK_ID to city indices
-city_idx = arg_parser(['i']).i
+args = arg_parser([('i', int), ('c', str)])
+city_idx = args.i
+country = args.c
+
+print(country)
 print(city_idx)
 
-create_features('netherlands',
-                city_idx=city_idx,
+create_features(country,
+                city_idx,
                 bld=True,
                 blk=True,
                 bld_d=True,
@@ -23,4 +27,5 @@ create_features('netherlands',
                 city_level=True,
                 left_over=False,
                 ua_mode=False,
-                data_dir='/p/projects/eubucco/data/2-database-city-level')
+                path_stats='/p/projects/eubucco/stats/5-ft-eng',
+                data_dir='/p/projects/eubucco/data/2-database-city-level-v0_1')
