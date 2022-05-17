@@ -44,7 +44,7 @@ def create_features(country_name,
     for file in ['geom', 'buffer', 'bld_fts', 'bld_d_fts', 'block_fts', 'block_d_fts', 'intersections', 'int_fts',
                  'streets', 'str_fts', 'sbb', 'sbb_fts', 'lu_fts', 'city_level_fts']:
 
-        fts_paths_cities = get_all_paths(country_name, data_dir, file, left_over, ua_mode)
+        fts_paths_cities = get_all_paths(country_name, file, data_dir, left_over, ua_mode)
         paths[file] = fts_paths_cities[city_idx]
 
     city_name = os.path.split(list(paths.values())[0])[-2]

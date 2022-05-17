@@ -609,7 +609,7 @@ def merge(list_saved_paths,country, path_db_folder='/p/projects/eubucco/data/2-d
     counter=0
 
     if list_saved_paths: all_paths = list_saved_paths
-    else: all_paths = get_all_paths(country,path_db_folder) 
+    else: all_paths = get_all_paths(country, path_root_folder=path_db_folder) 
     
     for path in all_paths:
         bool_merge=False
@@ -686,7 +686,7 @@ def db_set_up(parse_single=True,
     GADM_file = prepare_GADM(GADM_file,CRS_UNI)
 
     if folders: list_city_paths = create_folders(GADM_file,country_name,path_db_folder)
-    else: list_city_paths = get_all_paths(country_name,path_db_folder)
+    else: list_city_paths = get_all_paths(country_name, path_root_folder=path_db_folder)
 
     if boundaries:
         create_city_boundary_files(GADM_file,country_name,list_city_paths)

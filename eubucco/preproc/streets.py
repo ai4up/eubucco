@@ -23,8 +23,8 @@ def download_osm_streets(country_name,
 
     print(country_name)
 
-    paths_in = get_all_paths(country_name, data_dir, 'boundary')
-    paths_out = get_all_paths(country_name, data_dir, 'streets')
+    paths_in = get_all_paths(country_name, 'boundary', data_dir)
+    paths_out = get_all_paths(country_name, 'streets', data_dir)
 
     n_streets = 0
 
@@ -115,7 +115,7 @@ def parse_streets(country_name,
     paths = {}
     for file in ['streets', 'geom', 'intersections', 'sbb']:
         paths[file] = get_all_paths(
-            country_name, data_dir, file, left_over)[city_idx]
+            country_name, file, data_dir, left_over)[city_idx]
 
     streets = import_csv_w_wkt_to_gdf(paths['streets'], CRS_UNI)
     buildings = import_csv_w_wkt_to_gdf(paths['geom'], CRS_UNI)

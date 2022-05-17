@@ -486,7 +486,7 @@ def create_stats_main(db_version=0.1,
     print('----------')
 
     # get all paths for this country
-    paths = get_all_paths(p['country'],path_root_folder)
+    paths = get_all_paths(p['country'], path_root_folder=path_root_folder)
 
     # read in id mapper
     df_id_mapper = pd.read_csv(os.path.join(path_root_id,p['country']+'_ids.csv'))

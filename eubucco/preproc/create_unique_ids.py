@@ -38,7 +38,7 @@ def create_id(db_version = 0.1,
     # read in id mapper
     df_id_mapper = pd.read_csv(os.path.join(path_root_id,p['country']+'_ids.csv'))
     # read in all paths
-    list_city_paths = get_all_paths(p['country'],path_old_db_folder)
+    list_city_paths = get_all_paths(p['country'], path_root_folder=path_old_db_folder)
 
     i=0
     #for path in list_city_paths:
