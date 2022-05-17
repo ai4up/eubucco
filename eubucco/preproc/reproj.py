@@ -24,7 +24,7 @@ def reproj_to_3035_in_db(country_names = ['france','netherlands'],
         print(country_name)
         print('\n=====================\n')
 
-        for path in get_all_paths(country_name,'geom') + get_all_paths(country_name,'buffer'):
+        for path in get_all_paths(country_name,'geom') + get_all_paths(country_name, 'buffer'):
                         
             print(path)
 

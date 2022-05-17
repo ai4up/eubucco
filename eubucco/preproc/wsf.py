@@ -221,9 +221,9 @@ def create_wsf_age(gadm_country_code,
     paths = {}
     for file in ['geom', 'boundary', 'wsf-evo_geoms', 'wsf-evo_age']:
         if left_over == False:
-            paths[file] = get_all_paths(country_name, file)[city_idx]
+            paths[file] = get_all_paths(country_name, filename=file)[city_idx]
         else:
-            paths[file] = get_all_paths(country_name, file, left_over)[city_idx]
+            paths[file] = get_all_paths(country_name, filename=file, left_over=left_over)[city_idx]
 
     city_name = os.path.split(list(paths.values())[0])[-1][:-9]
     print(city_name)

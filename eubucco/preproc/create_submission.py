@@ -237,7 +237,7 @@ def concate_release(db_version = 0.1,
     print('----------')
 
     # get all paths
-    all_paths = get_all_paths(p['country'],path_db_folder) 
+    all_paths = get_all_paths(p['country'], path_root_folder=path_db_folder) 
 
     # read in ids
     df_ids = pd.read_csv(os.path.join(path_root_id,p['country']+'_ids.csv'))
