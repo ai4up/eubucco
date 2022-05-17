@@ -2,6 +2,7 @@ import time
 
 import osmnx as ox
 import momepy
+from networkx.exception import NetworkXPointlessConcept
 
 from ufo_map.Preprocessing.preproc_streets import *
 from ufo_map.Utils.helpers import import_csv_w_wkt_to_gdf, save_csv_wkt, get_all_paths, write_stats
@@ -27,6 +28,7 @@ def download_osm_streets(country_name,
     paths_out = get_all_paths(country_name, 'streets', data_dir)
 
     n_streets = 0
+    n_cities_wo_streets = 0
 
     start = time.time()
 
@@ -37,22 +39,26 @@ def download_osm_streets(country_name,
         boundary = import_csv_w_wkt_to_gdf(
             path_in, CRS_UNI, geometry_col='boundary_GADM_2k_buffer').to_crs(4326).geometry.iloc[0]
 
-        city_network = ox.graph_from_polygon(boundary,
-                                             simplify=True,
-                                             network_type='drive')
+        try:
+            city_network = ox.graph_from_polygon(boundary,
+                                                simplify=True,
+                                                network_type='drive')
 
-        city_streets = ox.utils_graph.graph_to_gdfs(city_network,
-                                                    nodes=False,
-                                                    edges=True,
-                                                    node_geometry=False,
-                                                    fill_edge_geometry=True).to_crs(CRS_UNI)[['osmid', 'highway', 'length', 'geometry']]
+            city_streets = ox.utils_graph.graph_to_gdfs(city_network,
+                                                        nodes=False,
+                                                        edges=True,
+                                                        node_geometry=False,
+                                                        fill_edge_geometry=True).to_crs(CRS_UNI)[['osmid', 'highway', 'length', 'geometry']]
 
-        n_streets += len(city_streets)
+            n_streets += len(city_streets)
+            save_csv_wkt(city_streets, path_out)
 
-        save_csv_wkt(city_streets, path_out)
+        except NetworkXPointlessConcept:
+            print(f'NetworkXPointlessConcept exception: Presumably no street network for city {path_in}')
+            n_cities_wo_streets += 1
 
     duration = time.time() - start
-    stats = {'country_name': country_name, 'n_streets': n_streets}
+    stats = {'country_name': country_name, 'n_streets': n_streets, 'n_cities_wo_streets': n_cities_wo_streets}
     filename = f'{country_name}_stat_ddl'
     write_stats(stats, duration, path_stats, filename)
 
@@ -109,7 +115,10 @@ def parse_streets(country_name,
 
         Returns: None
     '''
-
+    n_int = 0
+    n_sbb = 0
+    n_streets = 0
+    successful = True
     start = time.time()
 
     paths = {}
@@ -117,17 +126,22 @@ def parse_streets(country_name,
         paths[file] = get_all_paths(
             country_name, file, data_dir, left_over)[city_idx]
 
-    streets = import_csv_w_wkt_to_gdf(paths['streets'], CRS_UNI)
-    buildings = import_csv_w_wkt_to_gdf(paths['geom'], CRS_UNI)
+    try:
+        streets = import_csv_w_wkt_to_gdf(paths['streets'], CRS_UNI)
+        buildings = import_csv_w_wkt_to_gdf(paths['geom'], CRS_UNI)
 
-    streets, n_streets, n_int = create_streets_and_intersections(
-        streets, buildings, paths['streets'], paths['intersections'])
+        streets, n_streets, n_int = create_streets_and_intersections(
+            streets, buildings, paths['streets'], paths['intersections'])
 
-    n_sbb = create_sbb(streets, paths['sbb'])
+        n_sbb = create_sbb(streets, paths['sbb'])
 
-    save_csv_wkt(streets, paths['streets'])
+        save_csv_wkt(streets, paths['streets'])
+
+    except FileNotFoundError as e:
+        print(f'No street network or geometry found: {e}')
+        successful = False
 
     duration = time.time() - start
-    stats = {'city_idx': city_idx, 'n_streets': n_streets, 'n_int': n_int, 'n_sbb': n_sbb}
+    stats = {'city_idx': city_idx, 'n_streets': n_streets, 'n_int': n_int, 'n_sbb': n_sbb, 'successful': successful}
     filename = f'{city_idx}_stat_str'
     write_stats(stats, duration, path_stats, filename)
