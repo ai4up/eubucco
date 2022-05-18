@@ -18,4 +18,8 @@ module load anaconda
 
 source activate /home/nikolami/.conda/envs/ox112
 
-python -u /p/projects/eubucco/git-eubucco/database/preprocessing/6-streets/parsing-streets-inter-sbb.py -c 'netherlands' -i $SLURM_ARRAY_TASK_ID
+# Slurm's MaxArraySize is set to 3000, so in order to preprocess countries with more cities,
+# we need to split the job into multiple jobs with different offset indices.
+CITY_IDX_OFFSET=0
+CITY_IDX=$SLURM_ARRAY_TASK_ID
+python -u /p/projects/eubucco/git-eubucco/database/preprocessing/6-streets/parsing-streets-inter-sbb.py -c 'netherlands' -i $(($CITY_IDX_OFFSET + $CITY_IDX))
