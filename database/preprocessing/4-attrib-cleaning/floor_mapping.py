@@ -5,12 +5,12 @@ import pandas as pd
 PROJECT_SRC_PATH = os.path.realpath(os.path.join(__file__, '..', '..', '..', '..', 'eubucco'))
 sys.path.append(PROJECT_SRC_PATH)
 
-from preproc.create_overview import get_paths_dataset
-from preproc.attribs import *
-from ufo_map.Utils.helpers import arg_parser
+from preproc.create_overview import get_paths_dataset  # noqa: E402
+from preproc.attribs import *  # noqa: E402
+from ufo_map.Utils.helpers import arg_parser  # noqa: E402
 
 # get the relevant files that should be mapped
-path_cities,dataset_name = get_paths_dataset(arg_parser(['i']).i-1,'attrib')
+path_cities, dataset_name = get_paths_dataset(arg_parser(['i']).i - 1, 'attrib')
 
 print('...')
 
@@ -28,11 +28,11 @@ for path_city in path_cities:
         len_pre = len(df[df.height.isna()])
         df['height'] = add_floor_as_height(df)
         len_post = len(df[df.height.isna()])
-        print('Filled in {} vals'.format(len_pre-len_post))
-        lst_vals.append(len_pre-len_post)
+        print('Filled in {} vals'.format(len_pre - len_post))
+        lst_vals.append(len_pre - len_post)
         # path_city = path_city.split('.')[0]+'_test.csv'
-        df.to_csv(path_city,index=False)
-    except:
+        df.to_csv(path_city, index=False)
+    except BaseException:
         failed.append(path_city)
 
 print('Filled in {} height values from floors'.format(sum(lst_vals)))

@@ -5,25 +5,14 @@ PROJECT_SRC_PATH = os.path.realpath(os.path.join(__file__, '..', '..', '..', '..
 
 sys.path.append(PROJECT_SRC_PATH)
 
-from preproc.db_set_up import db_set_up
+from preproc.db_set_up import db_set_up  # noqa: E402
 
 # only select sepa mode with separated countries like Germany, Austria, Italy,...
-db_set_up(parse_single=True, chunksize=int(5E5), folders=True, boundaries=True, bldgs=True, auto_merge=True, sepa_mode=False)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+db_set_up(
+    parse_single=True,
+    chunksize=int(5E5),
+    folders=True,
+    boundaries=True,
+    bldgs=True,
+    auto_merge=True,
+    sepa_mode=False)
