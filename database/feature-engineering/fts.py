@@ -1,11 +1,11 @@
 import os
 import sys
 
-from ft_eng.ft_eng import create_features
-from ufo_map.Utils.helpers import arg_parser
-
 PROJECT_SRC_PATH = os.path.realpath(os.path.join(__file__, '..', '..', '..', 'eubucco'))
 sys.path.append(PROJECT_SRC_PATH)
+
+from ft_eng.ft_eng import create_features
+from ufo_map.Utils.helpers import arg_parser
 
 # utilize Slurm's concurrent job scheduling by mapping SLURM_ARRAY_TASK_ID to city indices
 args = arg_parser([('i', int), ('c', str)])
