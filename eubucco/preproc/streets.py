@@ -41,14 +41,17 @@ def download_osm_streets(country_name,
 
         try:
             city_network = ox.graph_from_polygon(boundary,
-                                                simplify=True,
-                                                network_type='drive')
+                                                 simplify=True,
+                                                 network_type='drive')
 
             city_streets = ox.utils_graph.graph_to_gdfs(city_network,
                                                         nodes=False,
                                                         edges=True,
                                                         node_geometry=False,
-                                                        fill_edge_geometry=True).to_crs(CRS_UNI)[['osmid', 'highway', 'length', 'geometry']]
+                                                        fill_edge_geometry=True).to_crs(CRS_UNI)[['osmid',
+                                                                                                  'highway',
+                                                                                                  'length',
+                                                                                                  'geometry']]
 
             n_streets += len(city_streets)
             save_csv_wkt(city_streets, path_out)

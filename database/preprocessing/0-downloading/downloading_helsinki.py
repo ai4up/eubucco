@@ -25,27 +25,26 @@ status, response = http.request('http://3d.hel.ninja/data/citygml/Helsinki3D_Cit
 
 # Get List of download links
 link_list = []
-for link in BeautifulSoup(response,'html.parser', parse_only=SoupStrainer('a')):
+for link in BeautifulSoup(response, 'html.parser', parse_only=SoupStrainer('a')):
     if link.has_attr('href'):
         if link['href'].endswith('.zip'):
             link_list.append(link['href'])
             print(link['href'])
 
-#print(link_list)     
+# print(link_list)
 
 # loop over all links to downlaod the zip files
 path_folder = '/Volumes/ssd_500gb/Drive/Downloads/helsinki/'
-i=0
+i = 0
 for lnk in link_list:
-    i = i+1
+    i = i + 1
     print(lnk)
-    path = os.path.join(path_folder,lnk)
+    path = os.path.join(path_folder, lnk)
     # takes path + url string and takes second part of split at last '/' to define output file name
     #path = os.path.join(path_folder,df['3DShape'][i].rsplit('/', 1)[1])
     const_path = 'http://3d.hel.ninja/data/citygml/Helsinki3D_CityGML_BUILDINGS_LOD2_NOTEXTURES_ZIP/'
     download_lnk = const_path + lnk
     print(download_lnk)
-    # download 
-    download_url(download_lnk,path)
+    # download
+    download_url(download_lnk, path)
     print('downloaded: {} of {} files '.format(i, len(link_list)))
-
