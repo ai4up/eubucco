@@ -51,8 +51,8 @@ def bbox_from_wsf_file_name(file_name):
     Example: WSF2019_v1_-100_16
     '''
     # get elements of the bounding box
-    EW = np.arange(int(file_name.split('_')[2]), int(file_name.split('_')[2])+4, 2).tolist()
-    NS = np.arange(int(file_name.split('_')[3]), int(file_name.split('_')[3])+4, 2).tolist()
+    EW = np.arange(int(file_name.split('_')[2]), int(file_name.split('_')[2]) + 4, 2).tolist()
+    NS = np.arange(int(file_name.split('_')[3]), int(file_name.split('_')[3]) + 4, 2).tolist()
     bbox = [EW[0], NS[0], EW[1], NS[1]]
     # get appropriate integers
     # latitude (w,e)
@@ -96,12 +96,12 @@ def wsf_pixel_counts_country(GADM_w_wsf,
 
     Returns: gpd.GeoDataFrame
     '''
-    pixel_sum_array = [None]*len(GADM_w_wsf)
+    pixel_sum_array = [None] * len(GADM_w_wsf)
 
     for index, row in GADM_w_wsf.iterrows():
         city_name = row['NAME_1']
         print(city_name)
-        if not city_name is None:
+        if city_name is not None:
             pixel_sum_array[index] = wsf_pixel_count_city(GADM_w_wsf,
                                                           city_name)
 
@@ -159,7 +159,7 @@ def join_db_wsf(gdf, wsf):
     join['area'] = [row.geometry.intersection(wsf.loc[row.index_right].geometry).area
                     for _, row in join.iterrows()]
     join = join.sort_values('area', ascending=False).drop_duplicates('id').sort_index()
-    unmatched_bldgs = len_start-len(join)
+    unmatched_bldgs = len_start - len(join)
     join = pd.merge(gdf, join, how='left', on='id')[['id', 'age_wsf']]
     return join, len_start, unmatched_bldgs
 
@@ -188,7 +188,7 @@ def create_wsf_evo_matching(gadm_country_code):
                          for names in out.file_paths]
 
     out.to_csv(os.path.join('/p/projects/eubucco/data/2-database-city-level', country_name,
-                            country_name+'_wsf-evo-matching.csv'), index=False)
+                            country_name + '_wsf-evo-matching.csv'), index=False)
 
     print('Created wsf evo matching file.')
 
@@ -220,7 +220,7 @@ def create_wsf_age(gadm_country_code,
 
     paths = {}
     for file in ['geom', 'boundary', 'wsf-evo_geoms', 'wsf-evo_age']:
-        if left_over == False:
+        if not left_over:
             paths[file] = get_all_paths(country_name, filename=file)[city_idx]
         else:
             paths[file] = get_all_paths(country_name, filename=file, left_over=left_over)[city_idx]
@@ -232,7 +232,7 @@ def create_wsf_age(gadm_country_code,
     boundary = import_csv_w_wkt_to_gdf(paths['boundary'], geometry_col='boundary_GADM_WGS84', crs=local_crs)
 
     wsf_matching = pd.read_csv(os.path.join('/p/projects/eubucco/data/2-database-city-level', country_name,
-                                            country_name+'_wsf-evo-matching.csv'))
+                                            country_name + '_wsf-evo-matching.csv'))
     paths_wsf = ast.literal_eval(wsf_matching[wsf_matching.city_name == city_name].file_paths.iloc[0])
 
     print('Parsing...')
@@ -287,7 +287,7 @@ def create_city_level_ft_area(path_sheet='gadm_table.csv',
 
         try:
             tot_ft_area[n] = sum(import_csv_w_wkt_to_gdf(path, 3035).geometry.area)
-        except:
+        except BaseException:
             tot_ft_area[n] = 0
 
     out = pd.DataFrame()
