@@ -15,6 +15,6 @@ pwd; hostname; date
 
 module load anaconda
 
-source activate ox112
+source activate /home/nikolami/.conda/envs/ox112
 
 python -u /p/projects/eubucco/git-eubucco/database/preprocessing/3-wsf/creating-wsf-evo-matching.py
