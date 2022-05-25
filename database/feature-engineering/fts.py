@@ -8,15 +8,12 @@ from ft_eng.ft_eng import create_features  # noqa: E402
 from ufo_map.Utils.helpers import arg_parser  # noqa: E402
 
 # utilize Slurm's concurrent job scheduling by mapping SLURM_ARRAY_TASK_ID to city indices
-args = arg_parser([('i', int), ('c', str)])
-city_idx = args.i
-country = args.c
+args = arg_parser([('p', str)])
+city_path = args.p
 
-print(country)
-print(city_idx)
+print(city_path)
 
-create_features(country,
-                city_idx,
+create_features(city_path,
                 bld=True,
                 blk=True,
                 bld_d=True,
@@ -25,7 +22,4 @@ create_features(country,
                 str_=True,
                 sbb_=True,
                 city_level=True,
-                left_over=False,
-                ua_mode=False,
-                path_stats='/p/projects/eubucco/stats/5-ft-eng',
-                data_dir='/p/projects/eubucco/data/2-database-city-level-v0_1')
+                path_stats='/p/projects/eubucco/stats/5-ft-eng')
