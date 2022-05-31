@@ -4,13 +4,13 @@ import osmnx as ox
 import momepy
 from networkx.exception import NetworkXPointlessConcept
 
-from ufo_map.Preprocessing.preproc_streets import *
-from ufo_map.Utils.helpers import import_csv_w_wkt_to_gdf, save_csv_wkt, get_all_paths, write_stats
+import ufo_map.Preprocessing.preproc_streets as ufo_streets
+import ufo_map.Utils.helpers as ufo_helpers
 
 CRS_UNI = 'EPSG:3035'
 
 
-def download_osm_streets(country_name,
+def download_osm_streets_country(country_name,
                          data_dir='/p/projects/eubucco/data/2-database-city-level-v0_1',
                          path_stats='/p/projects/eubucco/stats/6-streets'):
     '''
@@ -24,19 +24,28 @@ def download_osm_streets(country_name,
 
     print(country_name)
 
-    paths_in = get_all_paths(country_name, 'boundary', data_dir)
-    paths_out = get_all_paths(country_name, 'streets', data_dir)
+    paths = ufo_helpers.get_all_paths(country_name, data_dir)
 
-    n_streets = 0
-    n_cities_wo_streets = 0
+    success = []
 
     start = time.time()
 
-    for path_in, path_out in zip(paths_in, paths_out):
+    for city_path in paths:
+        success.append(download_osm_streets(city_path))
 
+    duration = time.time() - start
+    stats = {'country_name': country_name, 'n_cities_wo_streets': success.count(False)}
+    filename = f'{country_name}_stat_ddl'
+    ufo_helpers.write_stats(stats, duration, path_stats, filename)
+
+
+def download_osm_streets(city_path):
+
+        path_in = f'{city_path}_boundary.csv'
+        path_out = f'{city_path}_streets.csv'
         print(path_out)
 
-        boundary = import_csv_w_wkt_to_gdf(
+        boundary = ufo_helpers.import_csv_w_wkt_to_gdf(
             path_in, CRS_UNI, geometry_col='boundary_GADM_2k_buffer').to_crs(4326).geometry.iloc[0]
 
         try:
@@ -53,20 +62,15 @@ def download_osm_streets(country_name,
                                                                                                   'length',
                                                                                                   'geometry']]
 
-            n_streets += len(city_streets)
-            save_csv_wkt(city_streets, path_out)
+            ufo_helpers.save_csv_wkt(city_streets, path_out)
+            return True
 
         except NetworkXPointlessConcept:
             print(f'NetworkXPointlessConcept exception: Presumably no street network for city {path_in}')
-            n_cities_wo_streets += 1
-
-    duration = time.time() - start
-    stats = {'country_name': country_name, 'n_streets': n_streets, 'n_cities_wo_streets': n_cities_wo_streets}
-    filename = f'{country_name}_stat_ddl'
-    write_stats(stats, duration, path_stats, filename)
+            return False
 
 
-def create_streets_and_intersections(streets, buildings, path_str, path_int):
+def create_streets_and_intersections(streets, buildings, path_int):
     '''
         Modifies and saves in the relevant folder city-level street file from street linestrings.
 
@@ -77,7 +81,7 @@ def create_streets_and_intersections(streets, buildings, path_str, path_int):
 
     print('Creating intersections...')
     intersections = momepy.nx_to_gdf(streets, lines=False)
-    save_csv_wkt(intersections, path_int)
+    ufo_helpers.save_csv_wkt(intersections, path_int)
     len_intersections = len(intersections)
     del intersections
 
@@ -85,9 +89,9 @@ def create_streets_and_intersections(streets, buildings, path_str, path_int):
     streets = momepy.betweenness_centrality(streets, mode='edges', name='betweenness_metric_e')
     streets = momepy.closeness_centrality(streets, name='closeness_global')
     streets = momepy.closeness_centrality(streets, radius=500, name='closeness500', distance='mm_len', weight='mm_len')
-    streets = network_to_street_gdf(streets, buildings)
+    streets = ufo_streets.network_to_street_gdf(streets, buildings)
 
-    return(streets, len(streets), len_intersections)
+    return streets, len(streets), len_intersections
 
 
 def create_sbb(streets, path_sbb):
@@ -100,15 +104,12 @@ def create_sbb(streets, path_sbb):
         Returns: None
     '''
     print('Creating street-based blocks...')
-    sbb = generate_sbb(streets)
-    save_csv_wkt(sbb, path_sbb)
-    return(len(sbb))
+    sbb = ufo_streets.generate_sbb(streets)
+    ufo_helpers.save_csv_wkt(sbb, path_sbb)
+    return len(sbb)
 
 
-def parse_streets(country_name,
-                  city_idx,
-                  left_over=False,
-                  data_dir='/p/projects/eubucco/data/2-database-city-level-v0_1',
+def parse_streets(city_path,
                   path_stats='/p/projects/eubucco/stats/6-streets'):
     '''
         Parses Openstreetmap street network to create an updated <city>_streets.csv with computed network centrality metrics,
@@ -126,25 +127,25 @@ def parse_streets(country_name,
 
     paths = {}
     for file in ['streets', 'geom', 'intersections', 'sbb']:
-        paths[file] = get_all_paths(
-            country_name, file, data_dir, left_over)[city_idx]
+        paths[file] = f'{city_path}_{file}.csv'
+
 
     try:
-        streets = import_csv_w_wkt_to_gdf(paths['streets'], CRS_UNI)
-        buildings = import_csv_w_wkt_to_gdf(paths['geom'], CRS_UNI)
+        streets = ufo_helpers.import_csv_w_wkt_to_gdf(paths['streets'], CRS_UNI)
+        buildings = ufo_helpers.import_csv_w_wkt_to_gdf(paths['geom'], CRS_UNI)
 
         streets, n_streets, n_int = create_streets_and_intersections(
-            streets, buildings, paths['streets'], paths['intersections'])
+            streets, buildings, paths['intersections'])
 
         n_sbb = create_sbb(streets, paths['sbb'])
 
-        save_csv_wkt(streets, paths['streets'])
+        ufo_helpers.save_csv_wkt(streets, paths['streets'])
 
     except FileNotFoundError as e:
         print(f'No street network or geometry found: {e}')
         successful = False
 
     duration = time.time() - start
-    stats = {'city_idx': city_idx, 'n_streets': n_streets, 'n_int': n_int, 'n_sbb': n_sbb, 'successful': successful}
-    filename = f'{city_idx}_stat_str'
-    write_stats(stats, duration, path_stats, filename)
+    stats = {'city_path': city_path, 'n_streets': n_streets, 'n_int': n_int, 'n_sbb': n_sbb, 'successful': successful}
+    filename = f'{city_path}_stat_str'
+    ufo_helpers.write_stats(stats, duration, path_stats, filename)

@@ -8,11 +8,9 @@ from ufo_map.Utils.helpers import arg_parser  # noqa: E402
 from preproc.streets import parse_streets  # noqa: E402
 
 # utilize Slurm's concurrent job scheduling by mapping SLURM_ARRAY_TASK_ID to city indices
-args = arg_parser([('i', int), ('c', str)])
-city_idx = args.i
-country = args.c
+args = arg_parser([('p', str)])
+city_path = args.p
 
-print(country)
-print(city_idx)
+print(city_path)
 
-parse_streets(country, city_idx)
+parse_streets(city_path)
