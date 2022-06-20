@@ -56,3 +56,37 @@ def create_id(country,
             df.to_csv(file_path.replace(path_old_db_folder, path_new_db_folder), index=False)
 
     print('created unqiue ids. closing run.')
+
+
+def fix_id(country, path_db_folder='/p/projects/eubucco/data/2-database-city-level-v0_1'):
+
+    city_paths = get_all_paths(country, path_root_folder=path_db_folder)
+
+    for i, path in enumerate(city_paths):
+        print('looping through path {} / {} (city {})'.format(i, len(city_paths) - 1, os.path.split(path)[-1]))
+
+        # load new, globally unique id for all buildings as defined in _geom.csv
+        file_path = path + '_geom.csv'
+        if not os.path.isfile(file_path):
+            print(f'Warning: file {file_path} does not exist. No buildings in this city?')
+            continue
+
+        df = pd.read_csv(file_path)
+        id_source_id_mapping = dict(zip(df['id_source'], df['id']))
+
+        # update other files with id_source -> id mapping
+        for ending in ['_attrib', '_attrib_source', '_extra_attrib']:
+            file_path = path + ending + '.csv'
+
+            if not os.path.isfile(file_path):
+                print(f'Warning: file {file_path} does not exist')
+                continue
+
+            df = pd.read_csv(file_path)
+
+            df['id_misaligned'] = df['id']
+            df['id'] = df['id_source'].map(id_source_id_mapping)
+
+            df.to_csv(file_path, index=False)
+
+    print('Fixed alignment of new unique ids.')
