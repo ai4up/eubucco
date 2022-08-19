@@ -12,6 +12,9 @@ from ufo_map.Utils.helpers import arg_parser  # noqa: E402
 # get the relevant files that should be mapped
 path_cities, dataset_name = get_paths_dataset(arg_parser(['i']).i - 1, 'attrib')
 
+# define constants
+FLOOR_HEIGHT = 3 #m
+
 print('...')
 
 # intialise
@@ -26,7 +29,7 @@ for path_city in path_cities:
     try:
         df = pd.read_csv(path_city)
         len_pre = len(df[df.height.isna()])
-        df['height'] = add_floor_as_height(df)
+        df['height'] = add_floor_as_height(df,FLOOR_HEIGHT)
         len_post = len(df[df.height.isna()])
         print('Filled in {} vals'.format(len_pre - len_post))
         lst_vals.append(len_pre - len_post)
