@@ -48,5 +48,5 @@ def type_mapping(df_bldgs, mapping) -> pd.DataFrame:
     return df_bldgs
 
 
-def add_floor_as_height(df):
-    return [x if str(x) != 'nan' else y * 2.5 for x, y in zip(df.height, df.floors)]
+def add_floor_as_height(df,floor_height):
+    return [x if str(x) != 'nan' else y * floor_height for x, y in zip(df.height, df.floors)]
