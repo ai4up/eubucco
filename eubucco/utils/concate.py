@@ -8,6 +8,22 @@ from preproc.db_set_up import fetch_GADM_info_country
 from preproc.parsing import get_params
 
 
+def validity_merge_db(df_geom,df_attrib):
+    '''
+        Function to check that attributes+ids and geometries+ids dataframe that have 
+        been split can be reassembled. 
+    '''
+    if len(df_geom)!=len(df_attrib): 
+      raise 'Error: lengths do not match'
+
+    if len(df_geom.loc[~df_geom.id.isin(df_attrib.id)])>0: 
+      raise 'Error: ids do not match'
+
+    if any(df_geom.duplicated(subset=['id'])): 
+      raise 'Error: there are duplicated ids' 
+
+    return True
+
 def concat_city_level_fts(country_names):
     '''
     '''
