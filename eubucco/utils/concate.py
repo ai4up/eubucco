@@ -24,6 +24,29 @@ def validity_merge_db(df_geom,df_attrib):
 
     return True
 
+
+def compare_overviews(left_col,s,df_overview):
+    '''
+        Compare the city-level overview stats computed before and after chunking.
+
+        In:
+            * left_col: name of the column to test for in the chunk df
+            * s: series reproducing the stat at the city level
+            * df_overview: dataframe with the previously computed stats
+    '''
+    df_compare = pd.merge(df_overview[['city',left_col]],
+         s,
+         left_on='city',
+         right_index=True
+        )
+
+    if any(df_compare[left_col] != df_compare['right_col']):
+        print(f' ({left_col}) Error: Values for the {len(df_compare[left_col] != df_compare.right_col)} / {len(df_compare)} cities are not identical')
+
+    else: print(f'({left_col}) All values are identical') 
+
+    
+
 def concat_city_level_fts(country_names):
     '''
     '''
