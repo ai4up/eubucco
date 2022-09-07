@@ -72,6 +72,7 @@ def fix_id(country, path_db_folder='/p/projects/eubucco/data/2-database-city-lev
             continue
 
         df = pd.read_csv(file_path)
+        geom_id_source = df.id_source # save to ensure same len in geom and attrib files later
         id_source_id_mapping = dict(zip(df['id_source'], df['id']))
 
         # update other files with id_source -> id mapping
@@ -83,10 +84,11 @@ def fix_id(country, path_db_folder='/p/projects/eubucco/data/2-database-city-lev
                 continue
 
             df = pd.read_csv(file_path)
-
             df['id_misaligned'] = df['id']
             df['id'] = df['id_source'].map(id_source_id_mapping)
 
+            # to ensure no additional created rows in attrib files in comparison to geom files, f.e. in austria
+            df = df.loc[df.id_source.isin(geom_id_source)]    
             df.to_csv(file_path, index=False)
 
     print('Fixed alignment of new unique ids.')
