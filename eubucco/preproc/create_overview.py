@@ -1,7 +1,7 @@
 import pandas as pd
 import glob
 import numpy as np
-import os
+import os, sys
 import glob
 from shapely import wkt
 import geopandas as gpd
@@ -141,6 +141,11 @@ def get_paths_dataset(
 
     elif gadm_level == 'all':
         paths = [path[0] for path in paths]
+
+    # in case we are on a mounted volume (which doesn't start with /p/projects...)
+    if path_database.split('/',2)[1] !='p':
+        paths = [p.split('/p/projects/eubucco/data/')[1] for p in paths]
+        paths = [path_database +'/' + l.split('/',1)[1] for l in paths]     
 
     return paths, dataset_name
 
