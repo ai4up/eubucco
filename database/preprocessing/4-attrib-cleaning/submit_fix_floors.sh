@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --qos=short
-#SBATCH --time=01:00:00
+#SBATCH --time=00:10:00
 #SBATCH --job-name=floor_fix-%A_%a
 #SBATCH --account=eubucco
 #SBATCH --nodes=1
@@ -10,7 +10,7 @@
 #SBATCH --output=floor_fix-%A_%a.stdout
 #SBATCH --error=floor_fix-%A_%a.stderr
 #SBATCH --workdir=/p/tmp/fewagner/v0_1-db/fix_id
-#SBATCH --array=1,66
+#SBATCH --array=66
 
 pwd; hostname; date
 

@@ -23,9 +23,9 @@ FLOOR_HEIGHT = 3 #m
 # print(city_idx)
 # print('----------')
 
-params_file_path = '/p/projects/eubucco/data/0-raw-data/id_look_up/country-ids'
+path_input_parsing='/p/projects/eubucco/git-eubucco/database/preprocessing/1-parsing/inputs-parsing.csv'
 args = arg_parser(['i'])
-p = get_params(args.i, params_file_path)
+p = get_params(args.i, path_input_parsing)
 
 print('---')
 print(args.i)

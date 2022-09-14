@@ -1,5 +1,6 @@
-import os
+import os, sys
 import pandas as pd
+import numpy as np
 import socket
 print(socket.gethostname())
 
@@ -123,13 +124,15 @@ def fix_floor(i,
         # intialise
         failed = []
         lst_vals = []
+        i = 0 # TODO delete later
         for path_city in paths_cities:
-            print('-------')
+            print('{} -------'.format(i))
             #print(path_city.split('/')[-1])
             print(path_city)
             try:
                 # read in files
                 df = pd.read_csv(path_city)
+                df = df.drop_duplicates(subset='id').reset_index(drop=True) # drop duplicates (in case we have any)
                 len_df = len(df)
                 n_nan = len(df.loc[df.height.isna()])
                 id_source_df = df.id_source.copy(deep=True)
@@ -140,23 +143,28 @@ def fix_floor(i,
                 failed.append(path_city)
             
             if bool_merge:
-                # only merge on subset and drop all id duplicates in parsed data (very dirty as we loose bldgs, but similarly done in db-set-up)
+                # only merge on subset and drop all id duplicates in parsed data (very dirty as we can loose bldgs, but similarly done in db-set-up)
                 df_pars_tmp = df_pars.loc[df_pars.id_source.isin(df.id_source)] 
                 df_pars_tmp = df_pars_tmp.drop_duplicates(subset='id_source') 
                 print(len(df_pars_tmp))
-                df_merge = pd.merge(df,df_pars_tmp, on='id_source',how='left')
+                # we only calc new height vals where we had floor vals previously to not alter overall stats
+                df_merge = pd.merge(df[~df.floors.isna()],df_pars_tmp, on='id_source',how='inner')
+                print('df_merge len: {}'.format(len(df_merge)))
                 if len(df_merge)>0: 
-                    # assign height values from floos calculation
-                    df_merge = df_merge.rename(columns={'height_y':'height','floors_y':'floors'})
-                    df_merge = df_merge.drop(columns=['height_x','floors_x'])
-
-                    if floor_checks(df_merge,len_df,id_source_df,height_df,n_nan): 
+                    df = pd.merge(df,df_merge[['id_source','height_y']],how='left',on='id_source')
+                    df = df.drop(columns='height')
+                    df = df.rename(columns={'height_y':'height'})
+    
+                    if floor_checks(df,len_df,id_source_df,height_df,n_nan): 
                         print('Saving to disk...')
                         if test: path_city = '/p/projects/eubucco/data/test_data/floor_fixing/'+path_city.rsplit('/')[-1]
-                        df_merge.to_csv(path_city, index=False)
+                        df.to_csv(path_city, index=False)
+                i +=1
+            
+            
+            if i>100: break
 
         print('------')
-        print('------')
-        print('Filled in {} height values from floors'.format(sum(lst_vals)))
+        print('Changed values in {} cities'.format(i))
         print('Done')
         print(f'Could not load:{failed}')
