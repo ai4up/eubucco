@@ -8,9 +8,9 @@ from preproc.parsing import get_params  # noqa: E402
 from preproc.create_unique_ids import create_id  # noqa: E402
 from ufo_map.Utils.helpers import arg_parser  # noqa: E402
 
-params_file_path = '/p/projects/eubucco/data/0-raw-data/id_look_up/country-ids'
+path_input_parsing = '/p/projects/eubucco/git-eubucco/database/preprocessing/1-parsing/inputs-parsing.csv'
 args = arg_parser(['i'])
-country = get_params(args.i, params_file_path)['country']
+country = get_params(args.i, path_input_parsing)['country']
 
 create_id(country,
           db_version=0.1,
