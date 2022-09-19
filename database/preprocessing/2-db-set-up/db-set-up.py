@@ -9,7 +9,6 @@ from preproc.db_set_up import db_set_up  # noqa: E402
 
 # only select sepa mode with separated countries like Germany, Austria, Italy,...
 db_set_up(
-    parse_single=True,
     chunksize=int(5E5),
     folders=True,
     boundaries=True,

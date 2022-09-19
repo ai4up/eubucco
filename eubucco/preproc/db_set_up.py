@@ -556,7 +556,7 @@ def create_source_files(ids_x_cities, df_sources,
         raise ValueError("Num of bldgs in geometry file is not equivalent to num bldgs in correspdoning source files")
 
 
-def get_stats(country_name, dataset_name, n_bldg_start, n_bldg_end, end, list_0_cities, num_stats, parse_single):
+def get_stats(country_name, dataset_name, n_bldg_start, n_bldg_end, end, list_0_cities, num_stats):
     '''
     Reports stats on the run.
 
@@ -569,10 +569,7 @@ def get_stats(country_name, dataset_name, n_bldg_start, n_bldg_end, end, list_0_
 
     stats = {}
     stats['country'] = country_name
-    if parse_single:
-        stats['dataset_name'] = dataset_name
-    else:
-        stats['dataset_name'] = 'several'
+    stats['dataset_name'] = dataset_name
     stats['n_bldg_start'] = n_bldg_start
     stats['n_bldg_end'] = n_bldg_end
     stats['duration'] = '{} h {} m {} s'.format(h_div[0], m_div[0], round(m_div[1], 0))
@@ -666,8 +663,7 @@ def merge(list_saved_paths, country, path_db_folder='/p/projects/eubucco/data/2-
 # HIGH
 
 
-def db_set_up(parse_single=True,
-              chunksize=int(5E5),
+def db_set_up(chunksize=int(5E5),
               only_region=None,
               folders=True,
               boundaries=True,
@@ -706,13 +702,7 @@ def db_set_up(parse_single=True,
     print('----------')
 
     # if only single dataset should be allocated in folder structure
-    if parse_single:
-        dataset_name = p['dataset_name']
-        # otherwise all datasets of one country will be allocated
-        print('single_mode_active; lets go with: ', dataset_name)
-    else:
-        dataset_name = ''
-        print('lets go with: ', p['country'])
+    dataset_name = p['dataset_name']
 
     start = time.time()
 
@@ -740,171 +730,165 @@ def db_set_up(parse_single=True,
         # read in inputs parsing for masking gadm and to create a list of datasets
         # if no dataset given loop through all files for the country
         inputs_parsing = pd.read_csv(path_input_parsing)
-        if not dataset_name:
-            list_dataset_name = list(inputs_parsing.loc[inputs_parsing['country'] == country_name].dataset_name)
+
+        # check if we have osm with parts or normal case
+        if dataset_name in ['germany-osm', 'netherlands-gov']:
+            osm_part = True
+            dict_file_num = {'germany-osm': 7, 'netherlands-gov': 20}
+            num_osm_parts = dict_file_num[dataset_name]
         else:
-            list_dataset_name = [dataset_name]
+            osm_part = False
+            # set num_osm:parts to 1 so we go through the loop once!
+            num_osm_parts = 1
 
-        for dataset_name in list_dataset_name:
-            # check if we have osm with parts or normal case
-            if dataset_name in ['germany-osm', 'netherlands-gov']:
-                osm_part = True
-                dict_file_num = {'germany-osm': 7, 'netherlands-gov': 20}
-                num_osm_parts = dict_file_num[dataset_name]
+        # prepare GADM_file for sjoining - only take GADM bounds of dataset_name
+        gadm_file_temp = mask_gadm(GADM_file, dataset_name, country_name, inputs_parsing)
+
+        # intialise osm loopy-doopy
+        n_bldg_start_sum_total = 0
+        n_bldg_end_sum_total = 0
+        list_saved_names_sum_total = []
+        list_saved_paths_sum_total = []
+
+        # intialise chunky-lunky
+        n_bldg_start_sum = 0
+        n_bldg_end_sum = 0
+        list_saved_names_sum = []
+        list_saved_paths_sum = []
+
+        for jdx in range(num_osm_parts):
+
+            if osm_part:
+                print('looping through osm part {} / {}'.format(jdx, num_osm_parts))
+                # reading in gov geoms as chunks
+                chunks = pd.read_csv(
+                    os.path.join(
+                        path_int_fol,
+                        country_name,
+                        'osm',
+                        dataset_name +
+                        '_' +
+                        str(jdx) +
+                        '-3035_geoms.csv'),
+                    chunksize=chunksize)
+                # reading in attribs and x-attribs files, checking for duplicates
+                df_bldg_attrib, df_bldg_x_attrib, dict_num_attribs = get_attribs(
+                    path_int_fol, country_name, dataset_name, str(jdx), osm_part)
+                print('no_source file found for osm case - creating new one')
+                df_sources = create_new_df_source(df_bldg_attrib, dataset_name)
+                # here we check in the above func for duplicates
+
             else:
-                osm_part = False
-                # set num_osm:parts to 1 so we go through the loop once!
-                num_osm_parts = 1
-
-            # prepare GADM_file for sjoining - only take GADM bounds of dataset_name
-            gadm_file_temp = mask_gadm(GADM_file, dataset_name, country_name, inputs_parsing)
-
-            # intialise osm loopy-doopy
-            n_bldg_start_sum_total = 0
-            n_bldg_end_sum_total = 0
-            list_saved_names_sum_total = []
-            list_saved_paths_sum_total = []
-
-            # intialise chunky-lunky
-            n_bldg_start_sum = 0
-            n_bldg_end_sum = 0
-            list_saved_names_sum = []
-            list_saved_paths_sum = []
-
-            for jdx in range(num_osm_parts):
-
-                if osm_part:
-                    print('looping through osm part {} / {}'.format(jdx, num_osm_parts))
-                    # reading in gov geoms as chunks
-                    chunks = pd.read_csv(
+                # reading in gov geoms as chunks
+                chunks = pd.read_csv(
+                    os.path.join(
+                        path_int_fol,
+                        country_name,
+                        dataset_name +
+                        '-3035_geoms.csv'),
+                    chunksize=chunksize)
+                # reading in attribs and x-attribs files; checking for duplicates
+                df_bldg_attrib, df_bldg_x_attrib, dict_num_attribs = get_attribs(
+                    path_int_fol, country_name, dataset_name, str(jdx), osm_part)
+                try:
+                    df_sources = pd.read_csv(
                         os.path.join(
                             path_int_fol,
                             country_name,
-                            'osm',
                             dataset_name +
-                            '_' +
-                            str(jdx) +
-                            '-3035_geoms.csv'),
-                        chunksize=chunksize)
-                    # reading in attribs and x-attribs files, checking for duplicates
-                    df_bldg_attrib, df_bldg_x_attrib, dict_num_attribs = get_attribs(
-                        path_int_fol, country_name, dataset_name, str(jdx), osm_part)
-                    print('no_source file found for osm case - creating new one')
+                            '_attrib_sources.csv'))
+                except BaseException:
+                    df_sources = pd.DataFrame()
+
+                if df_sources.empty:
+                    print('no_source file found - creating new one')
                     df_sources = create_new_df_source(df_bldg_attrib, dataset_name)
-                    # here we check in the above func for duplicates
-
                 else:
-                    # reading in gov geoms as chunks
-                    chunks = pd.read_csv(
-                        os.path.join(
-                            path_int_fol,
-                            country_name,
-                            dataset_name +
-                            '-3035_geoms.csv'),
-                        chunksize=chunksize)
-                    # reading in attribs and x-attribs files; checking for duplicates
-                    df_bldg_attrib, df_bldg_x_attrib, dict_num_attribs = get_attribs(
-                        path_int_fol, country_name, dataset_name, str(jdx), osm_part)
-                    try:
-                        df_sources = pd.read_csv(
-                            os.path.join(
-                                path_int_fol,
-                                country_name,
-                                dataset_name +
-                                '_attrib_sources.csv'))
-                    except BaseException:
-                        df_sources = pd.DataFrame()
+                    df_sources['dataset_name'] = dataset_name
+                    print('Checking for duplicates in source files')
+                    df_sources = remove_dupls(df_sources, 'df_sources', 'id')
 
-                    if df_sources.empty:
-                        print('no_source file found - creating new one')
-                        df_sources = create_new_df_source(df_bldg_attrib, dataset_name)
-                    else:
-                        df_sources['dataset_name'] = dataset_name
-                        print('Checking for duplicates in source files')
-                        df_sources = remove_dupls(df_sources, 'df_sources', 'id')
+            # print mode
+            if num_osm_parts > 1:
+                print('proceeding with osm part: ', jdx)
+            else:
+                print('proceeding with normal case')
 
-                # print mode
-                if num_osm_parts > 1:
-                    print('proceeding with osm part: ', jdx)
+            for idx, chunk in enumerate(chunks):
+                # start looping
+                print('-----')
+                print('chunk: ', idx)
+                # read in chunks
+                gdf = gpd.GeoDataFrame(chunk,
+                                        geometry=chunk['geometry'].apply(wkt.loads), crs=CRS_UNI)
+                print('read in geoms for chunk')
+
+                # adjust idx counter if osm parts
+                if osm_part:
+                    idx = str(jdx) + '_' + str(idx)
                 else:
-                    print('proceeding with normal case')
+                    idx = str(idx)
 
-                for idx, chunk in enumerate(chunks):
-                    # start looping
-                    print('-----')
-                    print('chunk: ', idx)
-                    # read in chunks
-                    gdf = gpd.GeoDataFrame(chunk,
-                                           geometry=chunk['geometry'].apply(wkt.loads), crs=CRS_UNI)
-                    print('read in geoms for chunk')
-
-                    # adjust idx counter if osm parts
-                    if osm_part:
-                        idx = str(jdx) + '_' + str(idx)
-                    else:
-                        idx = str(idx)
-
-                    # create city bldg geom files per chunk
-                    ids_x_cities, list_saved_names, list_saved_paths, n_bldg_start, n_bldg_end = create_city_bldg_geom_files(
-                        gdf, dataset_name, country_name, gadm_file_temp, list_city_paths, only_region, path_input_parsing, idx)
-                    # create attribute file
-                    create_city_bldg_attrib_files(
-                        ids_x_cities,
-                        df_bldg_attrib,
-                        df_bldg_x_attrib,
-                        list_saved_names,
-                        list_saved_paths,
-                        idx)
-                    # create source file
-                    create_source_files(ids_x_cities, df_sources, list_saved_names, list_saved_paths, idx)
-                    # add number of total bldgs start
-                    n_bldg_start_sum += n_bldg_start
-                    # add number of total bldgs start
-                    n_bldg_end_sum += n_bldg_end
-                    # collect all city names & paths where we have bldgs
-                    list_saved_names_sum.append(list_saved_names)
-                    list_saved_paths_sum.append(list_saved_paths)
-
-                # add number of total bldgs start in case we have several osm parts
-                n_bldg_start_sum_total += n_bldg_start_sum
+                # create city bldg geom files per chunk
+                ids_x_cities, list_saved_names, list_saved_paths, n_bldg_start, n_bldg_end = create_city_bldg_geom_files(
+                    gdf, dataset_name, country_name, gadm_file_temp, list_city_paths, only_region, path_input_parsing, idx)
+                # create attribute file
+                create_city_bldg_attrib_files(
+                    ids_x_cities,
+                    df_bldg_attrib,
+                    df_bldg_x_attrib,
+                    list_saved_names,
+                    list_saved_paths,
+                    idx)
+                # create source file
+                create_source_files(ids_x_cities, df_sources, list_saved_names, list_saved_paths, idx)
                 # add number of total bldgs start
-                n_bldg_end_sum_total += n_bldg_end_sum
-                # collect all city names where we have bldgs
-                list_saved_names_sum_total.append(list_saved_names_sum)
-                list_saved_paths_sum_total.append(list_saved_paths_sum)
+                n_bldg_start_sum += n_bldg_start
+                # add number of total bldgs start
+                n_bldg_end_sum += n_bldg_end
+                # collect all city names & paths where we have bldgs
+                list_saved_names_sum.append(list_saved_names)
+                list_saved_paths_sum.append(list_saved_paths)
 
-            # calculate end time
-            end = time.time() - start
+            # add number of total bldgs start in case we have several osm parts
+            n_bldg_start_sum_total += n_bldg_start_sum
+            # add number of total bldgs start
+            n_bldg_end_sum_total += n_bldg_end_sum
+            # collect all city names where we have bldgs
+            list_saved_names_sum_total.append(list_saved_names_sum)
+            list_saved_paths_sum_total.append(list_saved_paths_sum)
 
-            # flatten the created lists of lists of lists and remove duplicates
-            list_saved_names_sum_total = flatten_list(list_saved_names_sum_total)
-            list_saved_paths_sum_total = flatten_list(list_saved_paths_sum_total)
+        # calculate end time
+        end = time.time() - start
 
-            # find all cities where we have 0 buildings
-            #list_city_names = [os.path.split(city_path)[-1] for city_path in list_city_paths]
-            #list_0_cities = [city for city in list_city_names if city not in list_saved_names_sum_total]
+        # flatten the created lists of lists of lists and remove duplicates
+        list_saved_names_sum_total = flatten_list(list_saved_names_sum_total)
+        list_saved_paths_sum_total = flatten_list(list_saved_paths_sum_total)
 
-            # calculate stats
-            df_stats = get_stats(
-                country_name,
-                dataset_name,
-                n_bldg_start_sum_total,
-                n_bldg_end_sum_total,
-                end,
-                list_saved_names_sum_total,
-                dict_num_attribs,
-                parse_single)
-            # save stats file
-            df_stats.to_csv(os.path.join(path_stats, dataset_name + '_stat.csv'), index=False)
-            print(df_stats.iloc[0])
-            print('----------------')
-            print('saved all geom files in gadm folders & saved stats files')
-            print('################')
+        # find all cities where we have 0 buildings
+        #list_city_names = [os.path.split(city_path)[-1] for city_path in list_city_paths]
+        #list_0_cities = [city for city in list_city_names if city not in list_saved_names_sum_total]
 
-            if auto_merge:
-                # merges all files only in cities where we saved bldgs
-                print('merging all paths')
-                merge(list_saved_paths_sum_total, None, path_db_folder)
+        # calculate stats
+        df_stats = get_stats(
+            country_name,
+            dataset_name,
+            n_bldg_start_sum_total,
+            n_bldg_end_sum_total,
+            end,
+            list_saved_names_sum_total,
+            dict_num_attribs)
+        # save stats file
+        df_stats.to_csv(os.path.join(path_stats, dataset_name + '_stat.csv'), index=False)
+        print(df_stats.iloc[0])
+        print('----------------')
+        print('saved all geom files in gadm folders & saved stats files')
+        print('################')
+
+        if auto_merge:
+            # merges all files only in cities where we saved bldgs
+            print('merging all paths')
+            merge(list_saved_paths_sum_total, None, path_db_folder)
 
     if not auto_merge:
         # merges all files per city in whole country
