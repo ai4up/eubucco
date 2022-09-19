@@ -193,25 +193,6 @@ def create_new_df_source(df_attrib, dataset_name):
     return df_sources
 
 
-"""
-def get_city_paths(list_city_paths,dataset_name,country_name):
-
-    if sepa_mode:
-        # get city pahts from osm-txt file
-        if 'osm' in dataset_name:
-            list_city_paths = get_all_paths(country_name, filename='osm')
-        # get city paths from normal txt file
-        else:
-            # get all osm paths
-            osm_paths = get_all_paths(country_name, filename='osm')
-            # list city paths is all paths apart from osm paths
-            list_city_paths = [path for path in list_city_paths if not path in osm_paths]
-
-    else: list_city_paths = list_city_paths
-    return list_city_paths
-"""
-
-
 def fetch_GADM_info_country(country_name,
                             levels=None,
                             path_sheet='gadm_table.csv',
@@ -661,7 +642,6 @@ def db_set_up(country,
             boundaries=True,
             bldgs=True,
             auto_merge=True,
-            sepa_mode=False,
             path_stats='/p/projects/eubucco/stats/2-db-set-up',
             path_inputs_parsing='/p/projects/eubucco/git-eubucco/database/preprocessing/1-parsing/inputs-parsing.csv',
             path_int_fol='/p/projects/eubucco/data/1-intermediary-outputs',

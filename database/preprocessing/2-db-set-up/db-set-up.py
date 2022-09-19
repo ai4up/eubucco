@@ -12,12 +12,10 @@ from preproc.db_set_up import db_set_up  # noqa: E402
 params = json.load(sys.stdin)
 print(params)
 
-# only select sepa mode with separated countries like Germany, Austria, Italy,...
 db_set_up(
     **params,
     chunksize=int(5E5),
     folders=True,
     boundaries=True,
     bldgs=True,
-    auto_merge=True,
-    sepa_mode=False)
+    auto_merge=True)
