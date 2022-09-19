@@ -8,10 +8,8 @@ from datetime import date
 import glob
 import ast
 
-from ufo_map.Utils.helpers import *
-from ufo_map.Preprocessing.parsing import *
+import ufo_map.Utils.helpers as ufo_helpers
 from ufo_map.Feature_engineering.urban_atlas import building_in_ua
-from preproc.parsing import get_params
 from utils.extra_cases import average_flanders_dupls
 
 # declare global var
@@ -35,7 +33,7 @@ def check_edge_cases(gadm_name):
 """
 
 
-def mask_gadm(gadm_file, dataset_name, country_name, inputs_parsing):
+def mask_gadm(gadm_file, dataset_name, country_name, path_inputs_parsing):
     """
     Function to create a temporary gadm file that only consists of gadm bounds of the specific gov or osm dataset.
     Case 1: one dataset per country -> no masking, we take all gadm bounds for this countryname
@@ -44,6 +42,7 @@ def mask_gadm(gadm_file, dataset_name, country_name, inputs_parsing):
     Case 3: current dataset is one of several in a country, take only gadm bound relevant for this dataset
 
     """
+    inputs_parsing = pd.read_csv(path_inputs_parsing)
 
     # get gadm_level and gadm_name
     gadm_level = inputs_parsing.loc[inputs_parsing.dataset_name == dataset_name].gadm_level.values[0]
@@ -65,14 +64,14 @@ def mask_gadm(gadm_file, dataset_name, country_name, inputs_parsing):
         for i in range(len(gadm_level)):
             # only if gadm_level is not nan (f.e. because we left out friuli in italy,
             # but its still in inputs-parsing.csv)
-            if not gadm_level[i] != gadm_level[i]:
+            if not is_nan(gadm_level[i]):
                 # check for potential edge cases, f.e. Thüringen
                 #gadm_name[i] = check_edge_cases(gadm_name[i])
                 # mask
                 gadm_file_temp = gadm_file_temp.loc[gadm_file_temp[gadm_level[i]] != gadm_name[i]]
 
     # in case gadm_level is nan - raise error
-    elif gadm_level != gadm_level:
+    elif is_nan(gadm_level):
         raise ValueError("No gadm_level provided")
 
     # edge case to fill up empty cities in italy or spain
@@ -85,6 +84,10 @@ def mask_gadm(gadm_file, dataset_name, country_name, inputs_parsing):
         #gadm_name = check_edge_cases(gadm_name)
         gadm_file_temp = gadm_file.loc[gadm_file[gadm_level] == gadm_name]
     return gadm_file_temp
+
+
+def is_nan(x):
+    return (x != x)
 
 
 def get_city_per_bldg(gdf_bldg, gdf_GADM):
@@ -381,12 +384,9 @@ def create_city_boundary_files(GADM_file,
 
 
 def create_city_bldg_geom_files(bldg_gdf,
-                                dataset_name,
-                                country_name,
                                 gadm_file,
                                 list_city_paths,
                                 only_region,
-                                path_input_parsing,
                                 part
                                 ):
     '''
@@ -404,17 +404,7 @@ def create_city_bldg_geom_files(bldg_gdf,
         * add support for importing neighboring regions within a country for getting buildings within buffer.
         * add support for incomplete OSM countries
     '''
-    """
-    # read in inputs_parsing file
-    inputs_parsing = pd.read_csv(path_input_parsing)
 
-    # check first if dataset_name in inputs parsing
-    if inputs_parsing.dataset_name.str.contains(dataset_name).any():
-        print('Loading building footprint geometries...')
-    elif osm_part:
-        print('Loading osm part building footprint geometries...')
-    else: raise ValueError('Error: dataset_name {} could not be found in inputs_parsing.csv'.format(dataset_name))
-    """
     # adjust TODO!
 
     # counting initial num bldgs and dropping duplicates
@@ -470,8 +460,8 @@ def create_city_bldg_geom_files(bldg_gdf,
             n_bldg_end += len(city)
 
             # save bldgs of city and bldgs in buffer
-            save_csv_wkt(city[['id', 'geometry']], city_path + '_geom_' + part + '.csv')
-            save_csv_wkt(buffer_area[['id', 'geometry']], city_path + '_buffer_' + part + '.csv')
+            ufo_helpers.save_csv_wkt(city[['id', 'geometry']], city_path + '_geom_' + part + '.csv')
+            ufo_helpers.save_csv_wkt(buffer_area[['id', 'geometry']], city_path + '_buffer_' + part + '.csv')
             list_saved_cities.append(city_name)
             list_saved_paths.append(city_path)
 
@@ -649,7 +639,7 @@ def merge(list_saved_paths, country, path_db_folder='/p/projects/eubucco/data/2-
     if list_saved_paths:
         all_paths = list_saved_paths
     else:
-        all_paths = get_all_paths(country, path_root_folder=path_db_folder)
+        all_paths = ufo_helpers.get_all_paths(country, path_root_folder=path_db_folder)
 
     for path in all_paths:
         bool_merge = False
@@ -663,18 +653,20 @@ def merge(list_saved_paths, country, path_db_folder='/p/projects/eubucco/data/2-
 # HIGH
 
 
-def db_set_up(chunksize=int(5E5),
-              only_region=None,
-              folders=True,
-              boundaries=True,
-              bldgs=True,
-              auto_merge=True,
-              sepa_mode=False,
-              path_stats='/p/projects/eubucco/stats/2-db-set-up',
-              path_input_parsing='/p/projects/eubucco/git-eubucco/database/preprocessing/1-parsing/inputs-parsing.csv',
-              path_int_fol='/p/projects/eubucco/data/1-intermediary-outputs',
-              path_db_folder='/p/projects/eubucco/data/2-database-city-level'
-              ):
+def db_set_up(country,
+            dataset_name,
+            chunksize=int(5E5),
+            only_region=None,
+            folders=True,
+            boundaries=True,
+            bldgs=True,
+            auto_merge=True,
+            sepa_mode=False,
+            path_stats='/p/projects/eubucco/stats/2-db-set-up',
+            path_inputs_parsing='/p/projects/eubucco/git-eubucco/database/preprocessing/1-parsing/inputs-parsing.csv',
+            path_int_fol='/p/projects/eubucco/data/1-intermediary-outputs',
+            path_db_folder='/p/projects/eubucco/data/2-database-city-level'
+            ):
     '''
 
         Sets up the EUBUCCO database structure from (i) GADM city boundaries, (ii) parsed country/region/city-level
@@ -692,25 +684,10 @@ def db_set_up(chunksize=int(5E5),
 
         Returns: None
     '''
-    args = arg_parser(['i'])
-    print(args.i)
-    # import parameters
-    p = get_params(args.i, path_input_parsing)
-
-    print(p['dataset_name'])
-    print(p['country'])
-    print('----------')
-
-    # if only single dataset should be allocated in folder structure
-    dataset_name = p['dataset_name']
-
     start = time.time()
 
     # get file gadm, import gadm, get proper crs, get country info
-    GADM_file, country_name, level_city, local_crs = fetch_GADM_info_country(p['country'])
-
-    # to ensure right crs, set local_crs to CRS_UNI (probably not necessarry)
-    local_crs = CRS_UNI
+    GADM_file, country_name, level_city, _ = fetch_GADM_info_country(country)
 
     # handle duplicates
     GADM_file = clean_GADM_city_names(GADM_file, country_name, level_city)
@@ -721,7 +698,7 @@ def db_set_up(chunksize=int(5E5),
     if folders:
         list_city_paths = create_folders(GADM_file, country_name, path_db_folder)
     else:
-        list_city_paths = get_all_paths(country_name, path_root_folder=path_db_folder)
+        list_city_paths = ufo_helpers.get_all_paths(country_name, path_root_folder=path_db_folder)
 
     if boundaries:
         create_city_boundary_files(GADM_file, country_name, list_city_paths)
@@ -729,7 +706,6 @@ def db_set_up(chunksize=int(5E5),
     if bldgs:
         # read in inputs parsing for masking gadm and to create a list of datasets
         # if no dataset given loop through all files for the country
-        inputs_parsing = pd.read_csv(path_input_parsing)
 
         # check if we have osm with parts or normal case
         if dataset_name in ['germany-osm', 'netherlands-gov']:
@@ -742,7 +718,7 @@ def db_set_up(chunksize=int(5E5),
             num_osm_parts = 1
 
         # prepare GADM_file for sjoining - only take GADM bounds of dataset_name
-        gadm_file_temp = mask_gadm(GADM_file, dataset_name, country_name, inputs_parsing)
+        gadm_file_temp = mask_gadm(GADM_file, dataset_name, country_name, path_inputs_parsing)
 
         # intialise osm loopy-doopy
         n_bldg_start_sum_total = 0
@@ -831,7 +807,7 @@ def db_set_up(chunksize=int(5E5),
 
                 # create city bldg geom files per chunk
                 ids_x_cities, list_saved_names, list_saved_paths, n_bldg_start, n_bldg_end = create_city_bldg_geom_files(
-                    gdf, dataset_name, country_name, gadm_file_temp, list_city_paths, only_region, path_input_parsing, idx)
+                    gdf, gadm_file_temp, list_city_paths, only_region, idx)
                 # create attribute file
                 create_city_bldg_attrib_files(
                     ids_x_cities,
@@ -862,8 +838,8 @@ def db_set_up(chunksize=int(5E5),
         end = time.time() - start
 
         # flatten the created lists of lists of lists and remove duplicates
-        list_saved_names_sum_total = flatten_list(list_saved_names_sum_total)
-        list_saved_paths_sum_total = flatten_list(list_saved_paths_sum_total)
+        list_saved_names_sum_total = ufo_helpers.flatten_list(list_saved_names_sum_total)
+        list_saved_paths_sum_total = ufo_helpers.flatten_list(list_saved_paths_sum_total)
 
         # find all cities where we have 0 buildings
         #list_city_names = [os.path.split(city_path)[-1] for city_path in list_city_paths]
