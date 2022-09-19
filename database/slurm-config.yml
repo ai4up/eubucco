@@ -1,0 +1,20 @@
+jobs:
+  - name: db-set-up
+    script: /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/db-set-up.py
+    workfiles:
+      - /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/params.csv
+    log_dir: /p/tmp/fewagner/v0_1-db/db-set-up
+    resources:
+      cpus: 4
+      time: "06:00:00"
+
+properties:
+  conda_env: "/home/nikolami/.conda/envs/ox112"
+  account: eubucco
+  log_level: INFO
+  exp_backoff_factor: 4
+  max_retries: 1
+  poll_interval: 30
+  slack:
+    channel: "#test-slurm-bot"
+    token: <to-be-added>
