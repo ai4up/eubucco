@@ -1,16 +1,16 @@
 #!/bin/bash
 
 #SBATCH --qos=short
-#SBATCH --time=02:00:00
-#SBATCH --job-name=sub-%A_%a
+#SBATCH --time=00:30:00
+#SBATCH --job-name=sub_test-%A_%a
 #SBATCH --account=eubucco
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=6
-#SBATCH --output=sub-out-%A_%a.txt
-#SBATCH --error=sub-err-%A_%a.txt
-#SBATCH --workdir=/p/tmp/fewagner/submission
-#SBATCH --array=1,5,58
+#SBATCH --cpus-per-task=2
+#SBATCH --output=sub_test-out-%A_%a.txt
+#SBATCH --error=sub_test-err-%A_%a.txt
+#SBATCH --workdir=/p/tmp/fewagner/v0_2-db/submission
+#SBATCH --array=10
 
 
 pwd; hostname; date

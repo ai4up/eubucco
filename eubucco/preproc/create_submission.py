@@ -1,9 +1,14 @@
 import os
 import glob
 import pandas as pd
+import geopandas as gpd
+
 
 from ufo_map.Utils.helpers import *
 from preproc.parsing import get_params
+
+
+CRS_UNI = 'EPSG:3035'
 
 
 def get_city_size(df, all_paths):
@@ -64,7 +69,7 @@ def merge_city_files(path):
     bool_empty = False
     try:
         df_attrib = pd.read_csv(os.path.join(path + '_attrib.csv'))
-        df_geom = pd.read_csv(os.path.join(path + '_geom.csv'))
+        df_geom = import_csv_w_wkt_to_gdf(os.path.join(path + '_geom.csv'), CRS_UNI)
     except BaseException:
         bool_empty = True
 
@@ -100,9 +105,9 @@ def merge_city_parts(city, db_version, file_lim, path, out_folder):
         # save city file
         path_out = 'v' + str(db_version) + '-' + \
             df_city_temp.loc[df_city_temp.city_name == city].id_marker.values[0] + '_p' + str(idx)
-        df_temp.to_csv(os.path.join(out_folder, path_out.replace('.', '_') + '.csv'), index=False)
-        df_temp.to_csv(os.path.join(out_folder, 'zip', path_out.replace('.', '_') + '.zip'), index=False,
-                       compression={'method': 'zip', 'archive_name': path_out.replace('.', '_') + '.csv'})
+
+        df_temp.to_file(os.path.join(out_folder, path_out.replace('.', '_') + '.gpkg'), driver="GPKG", index=False)
+        df_temp[['id', 'height', 'age', 'type', 'id_source', 'type_source']].to_csv(os.path.join(out_folder, path_out.replace('.', '_') + '.csv'), index=False)
 
 
 def concate_country(df, all_paths, db_version, out_folder):
@@ -122,9 +127,9 @@ def concate_country(df, all_paths, db_version, out_folder):
 
     # create out path and remove dots
     path_out = 'v' + str(db_version) + '-' + df['id_marker_country'][0]
-    df_out.to_csv(os.path.join(out_folder, path_out.replace('.', '_') + '.csv'), index=False)
-    df_out.to_csv(os.path.join(out_folder, 'zip', path_out.replace('.', '_') + '.zip'), index=False,
-                  compression={'method': 'zip', 'archive_name': path_out.replace('.', '_') + '.csv'})
+    df_out.to_file(os.path.join(out_folder, path_out.replace('.', '_') + '.gpkg'), driver="GPKG", index=False)
+    df_out[['id', 'height', 'age', 'type', 'id_source', 'type_source']].to_csv(os.path.join(out_folder, path_out.replace('.', '_') + '.csv'), index=False)
+
     print('Num bldgs saved: {}'.format(len(df_out)))
 
 
@@ -160,11 +165,12 @@ def concate_regions(df_reg_temp, all_paths, db_version, out_folder):
                 df_out = pd.concat([df_out, df_temp])
             # increase counter
             i += 1
+        
         print('saving files for region {}'.format(reg_id))
         path_out = 'v' + str(db_version) + '-' + str(reg_id)
-        df_out.to_csv(os.path.join(out_folder, path_out.replace('.', '_') + '.csv'), index=False)
-        df_out.to_csv(os.path.join(out_folder, 'zip', path_out.replace('.', '_') + '.zip'), index=False,
-                      compression={'method': 'zip', 'archive_name': path_out.replace('.', '_') + '.csv'})
+        df_out.to_file(os.path.join(out_folder, path_out.replace('.', '_') + '.gpkg'), driver="GPKG", index=False)
+        df_out[['id', 'height', 'age', 'type', 'id_source', 'type_source']].to_csv(os.path.join(out_folder, path_out.replace('.', '_') + '.csv'), index=False)
+
         n_bldgs += len(df_out)
 
     print('-----')
@@ -211,21 +217,9 @@ def concate_cities(df_reg_temp, all_paths, db_version, out_folder):
 
             # save part for region
             path_out = 'v' + str(db_version) + '-' + str(reg_id) + '-' + part
-            print(path_out)
-            df_out.to_csv(os.path.join(out_folder, path_out.replace('.', '_') + '.csv'), index=False)
-            df_out.to_csv(
-                os.path.join(
-                    out_folder,
-                    'zip',
-                    path_out.replace(
-                        '.',
-                        '_') + '.zip'),
-                index=False,
-                compression={
-                    'method': 'zip',
-                    'archive_name': path_out.replace(
-                        '.',
-                        '_') + '.csv'})
+            df_out.to_file(os.path.join(out_folder, path_out.replace('.', '_') + '.gpkg'), driver="GPKG", index=False)
+            df_out[['id', 'height', 'age', 'type', 'id_source', 'type_source']].to_csv(os.path.join(out_folder, path_out.replace('.', '_') + '.csv'), index=False)
+            
             # count num bldgs
             n_bldgs += len(df_out)
             j += 1
@@ -267,7 +261,11 @@ def concate_release(
     # get file sizes for all cities
     print('determining city sizes')
     df = get_city_size(df_ids, all_paths)
-    df.to_csv(os.path.join(out_folder, 'city_sizes', p['country'] + '_file_sizes.csv'), index=False)
+
+    path_file_size = os.path.join(out_folder, 'city_sizes')
+    if not os.path.exists(path_file_size):    
+            os.makedirs(path_file_size)
+    df.to_csv(os.path.join(path_file_size,p['country'] + '_file_sizes.csv'), index=False)
 
     # add region marker
     df['id_marker_country'] = df.id_marker.str.rsplit('.', 0).apply(lambda x: x[0])
