@@ -19,10 +19,10 @@ def validate_ids(city_path):
 
     failed = False
 
-    city_name = os.path.normpath(city_path).split(os.path.sep)[-1]
+    #city_name = os.path.normpath(city_path).split(os.path.sep)[-1]
 
-    df_geom = pd.read_csv(os.path.join(city_path,city_name+'_geom.csv'))
-    df_attrib = pd.read_csv(os.path.join(city_path,city_name+'_attrib.csv'))
+    df_geom = pd.read_csv(os.path.join(city_path+'_geom.csv'))
+    df_attrib = pd.read_csv(os.path.join(city_path+'_attrib.csv'))
 
     # test duplicates before merge
     n_duplicates_id_geom = df_geom.duplicated(subset=['id']).sum()
