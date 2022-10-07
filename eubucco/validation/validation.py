@@ -58,27 +58,9 @@ def validate_ids(city_path):
 
     print('===============\n')
 
-    if failed: print('FAILURE')
-    else: print('SUCCESS')
-
-
-
-
-
-
-
-
-
-
-# geom.csv -> id, id_source
-# attrib.csv -> id, id_source
-# ==> outer merge on id, check that id_source_y and id_source_x work, check that there are no duplicates / no null, or len before/after
-
-# if success: 
-# if failed: 
-
-# path
-# failed
-# nb_fail_x
-# id_duplicate
-# source_id_duplicates
+    if failed:
+        print('FAILURE')
+        exit(1)
+    else:
+        print('SUCCESS')
+        exit(0)
