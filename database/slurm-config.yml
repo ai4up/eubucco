@@ -10,7 +10,7 @@ jobs:
     special_cases:
       - name: small-files
         file:
-          path: /p/projects/eubucco/data/1-intermediary-outputs/{{country}}/{{dataset_name}}-3035_geoms.csv
+          path: "/p/projects/eubucco/data/1-intermediary-outputs/{{country}}/{{dataset_name}}-3035_geoms.csv"
           file_size_min: 10000000
           file_size_max: 20000000
         resources:
@@ -55,14 +55,14 @@ jobs:
     special_cases:
       - name: tiny-cities
         file:
-          path: {{city_path}}_geom.csv
+          path: "{{city_path}}_geom.csv"
           file_size_max: 10000000
         resources:
           cpus: 1
           time: "01:00:00"
       - name: small-cities
         file:
-          path: {{city_path}}_geom.csv
+          path: "{{city_path}}_geom.csv"
           file_size_min: 10000000
           file_size_max: 20000000
         resources:
@@ -70,7 +70,7 @@ jobs:
           time: "03:00:00"
       - name: medium-cities
         file:
-          path: {{city_path}}_geom.csv
+          path: "{{city_path}}_geom.csv"
           file_size_min: 20000000
           file_size_max: 100000000
         resources:
@@ -78,7 +78,7 @@ jobs:
           time: "12:00:00"
       - name: large-cities
         file:
-          path: {{city_path}}_geom.csv
+          path: "{{city_path}}_geom.csv"
           file_size_min: 100000000
         resources:
           cpus: 8
