@@ -14,14 +14,14 @@ CRS_UNI = 'EPSG:3035'
 
 
 def create_features(city_path,
-                    bld=False,
-                    blk=False,
-                    bld_d=False,
-                    blk_d=False,
-                    int_=False,
-                    str_=False,
-                    sbb_=False,
-                    city_level=False,
+                    bld=True,
+                    blk=True,
+                    bld_d=True,
+                    blk_d=True,
+                    int_=True,
+                    str_=True,
+                    sbb_=True,
+                    city_level=True,
                     path_stats='/p/projects/eubucco/stats/5-ft-eng'
                     ):
     '''
