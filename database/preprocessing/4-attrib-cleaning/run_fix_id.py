@@ -10,6 +10,7 @@ from ufo_map.Utils.helpers import arg_parser  # noqa: E402
 
 params_file_path = '/p/projects/eubucco/git-eubucco/database/preprocessing/1-parsing/inputs-parsing.csv'
 args = arg_parser(['i'])
-country = pd.read_csv(params_file_path).country.unique()[args.i]
+country = pd.read_csv(params_file_path).country[args.i-1]
 
+print(country)
 fix_id(country, path_db_folder='/p/projects/eubucco/data/2-database-city-level-v0_1')
