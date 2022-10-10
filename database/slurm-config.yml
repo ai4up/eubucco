@@ -87,8 +87,8 @@ jobs:
   - name: create-release
     script: /p/projects/eubucco/git-eubucco/database/preprocessing/5-release/run_create_submission.py
     param_files:
-      - /p/projects/eubucco/git-eubucco/database/preprocessing/5-release/params.csv
-    log_dir: /p/tmp/floriann/v0_1-db/db-set-up
+      - /p/projects/eubucco/git-eubucco/database/preprocessing/5-release/params.yml
+    log_dir: /p/tmp/floriann/v0_1-db/release
     resources:
       cpus: 2
       time: "01:00:00"
