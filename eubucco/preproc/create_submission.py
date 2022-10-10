@@ -234,29 +234,23 @@ def concate_cities(df_reg_temp, all_paths, db_version, out_folder):
 
 
 def concate_release(
-        db_version=0.1,
-        file_lim=2,
-        path_db_folder='/p/projects/eubucco/data/2-database-city-level-v0_1',
-        path_to_param_file='/p/projects/eubucco/git-eubucco/database/preprocessing/1-parsing/inputs-parsing.csv',
-        path_root_id='/p/projects/eubucco/data/0-raw-data/id_look_up/country-ids',
-        out_folder='/p/projects/eubucco/data/5-v0_1'):
+    country,
+    db_version=0.1,
+    file_lim=2,
+    path_db_folder='/p/projects/eubucco/data/2-database-city-level-v0_1',
+    path_root_id='/p/projects/eubucco/data/0-raw-data/id_look_up/country-ids',
+    out_folder='/p/projects/eubucco/data/5-v0_1'):
 
     # convert to byte
     file_lim = file_lim * 1e9
 
-    #import argparser
-    args = arg_parser(['i'])
-    print(args.i)
-    # import parameters
-    p = get_params(args.i, path_to_param_file)
-    print(p['country'])
-    print('----------')
+    print(country)
 
     # get all paths
-    all_paths = get_all_paths(p['country'], path_root_folder=path_db_folder)
+    all_paths = get_all_paths(country, path_root_folder=path_db_folder)
 
     # read in ids
-    df_ids = pd.read_csv(os.path.join(path_root_id, p['country'] + '_ids.csv'))
+    df_ids = pd.read_csv(os.path.join(path_root_id, country + '_ids.csv'))
 
     # get file sizes for all cities
     print('determining city sizes')
@@ -265,7 +259,7 @@ def concate_release(
     path_file_size = os.path.join(out_folder, 'city_sizes')
     if not os.path.exists(path_file_size):    
             os.makedirs(path_file_size)
-    df.to_csv(os.path.join(path_file_size,p['country'] + '_file_sizes.csv'), index=False)
+    df.to_csv(os.path.join(path_file_size, country + '_file_sizes.csv'), index=False)
 
     # add region marker
     df['id_marker_country'] = df.id_marker.str.rsplit('.', 0).apply(lambda x: x[0])
@@ -290,7 +284,7 @@ def concate_release(
             df = get_region_parts(df, file_lim)
             # save
             df[['id_marker', 'country_name', 'region_name', 'city_name', 'part_marker']].to_csv(
-                os.path.join(out_folder, 'id_codes', p['country'] + '_id_codes.csv'), index=False)
+                os.path.join(out_folder, 'id_codes', country + '_id_codes.csv'), index=False)
             # concate remaining cities
             concate_cities(df.loc[df.id_marker_region.isin(lst_out_ids)], all_paths, db_version, out_folder)
 
