@@ -7,8 +7,8 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
-#SBATCH --output=fix_id-%A_%a.stdout
-#SBATCH --error=fix_id-%A_%a.stderr
+#SBATCH --output=fix_id-%a.stdout
+#SBATCH --error=fix_id-%a.stderr
 #SBATCH --workdir=/p/tmp/fewagner/v0_1-db/fix_id/2022-10-10
 #SBATCH --array=6 
 

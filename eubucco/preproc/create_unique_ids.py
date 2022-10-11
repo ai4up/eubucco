@@ -63,7 +63,8 @@ def fix_id(country, path_db_folder='/p/projects/eubucco/data/2-database-city-lev
 
 	city_paths = get_all_paths(country, path_root_folder=path_db_folder)
 
-	list_dupls=[]
+	list_dupls = []
+	list_geom_loss = []
 	for i, path in enumerate(city_paths):
 		print('looping through path {} / {} (city {})'.format(i, len(city_paths) - 1, os.path.split(path)[-1]))
 
@@ -75,7 +76,11 @@ def fix_id(country, path_db_folder='/p/projects/eubucco/data/2-database-city-lev
 
 		df = pd.read_csv(file_path)		
 		if len(df.loc[df.duplicated(subset='id_source')])>0:
-			print('Dropping {} source_id duplicates in _geom'.format(len(df.loc[df.duplicated(subset='id_source')])))
+			len_full_duplicates = len(df[['id_source','geometry']][df[['id_source','geometry']].duplicated()])
+			len_geom_loss = len(df[['id_source','geometry']][df[['id_source','geometry']].duplicated(subset='id_source')]) - len_full_duplicates
+			list_dupls.append(len_full_duplicates)
+			list_geom_loss.append(len_geom_loss)
+			print('Dropping {} source_id dupls in _geom, causing a loss of {} unique geoms.'.format(len(df.loc[df.duplicated(subset='id_source')]), len_geom_loss))
 			df = df.drop_duplicates(subset='id_source').reset_index(drop=True)
 		
 		geom_id_source = df.id_source # save to ensure same len in geom and attrib files later
@@ -101,4 +106,6 @@ def fix_id(country, path_db_folder='/p/projects/eubucco/data/2-database-city-lev
 			df = df.loc[df.id_source.isin(geom_id_source)]    
 			df.to_csv(file_path, index=False)
 
+	print('Total drop of real duplicates: {}'.format(sum(list_dupls)))
+	print('Total drop of unique geoms: {}'.format(sum(list_geom_loss)))
 	print('Fixed alignment of new unique ids.')
