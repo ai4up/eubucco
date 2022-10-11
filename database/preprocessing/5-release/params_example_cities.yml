@@ -1,0 +1,12 @@
+- country_cities_mapping:
+    belgium: [Brugge]
+    czechia: [Liberec]
+    france: [Vichy]
+    germany: [Berlin]
+    netherlands: [Amsterdam]
+    poland: [Warszawa]
+    spain: [Madrid]
+    switzerland: [Basel]
+  db_version: 0.1
+  out_folder: /p/projects/eubucco/data/5-v0_2
+  path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1

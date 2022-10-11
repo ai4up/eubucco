@@ -223,6 +223,36 @@ def to_gpkg_zip(df, file_name, directory):
     os.remove(file_path)
 
 
+def create_example_cities(
+    country_cities_mapping,
+    db_version=0.1,
+    path_db_folder='/p/projects/eubucco/data/2-database-city-level-v0_1',
+    out_folder='/p/projects/eubucco/data/5-v0_1'):
+
+    for country, cities in country_cities_mapping.items():
+        all_paths = get_all_paths(country, path_root_folder=path_db_folder)
+        all_example_paths = [path for path in all_paths if _city_name(path) in cities]
+
+        for path in all_example_paths:
+            df, bool_empty = merge_city_files(path)
+
+            if bool_empty:
+                print(f'No attribute and/or geometry file found for example city {path}.')
+                continue
+
+            file_name = 'v' + str(db_version) + '-' + _gadm_city_code(df.iloc[0]['id']) + '-' + _city_name(path)
+            to_gpkg_zip(df, file_name, out_folder)
+            to_csv_zip(df[['id', 'height', 'age', 'type', 'id_source', 'type_source']], file_name, out_folder)
+
+
+def _city_name(city_path):
+    return city_path.rsplit('/', 1)[1]
+
+
+def _gadm_city_code(building_id):
+    return building_id.split('-')[1]
+
+
 def concate_release(
     country,
     db_version=0.1,
