@@ -107,7 +107,7 @@ properties:
   account: eubucco
   log_level: INFO
   exp_backoff_factor: 4
-  max_retries: 1
+  max_retries: 3
   poll_interval: 30
   slack:
     channel: "#test-slurm-bot"
