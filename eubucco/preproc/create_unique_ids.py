@@ -82,6 +82,7 @@ def fix_id(country, path_db_folder='/p/projects/eubucco/data/2-database-city-lev
 			list_geom_loss.append(len_geom_loss)
 			print('Dropping {} source_id dupls in _geom, causing a loss of {} unique geoms.'.format(len(df.loc[df.duplicated(subset='id_source')]), len_geom_loss))
 			df = df.drop_duplicates(subset='id_source').reset_index(drop=True)
+		df.to_csv(file_path,index=False)
 		
 		geom_id_source = df.id_source # save to ensure same len in geom and attrib files later
 		id_source_id_mapping = dict(zip(df['id_source'], df['id']))

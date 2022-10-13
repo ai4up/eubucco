@@ -10,7 +10,7 @@
 #SBATCH --output=fix_id-%a.stdout
 #SBATCH --error=fix_id-%a.stderr
 #SBATCH --workdir=/p/tmp/fewagner/v0_1-db/fix_id/2022-10-10
-#SBATCH --array=6 
+#SBATCH --array=6,66,22 
 
 pwd; hostname; date
 
