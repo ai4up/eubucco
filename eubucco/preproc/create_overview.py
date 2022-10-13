@@ -6,6 +6,7 @@ import glob
 from shapely import wkt
 import geopandas as gpd
 import ast
+from pathlib import Path
 
 from ufo_map.Utils.helpers import get_all_paths, arg_parser
 from preproc.parsing import get_params
@@ -506,27 +507,21 @@ def metrics_extra(dict_city, path_extra, bid_0, num_bldgs_files, list_ids_files)
 
 ##############
 ### MAIN #####
-def create_stats_main(
-        db_version=0.1,
-        path_overview='/p/projects/eubucco/stats/2-db-set-up/overview',
-        path_root_folder='/p/projects/eubucco/data/2-database-city-level',
-        path_input_parsing='/p/projects/eubucco/git-eubucco/database/preprocessing/1-parsing/inputs-parsing.csv',
-        path_root_id='/p/projects/eubucco/data/0-raw-data/id_look_up/country-ids'):
+def create_stats_main(country,
+                    db_version=0.1,
+                    path_db_folder='/p/projects/eubucco/data/2-database-city-level-v0_1',
+                    path_out='/p/projects/eubucco/stats/2-db-set-up/overview',
+                    path_root_id='/p/projects/eubucco/data/0-raw-data/id_look_up/country-ids'):
 
-    args = arg_parser(['i'])
-    print(args.i)
-    # import parameters
-    p = get_params(args.i, path_input_parsing)
 
-    print(p['dataset_name'])
-    print(p['country'])
+    print(country)
     print('----------')
 
     # get all paths for this country
-    paths = get_all_paths(p['country'], path_root_folder=path_root_folder)
+    paths = get_all_paths(country, path_root_folder=path_db_folder)
 
     # read in id mapper
-    df_id_mapper = pd.read_csv(os.path.join(path_root_id, p['country'] + '_ids.csv'))
+    df_id_mapper = pd.read_csv(os.path.join(path_root_id, country + '_ids.csv'))
 
     # intitalise output df
     df_out = pd.DataFrame()
@@ -596,15 +591,15 @@ def create_stats_main(
         # df append dict to city_name
         df_out = df_out.append(dict_city, ignore_index=True)
 
-    # save df_out
-    print('saving collected overview')
-    # check if files are present to not overwrite and instead add counter
-    path_save = os.path.join(path_overview, p['country'] + '_overview*')
+    print('saving collected overview')    
+    Path(path_out).mkdir(parents=True, exist_ok=True)
+    # check if files are present in path_out to not overwrite and instead add counter
+    path_save = os.path.join(path_out, country + '_overview*')
     files_present = glob.glob(path_save)
     if len(files_present) > 0:
         # add count to ending and save
-        df_out.to_csv(os.path.join(path_overview, p['country'] +
+        df_out.to_csv(os.path.join(path_out, country +
                       '_overview_' + str(len(files_present)) + '.csv'), index=False)
     else:
-        df_out.to_csv(os.path.join(path_overview, p['country'] + '_overview.csv'), index=False)
+        df_out.to_csv(os.path.join(path_out, country + '_overview.csv'), index=False)
     print('Everything saved successully. Closing run.')
