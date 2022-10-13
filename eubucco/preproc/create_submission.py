@@ -257,6 +257,7 @@ def concate_release(
     country,
     db_version=0.1,
     file_lim=2,
+    split_by_region=False,
     path_db_folder='/p/projects/eubucco/data/2-database-city-level-v0_1',
     path_root_id='/p/projects/eubucco/data/0-raw-data/id_look_up/country-ids',
     out_folder='/p/projects/eubucco/data/5-v0_1'):
@@ -286,7 +287,7 @@ def concate_release(
     df['id_marker_region'] = df.id_marker.str.rsplit('.').apply(lambda x: x[0] + '.' + x[1])
 
     # if country file size smaller file lim -> concate country
-    if df.file_size.sum() < file_lim:
+    if not split_by_region and df.file_size.sum() < file_lim:
         print('concatenating on country lvl as sum of files equals {} GB'.format(round(df.file_size.sum() * 1e-9, 3)))
         concate_country(df, all_paths, db_version, out_folder)
     else:

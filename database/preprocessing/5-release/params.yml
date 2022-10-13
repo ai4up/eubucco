@@ -1,140 +1,168 @@
 - country: austria
   db_version: 0.1
   file_lim: 9999
+  split_by_region: False
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: belgium
   db_version: 0.1
   file_lim: 9999
+  split_by_region: False
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: bulgaria
   db_version: 0.1
   file_lim: 9999
+  split_by_region: False
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: croatia
   db_version: 0.1
   file_lim: 9999
+  split_by_region: False
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: cyprus
   db_version: 0.1
   file_lim: 9999
+  split_by_region: False
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: czechia
   db_version: 0.1
   file_lim: 9999
+  split_by_region: True
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: denmark
   db_version: 0.1
   file_lim: 9999
+  split_by_region: False
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: estonia
   db_version: 0.1
   file_lim: 9999
+  split_by_region: False
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: finland
   db_version: 0.1
   file_lim: 9999
+  split_by_region: False
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: france
   db_version: 0.1
   file_lim: 9999
+  split_by_region: False
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: germany
   db_version: 0.1
   file_lim: 9999
+  split_by_region: True
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: greece
   db_version: 0.1
   file_lim: 9999
+  split_by_region: False
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: hungary
   db_version: 0.1
   file_lim: 9999
+  split_by_region: False
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: ireland
   db_version: 0.1
   file_lim: 9999
+  split_by_region: False
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: italy
   db_version: 0.1
   file_lim: 9999
+  split_by_region: True
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: latvia
   db_version: 0.1
   file_lim: 9999
+  split_by_region: False
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: lithuania
   db_version: 0.1
   file_lim: 9999
+  split_by_region: False
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: luxembourg
   db_version: 0.1
   file_lim: 9999
+  split_by_region: False
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: malta
   db_version: 0.1
   file_lim: 9999
+  split_by_region: False
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: netherlands
   db_version: 0.1
   file_lim: 9999
+  split_by_region: False
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: poland
   db_version: 0.1
   file_lim: 9999
+  split_by_region: False
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: portugal
   db_version: 0.1
   file_lim: 9999
+  split_by_region: False
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: romania
   db_version: 0.1
   file_lim: 9999
+  split_by_region: False
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: slovakia
   db_version: 0.1
   file_lim: 9999
+  split_by_region: False
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: slovenia
   db_version: 0.1
   file_lim: 9999
+  split_by_region: False
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: spain
   db_version: 0.1
   file_lim: 9999
+  split_by_region: False
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: sweden
   db_version: 0.1
   file_lim: 9999
+  split_by_region: False
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
 - country: switzerland
   db_version: 0.1
   file_lim: 9999
+  split_by_region: False
   out_folder: /p/projects/eubucco/data/5-v0_2
   path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
