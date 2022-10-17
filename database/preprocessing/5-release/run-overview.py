@@ -1,7 +1,8 @@
 import os
 import sys
+import json
 
-PROJECT_SRC_PATH = os.path.realpath(os.path.join(__file__, '..', '..', '..', '..', '..', 'eubucco'))
+PROJECT_SRC_PATH = os.path.realpath(os.path.join(__file__, '..', '..', '..', '..', 'eubucco'))
 sys.path.append(PROJECT_SRC_PATH)
 
 from preproc import create_overview # noqa: E402
