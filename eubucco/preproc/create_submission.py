@@ -4,8 +4,7 @@ import shutil
 
 import pandas as pd
 
-from ufo_map.Utils.helpers import *
-
+import ufo_map.Utils.helpers as ufo_helpers
 
 CRS_UNI = 'EPSG:3035'
 
@@ -68,7 +67,7 @@ def merge_city_files(path):
     bool_empty = False
     try:
         df_attrib = pd.read_csv(os.path.join(path + '_attrib.csv'))
-        df_geom = import_csv_w_wkt_to_gdf(os.path.join(path + '_geom.csv'), CRS_UNI)
+        df_geom = ufo_helpers.import_csv_w_wkt_to_gdf(os.path.join(path + '_geom.csv'), CRS_UNI)
     except BaseException:
         bool_empty = True
 
@@ -210,15 +209,15 @@ def concate_cities(df_reg_temp, all_paths, db_version, out_folder):
 
 
 def to_csv_zip(df, file_name, directory):
-    file_name = file_name.replace('.', '_') + '.csv.zip'
-    file_path = os.path.join(directory, file_name)
-    df.to_csv(file_path, index=False, compression='zip')
+    file_name = file_name.replace('.', '_') + '.csv'
+    with ufo_helpers.chdir(directory):
+        df.to_csv(file_name + '.zip', index=False, compression=dict(method='zip', archive_name=file_name))
 
 
-def to_gpkg_zip(df, file_name, directory):
+def to_gpkg_zip(gdf, file_name, directory):
     file_name = file_name.replace('.', '_') + '.gpkg'
     file_path = os.path.join(directory, file_name)
-    df.to_file(file_path, driver='GPKG', index=False)
+    gdf.to_file(file_path, driver='GPKG', index=False)
     shutil.make_archive(file_path, 'zip', directory, file_name)
     os.remove(file_path)
 
@@ -230,7 +229,7 @@ def create_example_cities(
     out_folder='/p/projects/eubucco/data/5-v0_1'):
 
     for country, cities in country_cities_mapping.items():
-        all_paths = get_all_paths(country, path_root_folder=path_db_folder)
+        all_paths = ufo_helpers.get_all_paths(country, path_root_folder=path_db_folder)
         all_example_paths = [path for path in all_paths if _city_name(path) in cities]
 
         for path in all_example_paths:
@@ -268,7 +267,7 @@ def concate_release(
     print(country)
 
     # get all paths
-    all_paths = get_all_paths(country, path_root_folder=path_db_folder)
+    all_paths = ufo_helpers.get_all_paths(country, path_root_folder=path_db_folder)
 
     # read in ids
     df_ids = pd.read_csv(os.path.join(path_root_id, country + '_ids.csv'))
