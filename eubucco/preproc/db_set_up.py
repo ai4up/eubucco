@@ -740,7 +740,9 @@ def db_set_up(country,
                             dict_num_attribs)
 
         # save stats file
+        Path(path_stats).mkdir(parents=True, exist_ok=False)
         df_stats.to_csv(os.path.join(path_stats, dataset_name + '_stat.csv'), index=False)
+
         print(df_stats.iloc[0])
         print('----------------')
         print('saved all geom files in gadm folders & saved stats files')
