@@ -294,8 +294,8 @@ def prepare_GADM(GADM_file, local_crs):
 
 
 def create_folders(GADM_file,
-                   country_name,
-                   path_db_folder='/p/projects/eubucco/data/2-database-city-level'):
+                   country,
+                   root_dir='/p/projects/eubucco/data/2-database-city-level'):
     '''
         Create city folder for a country with a region parent folder (except when there is none possible in GADM).
 
@@ -306,33 +306,21 @@ def create_folders(GADM_file,
         !!TODO!!:
         * add support for incomplete OSM countries
     '''
-    # create new folder for country
-    os.mkdir(os.path.join(path_db_folder, country_name))
-
-    if country_name in ['cyprus', 'ireland']:
-
-        list_city_paths = [os.path.join(path_db_folder, country_name, city_name_) for city_name_ in GADM_file.city_name]
-        for city_path in list_city_paths:
-            Path(city_path).mkdir(parents=True, exist_ok=False)
-
+    if country in ['cyprus', 'ireland']:
+        list_city_paths = [os.path.join(root_dir, country, city) for city in GADM_file.city_name]
     else:
-        list_city_paths = [
-            os.path.join(
-                path_db_folder,
-                country_name,
-                region_name_,
-                city_name_) for region_name_,
-            city_name_ in zip(
+        list_city_paths = [os.path.join(root_dir, country, region, city) for region, city in zip(
                 GADM_file.region_name,
                 GADM_file.city_name)]
-        for city_path in list_city_paths:
-            Path(city_path).mkdir(parents=True, exist_ok=False)
 
-    list_city_paths = [os.path.join(path, city_name_) for path, city_name_ in zip(list_city_paths, GADM_file.city_name)]
-    textfile = open(os.path.join(path_db_folder, country_name, "paths_" + country_name + ".txt"), "w")
-    for element in list_city_paths:
-        textfile.write(element + "\n")
-    textfile.close()
+    for city_path in list_city_paths:
+        Path(city_path).mkdir(parents=True, exist_ok=False)
+
+    list_city_paths = [os.path.join(path, city) for path, city in zip(list_city_paths, GADM_file.city_name)]
+    paths_file = os.path.join(root_dir, country, f"paths_{country}.txt")
+    with open(paths_file, "w") as f:
+        for element in list_city_paths:
+            f.write(element + "\n")
 
     print('Folders created.')
 
@@ -626,15 +614,15 @@ def merge(list_saved_paths, country, path_db_folder='/p/projects/eubucco/data/2-
 
 def db_set_up(country,
             dataset_name,
+            path_db_folder,
             chunksize=int(5E5),
             only_region=None,
-            folders=True,
+            overwrite=False,
             boundaries=True,
             bldgs=True,
             path_stats='/p/projects/eubucco/stats/2-db-set-up',
             path_inputs_parsing='/p/projects/eubucco/git-eubucco/database/preprocessing/1-parsing/inputs-parsing.csv',
             path_int_fol='/p/projects/eubucco/data/1-intermediary-outputs',
-            path_db_folder='/p/projects/eubucco/data/2-database-city-level'
             ):
     '''
 
@@ -664,10 +652,14 @@ def db_set_up(country,
     # reproject gadm,add buffer to boundary
     GADM_file = prepare_GADM(GADM_file, CRS_UNI)
 
-    if folders:
-        list_city_paths = create_folders(GADM_file, country_name, path_db_folder)
-    else:
+    if overwrite:
         list_city_paths = ufo_helpers.get_all_paths(country_name, path_root_folder=path_db_folder)
+    else:
+        folder_name = os.path.join(path_db_folder, country_name)
+        if os.path.isdir(folder_name):
+            raise Exception(f'{folder_name} already exists. Aborting...')
+
+        list_city_paths = create_folders(GADM_file, country_name, path_db_folder)
 
     if boundaries:
         create_city_boundary_files(GADM_file, country_name, list_city_paths)
