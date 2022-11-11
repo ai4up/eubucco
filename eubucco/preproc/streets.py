@@ -10,7 +10,7 @@ import ufo_map.Utils.helpers as ufo_helpers
 CRS_UNI = 'EPSG:3035'
 
 
-def download_osm_streets_country(country_name,
+def download_osm_streets_country(country,
                          data_dir='/p/projects/eubucco/data/2-database-city-level-v0_1',
                          path_stats='/p/projects/eubucco/stats/6-streets'):
     '''
@@ -22,9 +22,9 @@ def download_osm_streets_country(country_name,
         Returns: None
     '''
 
-    print(country_name)
+    print(country)
 
-    paths = ufo_helpers.get_all_paths(country_name, data_dir)
+    paths = ufo_helpers.get_all_paths(country, data_dir)
 
     success = []
 
@@ -34,8 +34,8 @@ def download_osm_streets_country(country_name,
         success.append(download_osm_streets(city_path))
 
     duration = time.time() - start
-    stats = {'country_name': country_name, 'n_cities_wo_streets': success.count(False)}
-    filename = f'{country_name}_stat_ddl'
+    stats = {'country': country, 'n_cities_wo_streets': success.count(False)}
+    filename = f'{country}_stat_ddl'
     ufo_helpers.write_stats(stats, duration, path_stats, filename)
 
 
