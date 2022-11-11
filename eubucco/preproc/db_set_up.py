@@ -276,8 +276,6 @@ def prepare_GADM(GADM_file, local_crs):
 
         Returns: gpd.GeoDataFrame
     '''
-    GADM_file['centroid_city_lat'] = GADM_file.iloc[0].geometry.centroid.x
-    GADM_file['centroid_city_lon'] = GADM_file.iloc[0].geometry.centroid.y
     GADM_file['boundary_GADM_WGS84'] = GADM_file.geometry.apply(lambda x: x.wkt)
 
     GADM_file_local = GADM_file.to_crs(local_crs)
@@ -285,7 +283,7 @@ def prepare_GADM(GADM_file, local_crs):
     GADM_file_local['boundary_GADM'] = GADM_file_local.geometry.apply(lambda x: x.wkt)
     GADM_file_local['boundary_GADM_500m_buffer'] = GADM_file_local.geometry.buffer(500).apply(lambda x: x.wkt)
     GADM_file_local['boundary_GADM_2k_buffer'] = GADM_file_local.geometry.buffer(2000).apply(lambda x: x.wkt)
-    GADM_file_local['boundary_area'] = GADM_file_local.iloc[0].geometry.area
+
     GADM_file_local = GADM_file_local.drop(columns=['geometry'])
 
     print('GADM prepared.')
