@@ -42,7 +42,7 @@ def download_osm_streets_country(country,
 def download_osm_streets(city_path):
 
         path_in = f'{city_path}_boundary.csv'
-        path_out = f'{city_path}_streets.csv'
+        path_out = f'{city_path}_streets_raw.csv'
         print(path_out)
 
         boundary = ufo_helpers.import_csv_w_wkt_to_gdf(
@@ -126,12 +126,12 @@ def parse_streets(city_path,
     start = time.time()
 
     paths = {}
-    for file in ['streets', 'geom', 'intersections', 'sbb']:
+    for file in ['streets_raw', 'geom', 'streets', 'intersections', 'sbb']:
         paths[file] = f'{city_path}_{file}.csv'
 
 
     try:
-        streets = ufo_helpers.import_csv_w_wkt_to_gdf(paths['streets'], CRS_UNI)
+        streets = ufo_helpers.import_csv_w_wkt_to_gdf(paths['streets_raw'], CRS_UNI)
         buildings = ufo_helpers.import_csv_w_wkt_to_gdf(paths['geom'], CRS_UNI)
 
         streets, n_streets, n_int = create_streets_and_intersections(
