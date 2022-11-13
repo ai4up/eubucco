@@ -24,7 +24,7 @@ def download_osm_streets_country(country,
 
     print(country)
 
-    paths = ufo_helpers.get_all_paths(country, data_dir)
+    paths = ufo_helpers.get_all_paths(country, path_root_folder=data_dir)
 
     success = []
 
