@@ -1,3 +1,4 @@
+import os
 import time
 
 import osmnx as ox
@@ -21,15 +22,11 @@ def download_osm_streets_country(country,
 
         Returns: None
     '''
-
     print(country)
-
-    paths = ufo_helpers.get_all_paths(country, path_root_folder=data_dir)
-
     success = []
-
     start = time.time()
 
+    paths = ufo_helpers.get_all_paths(country, path_root_folder=data_dir)
     for city_path in paths:
         success.append(download_osm_streets(city_path))
 
@@ -40,10 +37,13 @@ def download_osm_streets_country(country,
 
 
 def download_osm_streets(city_path):
-
         path_in = f'{city_path}_boundary.csv'
         path_out = f'{city_path}_streets_raw.csv'
         print(path_out)
+
+        if os.path.isfile(path_out):
+            print(f'OSM street network for city has already been downloaded: {path_out}')
+            return True
 
         boundary = ufo_helpers.import_csv_w_wkt_to_gdf(
             path_in, CRS_UNI, geometry_col='boundary_GADM_2k_buffer').to_crs(4326).geometry.iloc[0]
