@@ -9,10 +9,10 @@ jobs:
       time: "06:00:00"
     special_cases:
       - name: small-files
-        file:
+        files:
           path: "/p/projects/eubucco/data/1-intermediary-outputs/{{country}}/{{dataset_name}}-3035_geoms.csv"
-          file_size_min: 10000000
-          file_size_max: 20000000
+          size_min: 10000000
+          size_max: 20000000
         resources:
           time: "03:00:00"
 
@@ -53,16 +53,16 @@ jobs:
       time: "03:00:00"
     special_cases:
       - name: small-cities
-        file:
+        files:
           path: "{{city_path}}_geom.csv"
-          file_size_max: 20000000
+          size_max: 20000000
         resources:
           cpus: 1
           time: "01:00:00"
       - name: large-cities
-        file:
+        files:
           path: "{{city_path}}_geom.csv"
-          file_size_min: 100000000
+          size_min: 100000000
         resources:
           cpus: 8
           time: "06:00:00"
@@ -133,9 +133,9 @@ jobs:
       time: "06:00:00"
     special_cases:
       - name: large-cities
-        file:
+        files:
           path: "{{city_path}}_geom.csv"
-          file_size_min: 100000000
+          size_min: 100000000
         resources:
           cpus: 4
           time: "24:00:00"
@@ -177,16 +177,16 @@ jobs:
       time: "12:00:00"
     special_cases:
       - name: small-cities
-        file:
+        files:
           path: "{{city_path}}_geom.csv"
-          file_size_max: 20000000
+          size_max: 20000000
         resources:
           cpus: 1
           time: "03:00:00"
       - name: large-cities
-        file:
+        files:
           path: "{{city_path}}_geom.csv"
-          file_size_min: 100000000
+          size_min: 100000000
         resources:
           cpus: 8
           time: "24:00:00"
@@ -198,8 +198,23 @@ jobs:
     log_dir: /p/projects/eubucco/logs/v0_1-db/create-training-dataset
     resources:
       cpus: 8
-      mem: 120000
+      mem: 62000
       time: "12:00:00"
+    special_cases:
+      - name: small-countries
+        files:
+          path: "{{data_dir}}/{{country}}"
+          size_max: 10000000000
+        resources:
+          cpus: 4
+          mem: 30000
+      - name: large-countries
+        files:
+          path: "{{data_dir}}/{{country}}"
+          size_min: 50000000000
+        resources:
+          cpus: 8
+          mem: 126000
 
 properties:
   conda_env: "/home/nikolami/.conda/envs/ox112"

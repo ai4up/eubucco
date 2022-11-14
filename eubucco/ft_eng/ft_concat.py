@@ -15,9 +15,11 @@ def generate_dataset(file_path, **kwargs):
     df.to_pickle(file_path)
 
 
-def load_dataset(countries, data_dir, cities=None, n_cities=None, fts_types=None, fts_selection=None, dropna_for_col=None, join_type='inner', seed=1):
+def load_dataset(data_dir, country=None, countries=[], cities=None, n_cities=None, fts_types=None, fts_selection=None, dropna_for_col=None, join_type='inner', seed=1):
     fts_types = fts_types or ['attrib', 'bld_fts', 'bld_d_fts', 'block_fts', 'block_d_fts', 'int_fts',
                               'str_fts', 'sbb_fts', 'wsf-evo_age', 'lu_fts', 'city_level_fts']
+    if country:
+        countries = [country]
 
     files = []
     for type in fts_types:
