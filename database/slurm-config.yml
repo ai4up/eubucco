@@ -141,7 +141,7 @@ jobs:
           time: "24:00:00"
 
   - name: feature-engineering
-    script: /p/projects/eubucco/git-eubucco/database/feature-engineering/fts.py
+    script: /p/projects/eubucco/git-eubucco/database/feature-engineering/fts_eng.py
     param_files:
       - /p/projects/eubucco/data/2-database-city-level-v0_1/austria/params.csv
       - /p/projects/eubucco/data/2-database-city-level-v0_1/belgium/params.csv
@@ -190,6 +190,16 @@ jobs:
         resources:
           cpus: 8
           time: "24:00:00"
+
+  - name: create-training-dataset
+    script: /p/projects/eubucco/git-eubucco/database/feature-engineering/fts_concat.py
+    param_files:
+      - /p/projects/eubucco/git-eubucco/database/feature-engineering/params.yml
+    log_dir: /p/projects/eubucco/logs/v0_1-db/create-training-dataset
+    resources:
+      cpus: 8
+      mem: 120000
+      time: "12:00:00"
 
 properties:
   conda_env: "/home/nikolami/.conda/envs/ox112"
