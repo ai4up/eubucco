@@ -52,7 +52,7 @@ def create_features(city_path,
     city_fts = pd.DataFrame(index=[0])
 
     if bld:
-        building_fts = buildings.merge(ufo_buildings.features_building_level(buildings), on='id_source')
+        building_fts = buildings.merge(ufo_buildings.features_building_level(buildings), on='id')
         building_fts.loc[indexes_].drop(columns=['geometry']).to_csv(paths['bld_fts'], index=False)
         city_fts = pd.concat((city_fts, ufo_city.features_city_level_buildings(buildings.loc[indexes_])), axis=1)
 
@@ -61,7 +61,7 @@ def create_features(city_path,
         building_fts.loc[indexes_].to_csv(paths['bld_d_fts'], index=False)
 
     if blk:
-        block_fts = buildings.merge(ufo_blocks.features_block_level(buildings), on='id_source')
+        block_fts = buildings.merge(ufo_blocks.features_block_level(buildings), on='id')
         block_fts.loc[indexes_].drop(columns=['geometry']).to_csv(paths['block_fts'], index=False)
         city_fts = pd.concat((city_fts, ufo_city.features_city_level_blocks(block_fts.loc[indexes_])), axis=1)
 

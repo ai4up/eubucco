@@ -141,7 +141,7 @@ jobs:
           time: "24:00:00"
 
   - name: feature-engineering
-    script: /p/projects/eubucco/git-eubucco/database/validation/validate-ids.py
+    script: /p/projects/eubucco/git-eubucco/database/feature-engineering/fts.py
     param_files:
       - /p/projects/eubucco/data/2-database-city-level-v0_1/austria/params.csv
       - /p/projects/eubucco/data/2-database-city-level-v0_1/belgium/params.csv
