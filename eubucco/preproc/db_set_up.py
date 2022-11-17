@@ -291,38 +291,43 @@ def prepare_GADM(GADM_file, local_crs):
     return(GADM_file_local)
 
 
-def create_folders(GADM_file,
-                   country,
-                   root_dir='/p/projects/eubucco/data/2-database-city-level'):
-    '''
-        Create city folder for a country with a region parent folder (except when there is none possible in GADM).
-
-        Saves the list of the folder paths as a .txt file.
-
-        Returns: list of paths
-
-        !!TODO!!:
-        * add support for incomplete OSM countries
-    '''
+def city_paths_from_gadm(path_db_folder,country,GADM_file):
     if country in ['cyprus', 'ireland']:
-        list_city_paths = [os.path.join(root_dir, country, city) for city in GADM_file.city_name]
+        return [os.path.join(path_db_folder, country, city) for city in GADM_file.city_name]
     else:
-        list_city_paths = [os.path.join(root_dir, country, region, city) for region, city in zip(
-                GADM_file.region_name,
-                GADM_file.city_name)]
+        return [os.path.join(path_db_folder, country, region, city) for region, city in zip(
+                                                                                    GADM_file.region_name,
+                                                                                    GADM_file.city_name)]
 
+
+def create_folders(list_city_paths):
     for city_path in list_city_paths:
         Path(city_path).mkdir(parents=True, exist_ok=False)
 
-    list_city_paths = [os.path.join(path, city) for path, city in zip(list_city_paths, GADM_file.city_name)]
-    paths_file = os.path.join(root_dir, country, f"paths_{country}.txt")
-    with open(paths_file, "w") as f:
-        for element in list_city_paths:
+
+def city_paths_to_txt(city_paths,country,path_db_folder):
+    city_names = [el.rsplit('/')[-1] for el in city_paths]
+    city_paths_full = [os.path.join(path, city) for path, city in zip(city_paths, city_names)]   
+    
+    path_file = os.path.join(path_db_folder, country, f"paths_{country}.txt")
+    if os.path.isfile(path_file): 
+        add_paths_to_file(city_paths_full,path_file,country,path_db_folder)
+    else:
+        write_to_file(path_file,city_paths_full,'w')
+
+
+def add_paths_to_file(city_paths_full,path_file,country,path_db_folder):
+    city_paths_exist = ufo_helpers.get_all_paths(country, path_root_folder=path_db_folder)
+    city_paths_to_add = [path for path in city_paths_full if path not in city_paths_exist]
+    if city_paths_to_add:
+        write_to_file(path_file,city_paths_to_add,'a')
+
+
+def write_to_file(path_file,city_paths,mode):
+    # mode 'w' overwrites existing content, 'a' appends content
+    with open(path_file,mode) as f:
+        for element in city_paths:
             f.write(element + "\n")
-
-    print('Folders created.')
-
-    return(list_city_paths)
 
 
 def create_city_boundary_files(GADM_file,
@@ -643,30 +648,23 @@ def db_set_up(country,
 
     # get file gadm, import gadm, get proper crs, get country info
     GADM_file, country_name, level_city, _ = fetch_GADM_info_country(country)
-
-    # handle duplicates
     GADM_file = clean_GADM_city_names(GADM_file, country_name, level_city)
-
-    # reproject gadm,add buffer to boundary
     GADM_file = prepare_GADM(GADM_file, CRS_UNI)
 
-    if overwrite:
-        list_city_paths = ufo_helpers.get_all_paths(country_name, path_root_folder=path_db_folder)
-    else:
-        folder_name = os.path.join(path_db_folder, country_name)
-        if os.path.isdir(folder_name):
-            raise Exception(f'{folder_name} already exists. Aborting...')
+    # only take gadm bounds and cities from dataset_name
+    gadm_bounds_dataset = mask_gadm(GADM_file, dataset_name, country_name, path_inputs_parsing)
+    city_paths_dataset = city_paths_from_gadm(path_db_folder,country_name,gadm_bounds_dataset)
 
-        list_city_paths = create_folders(GADM_file, country_name, path_db_folder)
+    if not overwrite:
+        if os.path.isdir(city_paths_dataset[0]):
+            raise Exception(f'Folders for {dataset_name} already exist. Aborting...')
+        create_folders(city_paths_dataset)
+        city_paths_to_txt(city_paths_dataset,country,path_db_folder)
 
     if boundaries:
-        create_city_boundary_files(GADM_file, country_name, list_city_paths)
+        create_city_boundary_files(gadm_bounds_dataset, country_name, city_paths_dataset)
 
     if bldgs:
-        # read in inputs parsing for masking gadm and to create a list of datasets
-        # prepare GADM_file for sjoining - only take GADM bounds of dataset_name
-        gadm_file_temp = mask_gadm(GADM_file, dataset_name, country_name, path_inputs_parsing)
-
         n_bldg_start_sum = 0
         n_bldg_end_sum = 0
         list_saved_names_sum = []
@@ -701,7 +699,7 @@ def db_set_up(country,
             gdf = gpd.GeoDataFrame(chunk, geometry=chunk['geometry'].apply(wkt.loads), crs=CRS_UNI)
 
             gdf_bldgs, list_saved_names, list_saved_paths, n_bldg_start, n_bldg_end = create_city_bldg_geom_files(
-                gdf, gadm_file_temp, list_city_paths, only_region, idx)
+                gdf, gadm_bounds_dataset, city_paths_dataset, only_region, idx)
 
             create_city_bldg_attrib_files(gdf_bldgs,
                                         df_bldg_attrib,
