@@ -93,8 +93,11 @@ jobs:
     log_dir: /p/projects/eubucco/logs/v0_1-db/download-streets
     resources:
       cpus: 1
-      time: "24:00:00"
       partition: io
+      mem: 8000
+    properties:
+      exp_backoff_factor: 2
+      max_retries: 1
 
   - name: preprocess-streets
     script: /p/projects/eubucco/git-eubucco/database/preprocessing/6-streets/parsing-streets-inter-sbb.py
