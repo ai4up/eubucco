@@ -129,6 +129,9 @@ def parse_streets(city_path,
     for file in ['streets_raw', 'geom', 'streets', 'intersections', 'sbb']:
         paths[file] = f'{city_path}_{file}.csv'
 
+    if os.path.isfile(paths['streets']):
+        print(f"OSM street network for city has already been parsed and preprocessed: {paths['streets']}")
+        return
 
     try:
         streets = ufo_helpers.import_csv_w_wkt_to_gdf(paths['streets_raw'], CRS_UNI)
