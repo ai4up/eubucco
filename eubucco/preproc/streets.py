@@ -109,6 +109,18 @@ def create_sbb(streets, path_sbb):
     return len(sbb)
 
 
+def parse_streets_region(country,
+                        region,
+                        data_dir='/p/projects/eubucco/data/2-database-city-level-v0_1',
+                        path_stats='/p/projects/eubucco/stats/6-streets'):
+
+    paths = ufo_helpers.get_all_paths(country, path_root_folder=data_dir)
+    region_path = [p for p in paths if region in p]
+
+    for city_path in region_path:
+        parse_streets(city_path, path_stats)
+
+
 def parse_streets(city_path,
                   path_stats='/p/projects/eubucco/stats/6-streets'):
     '''
