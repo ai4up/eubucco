@@ -3,7 +3,7 @@ import pandas as pd
 import psutil
 import ast
 
-from ufo_map.Utils.helpers import get_all_paths, arg_parser
+from ufo_map.Utils.helpers import get_all_paths, arg_parser, import_csv_w_wkt_to_gdf
 from preproc.db_set_up import fetch_GADM_info_country
 from preproc.parsing import get_params
 
@@ -324,3 +324,68 @@ def concate_flanders():
     print('saving files')
     df_out.to_csv('/p/projects/eubucco/data/0-raw-data/gvt-data/belgium/flanders/flanders-3035-raw.csv')
     print('all saved - closing run.')
+
+
+CRS_UNI=3035
+
+def load(path_points,path_polys,crs=CRS_UNI):
+    gdf_point = gpd.read_file(path_points).to_crs(crs)
+    gdf_polygon = ufo_helpers.import_csv_w_wkt_to_gdf(path_polys, crs = crs)
+    return gdf_point,gdf_polygon
+
+
+def check_duplicates(df,id_col):
+    '''
+        Checks duplicates on ids and drops them in cases some exist.
+    '''
+    n_duplicates = len(df.loc[df.duplicated(subset=id_col)])
+    if n_duplicates>0:
+        print(f'Warning! Found {n_duplicates} duplicates!')
+        df = df.drop_duplicates(subset=id_col)
+    return df
+
+
+def sjoin_point_polygon(gdf_polygon,gdf_point,buffer_size=20):
+    ''' 
+        Joins every point (with buffer of `buffer_size` meters) intersecting polygon
+        to polygon.
+
+    '''
+    gdf_point['geometry_point'] = gdf_point.geometry
+    gdf_point['geometry'] = gdf_point.geometry.buffer(buffer_size)
+    return gpd.sjoin(gdf_polygon, gdf_point, how="left", predicate='intersects')
+
+
+def get_unique_points(gdf,id_col='ID'):
+    '''
+        Keeps the point that is closest to the polygon for each polygon,
+        in cases where several points have been matched to a polygon.
+
+        The distance is computed from the edge of the polygon closest
+        to the point. 
+        
+        If points are within the polygon, distance is 0 and the
+        point kept is the first one in appearing in the df.
+    '''
+    gdf['distance'] = gdf.geometry.distance(gdf.geometry_point)
+    return gdf.sort_values('distance', ascending=True).drop_duplicates(id_col)
+
+
+def get_unique_polys(gdf,id_col='id'):
+    '''
+    Removes all duplicated polygons, based on shortest distance to point.
+    '''
+    return gdf.sort_values('distance', ascending=True).drop_duplicates(id_col).dropna()
+
+
+def point_to_poly(path_point, path_polygon,id_col_point ='ID',id_col_polygon='id', buffer_size=20):
+    '''
+    Matches one point out of manny to closest polygon. 
+    '''
+    gdf_point,gdf_polygon=load(path_point,path_polygon,crs=CRS_UNI)
+    gdf_point = check_duplicates(gdf_point,id_col_point)
+    gdf_polygon = check_duplicates(gdf_polygon,id_col_polygon)
+    gdf_sjoin = sjoin_point_polygon(gdf_polygon,gdf_point,buffer_size)
+    gdf_sjoin_unique = get_unique_points(gdf_sjoin,id_col='ID')
+    return get_unique_polys(gdf_sjoin_unique,id_col='id')
+
