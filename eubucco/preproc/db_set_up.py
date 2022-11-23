@@ -527,10 +527,11 @@ def get_stats(country_name, dataset_name, n_bldg_start, n_bldg_end, end, list_0_
     stats['duration'] = '{} h {} m {} s'.format(h_div[0], m_div[0], round(m_div[1], 0))
     stats['date'] = date.today().strftime("%d/%m/%Y")
     stats['saved_cities'] = [list_0_cities]
-    stats['n_attrib_pre_dupl'] = num_stats['num_attrib0']
-    stats['n_attrib_post_dupl'] = num_stats['num_attrib1']
-    stats['n_x_attrib_pre_dupl'] = num_stats['num_x_attrib0']
-    stats['n_x_attrib_post_dupl'] = num_stats['num_x_attrib1']
+    if num_stats:
+        stats['n_attrib_pre_dupl'] = num_stats['num_attrib0']
+        stats['n_attrib_post_dupl'] = num_stats['num_attrib1']
+        stats['n_x_attrib_pre_dupl'] = num_stats['num_x_attrib0']
+        stats['n_x_attrib_post_dupl'] = num_stats['num_x_attrib1']
 
     return(pd.DataFrame(stats, index=['0']))
 
@@ -620,6 +621,7 @@ def db_set_up(country,
             path_db_folder,
             chunksize=int(5E5),
             only_region=None,
+            only_geometries = None,
             overwrite=False,
             boundaries=True,
             bldgs=True,
@@ -674,22 +676,25 @@ def db_set_up(country,
         geom_filename = os.path.join(path_int_fol, country_name, dataset_name + '-3035_geoms.csv')
         chunks = pd.read_csv(geom_filename, chunksize=chunksize)
 
-        # reading in attribs and x-attribs files; checking for duplicates
-        df_bldg_attrib, df_bldg_x_attrib, dict_num_attribs = get_attribs(
-            path_int_fol, country_name, dataset_name)
-        try:
-            source_filename = os.path.join(path_int_fol, country_name, dataset_name + '_attrib_sources.csv')
-            df_sources = pd.read_csv(source_filename)
-        except BaseException:
-            df_sources = pd.DataFrame()
+        # reading in attribs and x-attribs files; checking for duplicates and creating source files
+        if only_geometries: 
+            dict_num_attribs={}
+        else: 
+            df_bldg_attrib, df_bldg_x_attrib, dict_num_attribs = get_attribs(path_int_fol, 
+                                                                            country_name, dataset_name)
+            try:
+                source_filename = os.path.join(path_int_fol, country_name, dataset_name + '_attrib_sources.csv')
+                df_sources = pd.read_csv(source_filename)
+            except BaseException:
+                df_sources = pd.DataFrame()
 
-        if df_sources.empty:
-            print('no_source file found - creating new one')
-            df_sources = create_new_df_source(df_bldg_attrib, dataset_name)
-        else:
-            df_sources['dataset_name'] = dataset_name
-            print('Checking for duplicates in source files')
-            df_sources = remove_dupls(df_sources, 'df_sources', 'id')
+            if df_sources.empty:
+                print('no_source file found - creating new one')
+                df_sources = create_new_df_source(df_bldg_attrib, dataset_name)
+            else:
+                df_sources['dataset_name'] = dataset_name
+                print('Checking for duplicates in source files')
+                df_sources = remove_dupls(df_sources, 'df_sources', 'id')
 
 
         for idx, chunk in enumerate(chunks):
@@ -701,20 +706,22 @@ def db_set_up(country,
             gdf_bldgs, list_saved_names, list_saved_paths, n_bldg_start, n_bldg_end = create_city_bldg_geom_files(
                 gdf, gadm_bounds_dataset, city_paths_dataset, only_region, idx)
 
-            create_city_bldg_attrib_files(gdf_bldgs,
-                                        df_bldg_attrib,
-                                        'attrib',
-                                        list_saved_names,
-                                        list_saved_paths,
-                                        idx)
-            if not df_bldg_x_attrib.empty:
+            if not only_geometries:
                 create_city_bldg_attrib_files(gdf_bldgs,
-                                            df_bldg_x_attrib,
-                                            'extra_attrib',
+                                            df_bldg_attrib,
+                                            'attrib',
                                             list_saved_names,
                                             list_saved_paths,
                                             idx)
-            create_source_files(gdf_bldgs, df_sources, list_saved_names, list_saved_paths, idx)
+                if not df_bldg_x_attrib.empty:
+                    create_city_bldg_attrib_files(gdf_bldgs,
+                                                df_bldg_x_attrib,
+                                                'extra_attrib',
+                                                list_saved_names,
+                                                list_saved_paths,
+                                                idx)
+            
+                create_source_files(gdf_bldgs, df_sources, list_saved_names, list_saved_paths, idx)
 
             n_bldg_start_sum += n_bldg_start
             n_bldg_end_sum += n_bldg_end
