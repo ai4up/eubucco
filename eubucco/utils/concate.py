@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import geopandas as gpd
 import psutil
 import ast
 
