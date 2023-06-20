@@ -63,5 +63,5 @@ Bibtex:
 
 ## Contact
 
-For any questions, contact Nikola Milojevic-Dupont (milojevic@mcc-berlin.net) or Felix Wagner (wagner@mcc-berlin.net).
+For any questions, contact info@eubucco.com.
 
