@@ -16,6 +16,6 @@ pwd; hostname; date
 
 module load anaconda
 
-source activate /home/nikolami/.conda/envs/urban_form
+source activate /home/nikolami/.conda/envs/ox112
 
 python -u downloading-microsoft.py
