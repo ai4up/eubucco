@@ -152,7 +152,7 @@ jobs:
      #  - /p/projects/eubucco/data/2-database-city-level-v0_1/bulgaria/params.csv
      #  - /p/projects/eubucco/data/2-database-city-level-v0_1/croatia/params.csv
      #  - /p/projects/eubucco/data/2-database-city-level-v0_1/cyprus/params.csv
-       - /p/projects/eubucco/data/2-database-city-level-v0_1/czechia/params.csv
+     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/czechia/params.csv
      #  - /p/projects/eubucco/data/2-database-city-level-v0_1/denmark/params.csv
      #  - /p/projects/eubucco/data/2-database-city-level-v0_1/estonia/params.csv
      #  - /p/projects/eubucco/data/2-database-city-level-v0_1/finland/params.csv
@@ -160,7 +160,7 @@ jobs:
        - /p/projects/eubucco/data/2-database-city-level-v0_1/germany/params.csv
      #  - /p/projects/eubucco/data/2-database-city-level-v0_1/greece/params.csv
      #  - /p/projects/eubucco/data/2-database-city-level-v0_1/hungary/params.csv
-       - /p/projects/eubucco/data/2-database-city-level-v0_1/ireland/params.csv
+     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/ireland/params.csv
      #  - /p/projects/eubucco/data/2-database-city-level-v0_1/italy/params.csv
      #  - /p/projects/eubucco/data/2-database-city-level-v0_1/latvia/params.csv
      #  - /p/projects/eubucco/data/2-database-city-level-v0_1/lithuania/params.csv
@@ -170,7 +170,7 @@ jobs:
      #  - /p/projects/eubucco/data/2-database-city-level-v0_1/poland/params.csv
      #  - /p/projects/eubucco/data/2-database-city-level-v0_1/portugal/params.csv
      #  - /p/projects/eubucco/data/2-database-city-level-v0_1/romania/params.csv
-       - /p/projects/eubucco/data/2-database-city-level-v0_1/slovakia/params.csv
+     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/slovakia/params.csv
      #  - /p/projects/eubucco/data/2-database-city-level-v0_1/slovenia/params.csv
      #  - /p/projects/eubucco/data/2-database-city-level-v0_1/spain/params.csv
      #  - /p/projects/eubucco/data/2-database-city-level-v0_1/sweden/params.csv
@@ -178,22 +178,31 @@ jobs:
      log_dir: /p/projects/eubucco/logs/v0_1-db/feature-engineering
      resources:
        cpus: 4
+       mem: 30000
        time: "12:00:00"
      special_cases:
        - name: small-cities
          files:
            path: "{{city_path}}_geom.csv"
-           size_max: 20000000
+           size_max: 10000000
          resources:
            cpus: 1
            time: "03:00:00"
        - name: large-cities
          files:
            path: "{{city_path}}_geom.csv"
-           size_min: 100000000
+           size_min: 50000000
          resources:
            cpus: 8
            mem: 60000
+           time: "24:00:00"
+       - name: very-large-cities
+         files:
+           path: "{{city_path}}_geom.csv"
+           size_min: 100000000
+         resources:
+           cpus: 16
+           mem: 120000
            time: "24:00:00"
 
   # - name: create-training-dataset
@@ -226,7 +235,7 @@ properties:
   account: eubucco
   log_level: INFO
   exp_backoff_factor: 4
-  max_retries: 3
+  max_retries: 2
   poll_interval: 30
   slack:
     channel: "#test-slurm-bot"
