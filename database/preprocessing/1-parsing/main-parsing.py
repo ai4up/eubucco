@@ -6,4 +6,7 @@ sys.path.append(PROJECT_SRC_PATH)
 
 from preproc.parsing import parse  # noqa: E402
 
-parse(test_run=False)
+# parse(test_run=False)
+
+# microsoft
+parse(path_output='/p/projects/eubucco/data/1-intermediary-outputs-microsoft-circeular',test_run=False)

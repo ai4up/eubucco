@@ -1,0 +1,19 @@
+jobs:
+  - name: parsing-msft
+    script: /p/projects/eubucco/git-eubucco/database/preprocessing/1-parsing/main-parsing.py
+    param_files:
+      - /p/projects/eubucco/git-eubucco/database/preprocessing/1-parsing/inputs-parsing-microsoft.csv
+    log_dir: /p/projects/eubucco/logs-tmp/v1/parsing-msft
+    resources:
+      cpus: 4
+      time: "01:00:00"
+
+
+properties:
+  conda_env: "/home/nikolami/.conda/envs/ox112"
+  account: eubucco
+  log_level: INFO
+  exp_backoff_factor: 4
+  max_retries: 3
+  poll_interval: 30
+

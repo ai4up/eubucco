@@ -14,6 +14,7 @@ from geojsplit import geojsplit
 from pyrosm.data import sources
 import subprocess
 from pathlib import Path
+import json
 
 from ufo_map.Utils.helpers import *
 from ufo_map.Preprocessing.parsing import *
@@ -116,15 +117,23 @@ def pt(dataset_name):
     return(True if dataset_name == 'hamburg-gov' else False)
 
 
-def get_params(i, path_to_param_file):
+def get_params(i, path_or_dict):
     '''
     Get parameter dictionary from an input csv.
     Takes on line i of the input csv.
     Converts each variable from col_list into a dictionary.
     '''
-    p = pd.read_csv(path_to_param_file).iloc[i - 1]
+    if type(path_or_dict)==str:
+        p = pd.read_csv(path_to_param_file).iloc[i - 1]
+    elif type(path_or_dict)==dict:
+        p = pd.Series(path_or_dict)
+    else:
+         sys.exit('get_params: type of path_or_dict not supported.')
+    
+    print(p)
     p['type_map'] = ast.literal_eval(p['type_map'])  # converts either a dict or None
     p['extra_attrib'] = ast.literal_eval(p['extra_attrib'])  # converts either a list, a dict or None
+    
     col_list = ['id', 'height', 'type_source', 'age', 'floors', 'footprint']
     var_map = p[col_list]
     for i in range(len(var_map)):
@@ -922,15 +931,14 @@ def parse(path_to_param_file='/p/projects/eubucco/git-eubucco/database/preproces
     max_ram_percent = psutil.virtual_memory().percent
     tot_count_multipoly = 0
 
+    param = arg_as_param
     if arg_as_param is not None:
-        param = arg_as_param
+        p = get_params(param, path_to_param_file)
+
     else:
-        args = arg_parser(['i'])
-        param = args.i
-    print(param)
+        p = get_params(param, json.load(sys.stdin))
 
     # import parameters
-    p = get_params(param, path_to_param_file)
     print(p['country'])
     print(p['dataset_name'])
     print(p['extension'])
