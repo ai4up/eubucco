@@ -39,7 +39,8 @@ def download_msft():
 # get the list of url to retrieve
 df = pd.read_csv(url)
 # df = pd.read_csv('../../Downloads/dataset-links.csv')
-countries_eubucco = EUROPEAN_UNION.names + ['Switzerland']
+# countries_eubucco = EUROPEAN_UNION.names + ['Switzerland']
+countries_eubucco = ['Norway','UnitedKingdom']
 df = df[df.Location.isin(countries_eubucco)]
 
 check_all_countries_captured()

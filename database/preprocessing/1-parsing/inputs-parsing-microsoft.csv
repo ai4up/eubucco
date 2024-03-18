@@ -27,3 +27,5 @@
 "spain","Spain-msft","csv.gz","/p/projects/eubucco/data/0-raw-data/microsoft/Spain","EPSG:4326","None","height","None","None","None","None","None","None","None","['confidence']","all","all"
 "sweden","Sweden-msft","csv.gz","/p/projects/eubucco/data/0-raw-data/microsoft/Sweden","EPSG:4326","None","height","None","None","None","None","None","None","None","['confidence']","all","all"
 "switzerland","Switzerland-msft","csv.gz","/p/projects/eubucco/data/0-raw-data/microsoft/Switzerland","EPSG:4326","None","height","None","None","None","None","None","None","None","['confidence']","all","all"
+"norway","Norway-msft","csv.gz","/p/projects/eubucco/data/0-raw-data/microsoft/Norway","EPSG:4327","None","height","None","None","None","None","None","None","None","['confidence']","all","all"
+"uk","UK-msft","csv.gz","/p/projects/eubucco/data/0-raw-data/microsoft/UnitedKingdom","EPSG:4328","None","height","None","None","None","None","None","None","None","['confidence']","all","all"
