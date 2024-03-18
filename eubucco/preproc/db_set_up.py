@@ -293,27 +293,27 @@ def prepare_GADM(GADM_file, local_crs):
 
 def city_paths_from_gadm(path_db_folder,country,GADM_file):
     if country in ['cyprus', 'ireland']:
-        return [os.path.join(path_db_folder, country, city) for city in GADM_file.city_name]
+        return [os.path.join(path_db_folder, country, city, city) for city in GADM_file.city_name]
     else:
-        return [os.path.join(path_db_folder, country, region, city) for region, city in zip(
+        return [os.path.join(path_db_folder, country, region, city, city) for region, city in zip(
                                                                                     GADM_file.region_name,
                                                                                     GADM_file.city_name)]
 
 
 def create_folders(list_city_paths):
     for city_path in list_city_paths:
-        Path(city_path).mkdir(parents=True, exist_ok=False)
+        Path(os.path.split(city_path)[0]).mkdir(parents=True, exist_ok=False)
 
 
 def city_paths_to_txt(city_paths,country,path_db_folder):
-    city_names = [el.rsplit('/')[-1] for el in city_paths]
-    city_paths_full = [os.path.join(path, city) for path, city in zip(city_paths, city_names)]   
+    # city_names = [el.rsplit('/')[-1] for el in city_paths]
+    # city_paths_full = [os.path.join(path, city) for path, city in zip(city_paths, city_names)]   
     
     path_file = os.path.join(path_db_folder, country, f"paths_{country}.txt")
     if os.path.isfile(path_file): 
-        add_paths_to_file(city_paths_full,path_file,country,path_db_folder)
+        add_paths_to_file(city_paths,path_file,country,path_db_folder)
     else:
-        write_to_file(path_file,city_paths_full,'w')
+        write_to_file(path_file,city_paths,'w')
 
 
 def add_paths_to_file(city_paths_full,path_file,country,path_db_folder):
@@ -505,8 +505,7 @@ def create_source_files(gdf_bldgs,
 
 def raise_if_inconsistent(gdf_1, gdf_2, file_type):
     if len(gdf_1) != len(gdf_2):
-        raise ValueError(f'Num of bldgs in geometry file is not equivalent to num bldgs in correspdoning {file_type} files')
-
+        raise ValueError(f'Num of bldgs in geometry file is not equivalent to num bldgs in correspdoning {file_type} files. df1: {len(gdf_1)}. df2: {len(gdf_2)}')
 
 def get_stats(country_name, dataset_name, n_bldg_start, n_bldg_end, end, list_0_cities, num_stats):
     '''
@@ -628,6 +627,7 @@ def db_set_up(country,
             path_stats='/p/projects/eubucco/stats/2-db-set-up',
             path_inputs_parsing='/p/projects/eubucco/git-eubucco/database/preprocessing/1-parsing/inputs-parsing.csv',
             path_int_fol='/p/projects/eubucco/data/1-intermediary-outputs',
+            path_root_folder_GADM = '/p/projects/eubucco/data/0-raw-data/gadm'
             ):
     '''
 
@@ -649,7 +649,8 @@ def db_set_up(country,
     start = time.time()
 
     # get file gadm, import gadm, get proper crs, get country info
-    GADM_file, country_name, level_city, _ = fetch_GADM_info_country(country)
+    GADM_file, country_name, level_city, _ = fetch_GADM_info_country(country,
+                                                                     path_root_folder=path_root_folder_GADM)
     GADM_file = clean_GADM_city_names(GADM_file, country_name, level_city)
     GADM_file = prepare_GADM(GADM_file, CRS_UNI)
 
@@ -743,7 +744,7 @@ def db_set_up(country,
                             dict_num_attribs)
 
         # save stats file
-        Path(path_stats).mkdir(parents=True, exist_ok=False)
+        Path(path_stats).mkdir(parents=True, exist_ok=True)
         df_stats.to_csv(os.path.join(path_stats, dataset_name + '_stat.csv'), index=False)
 
         print(df_stats.iloc[0])
