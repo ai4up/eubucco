@@ -124,7 +124,7 @@ def get_params(i, path_or_dict):
     Converts each variable from col_list into a dictionary.
     '''
     if type(path_or_dict)==str:
-        p = pd.read_csv(path_to_param_file).iloc[i - 1]
+        p = pd.read_csv(path_or_dict).iloc[i - 1]
     elif type(path_or_dict)==dict:
         p = pd.Series(path_or_dict)
     else:
@@ -244,14 +244,14 @@ def get_extra_attribs(gdf, extra_attrib, extension, var_map, extra, file_path):
         else:
             gdf['source_file'] = os.path.split(file_path)[-1].split('.')[0]
             gdf['id'] = gdf.index
-            gdf['id'] = gdf['source_file'] + gdf['id'].apply(str)
+            gdf['id'] = gdf['source_file'] + '_' + gdf['id'].apply(str)
 
     elif extension in ['gml', 'xml']:
         # if gml and no id, create one
         if 'id' not in gdf.columns:
             gdf['source_file'] = os.path.split(file_path)[-1].split('.')[0]
             gdf['id'] = gdf.index
-            gdf['id'] = gdf['source_file'] + gdf['id'].apply(str)
+            gdf['id'] = gdf['source_file'] + '_' + gdf['id'].apply(str)
 
     if isinstance(extra_attrib, list):
         return(gdf[['id'] + extra_attrib])
