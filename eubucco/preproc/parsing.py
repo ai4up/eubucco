@@ -233,7 +233,7 @@ def get_file_paths(dataset_name, path_input_folder, extra, extension):
     return(file_paths)
 
 
-def get_extra_attribs(gdf, extra_attrib, extension, var_map, extra, file_path):
+def get_extra_attribs(gdf, extra_attrib, extension, var_map, extra, file_path,id):
     '''Returns a pd.DataFrame with non-standard attributes potentially chosen.'''
     # create id if missing
     if extension in ['shp', 'dxf', 'pbf','csv.gz']:
@@ -242,16 +242,12 @@ def get_extra_attribs(gdf, extra_attrib, extension, var_map, extra, file_path):
             gdf['id'] = gdf[var_map['id']]
         # if shp format and don't have id, create one
         else:
-            gdf['source_file'] = os.path.split(file_path)[-1].split('.')[0]
-            gdf['id'] = gdf.index
-            gdf['id'] = gdf['source_file'] + '_' + gdf['id'].apply(str)
+            gdf['id'] = id
 
     elif extension in ['gml', 'xml']:
         # if gml and no id, create one
         if 'id' not in gdf.columns:
-            gdf['source_file'] = os.path.split(file_path)[-1].split('.')[0]
-            gdf['id'] = gdf.index
-            gdf['id'] = gdf['source_file'] + '_' + gdf['id'].apply(str)
+            gdf['id'] = id
 
     if isinstance(extra_attrib, list):
         return(gdf[['id'] + extra_attrib])
@@ -1013,7 +1009,8 @@ def parse(path_to_param_file='/p/projects/eubucco/git-eubucco/database/preproces
                                                        p['extension'],
                                                        p['var_map'],
                                                        p['extra'],
-                                                       file_path)
+                                                       file_path,
+                                                       df_result_attrib.id)
 
         # append part to main results/metrics
         df_results_geom = df_results_geom.append(df_result_geom)
