@@ -1,12 +1,34 @@
+# jobs:
+#  - name: parsing-msft
+#    script: /p/projects/eubucco/git-eubucco/database/preprocessing/1-parsing/main-parsing.py
+#    param_files:
+#      - /p/projects/eubucco/git-eubucco/database/preprocessing/1-parsing/inputs-parsing-microsoft.csv
+#    log_dir: /p/projects/eubucco/logs-tmp/v1/parsing-msft
+#    resources:
+#      cpus: 4
+#      time: "01:00:00"
+
+# jobs:
+#   - name: db-set-up-msft
+#     script: /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/db-set-up.py
+#     param_files:
+#       - /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/params-microsoft24.csv
+#     log_dir: /p/projects/eubucco/logs-tmp/v1/db-set-up-msft
+#     resources:
+#       cpus: 4
+#       time: "01:00:00"
+
+
+# before running this the folders needs to cleaned from existing data
 jobs:
-  - name: parsing-msft
-    script: /p/projects/eubucco/git-eubucco/database/preprocessing/1-parsing/main-parsing.py
+  - name: db-set-up-msft_2
+    script: /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/db-set-up.py
     param_files:
-      - /p/projects/eubucco/git-eubucco/database/preprocessing/1-parsing/inputs-parsing-microsoft.csv
-    log_dir: /p/projects/eubucco/logs-tmp/v1/parsing-msft
+      - /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/params-microsoft24_2.csv
+    log_dir: /p/projects/eubucco/logs-tmp/v1/db-set-up-msft
     resources:
       cpus: 4
-      time: "01:00:00"
+      time: "12:00:00"
 
 
 properties:
