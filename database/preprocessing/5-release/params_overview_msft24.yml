@@ -1,0 +1,179 @@
+- country: austria
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+- country: belgium
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+- country: bulgaria
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+- country: croatia
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+- country: cyprus
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+- country: czechia
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+- country: denmark
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+- country: estonia
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+- country: finland
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+- country: france
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+- country: germany
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+  
+- country: greece
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+- country: hungary
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+- country: ireland
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+- country: italy
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+- country: latvia
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+- country: lithuania
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+- country: luxembourg
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+- country: malta
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+- country: netherlands
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+- country: poland
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+- country: portugal
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+- country: romania
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+- country: slovakia
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+- country: slovenia
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+- country: spain
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+  
+- country: sweden
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+- country: switzerland
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+- country: uk
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+
+ - country: norway
+ db_version: msft24
+ path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular
+ path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-msft
+ path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
