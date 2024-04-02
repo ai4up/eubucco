@@ -31,12 +31,12 @@ jobs:
 
 
   - name: run-overview
-    script: /p/projects/eubucco/git-eubucco/database/preprocessing/5-release/run_overview.py
+    script: /p/projects/eubucco/git-eubucco/database/preprocessing/5-release/run-overview.py
     param_files:
       - /p/projects/eubucco/git-eubucco/database/preprocessing/5-release/params_overview_msft24.yml
     log_dir: /p/projects/eubucco/logs-tmp/v1/release
     resources:
-      cpus: 4
+      cpus: 1
 
 
   # - name: create-release
