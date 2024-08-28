@@ -77,10 +77,7 @@ def merge_city_files(path):
 
         # merge on id
         df_temp = df_geom.merge(df_attrib, on='id')
-        if 'microsoft-circeular' not in path:
-            df_temp = df_temp[['id', 'height', 'age', 'type', 'id_source', 'type_source', 'geometry']]
-        else:
-            df_temp = df_temp[['id', 'height', 'age', 'type', 'type_source', 'geometry']]        
+        df_temp = df_temp[['id', 'height', 'age', 'type', 'id_source', 'type_source', 'geometry']]
     else:
         df_temp = pd.DataFrame()
         print('!!! empty city!!!')
