@@ -1,0 +1,12 @@
+- country_cities_mapping:
+    belgium: [Brugge]
+    czechia: [Liberec]
+    france: [Vichy]
+    germany: [Berlin]
+    netherlands: [Amsterdam]
+    poland: [Warszawa]
+    spain: [Madrid]
+    switzerland: [Basel]
+  db_version: msft
+  out_folder: /p/projects/eubucco/data/5-microsoft-circeular
+  path_db_folder: /p/projects/eubucco/data/2-database-city-level-microsoft-circeular

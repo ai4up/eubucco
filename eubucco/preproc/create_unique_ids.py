@@ -86,8 +86,11 @@ def create_id(country,
                     dupls_source_id_df.append(df.duplicated(subset='id_source').any())
                     
                     save_df(df, file_path.replace(path_old_db_folder, path_new_db_folder))
+
+            test_ids(len_df, ids_df, source_ids_df,dupls_source_id_df,dupls_id_df)
+
         except:
+            
             print(f'Missing files for {path}')
-        test_ids(len_df, ids_df, source_ids_df,dupls_source_id_df,dupls_id_df)
 
     print('created unqiue ids. closing run.')
