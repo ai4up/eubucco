@@ -1,0 +1,2 @@
+"country","dataset_name","extension","path_input_folder","local_crs","id","height","type_source","age","floors","footprint","type_map","bldg_elem","extra","extra_attrib","gadm_level","gadm_name"
+"portugal","portugal-osm","pbf","/p/projects/eubucco/data/0-raw-data/osm-pbf-24/portugal","EPSG:3763","None","height","building","start_date","building:levels","None","None","None","None","['building:use','amenity','building:material']","all","all"
