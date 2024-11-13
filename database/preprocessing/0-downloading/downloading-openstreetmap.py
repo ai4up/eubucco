@@ -11,24 +11,24 @@ import os
 #         'slovakia', 'slovenia', 'spain', 'sweden']
 
 
-EU_27 = [
-    'cyprus',
-    'czech_republic',
-    'denmark',
-    'estonia',
-    'finland',
-    'france',
-    'lithuania',
-    'luxembourg',
-    'malta',
-    'netherlands',
-    'poland',
-    'slovakia',
-    'slovenia',
-    'spain',
-    'switzerland']
+# EU_27 = [
+#     'cyprus',
+#     'czech_republic',
+#     'denmark',
+#     'estonia',
+#     'finland',
+#     'france',
+#     'lithuania',
+#     'luxembourg',
+#     'malta',
+#     'netherlands',
+#     'poland',
+#     'slovakia',
+#     'slovenia',
+#     'spain',
+#     'switzerland']
 
-countries_to_import = EU_27  # + ['switzerland']
+countries_to_import = ['portugal'] #EU_27  # + ['switzerland']
 
 
 countries_w_sub_regions = ['france', 'germany', 'italy', 'netherlands', 'poland']
@@ -42,7 +42,7 @@ dict_regions['netherlands'] = sources.subregions.netherlands.available
 dict_regions['poland'] = sources.subregions.poland.available
 
 
-path_output = "/p/projects/eubucco/data/0-raw-data/osm-pbf"
+path_output = "/p/projects/eubucco/data/0-raw-data/osm-pbf-24"
 
 
 for country in countries_to_import:
