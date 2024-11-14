@@ -28,7 +28,12 @@ import os
 #     'spain',
 #     'switzerland']
 
-countries_to_import = ['portugal'] #EU_27  # + ['switzerland']
+
+countries_to_import = ['austria','bulgaria','croatia','germany','greece','hungary',
+                       'ireland_and_northern_ireland','italy','latvia','romania','sweden']
+
+
+# countries_to_import =  #EU_27  # + ['switzerland']
 
 
 countries_w_sub_regions = ['france', 'germany', 'italy', 'netherlands', 'poland']
