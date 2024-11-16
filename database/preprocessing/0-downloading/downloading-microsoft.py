@@ -3,8 +3,10 @@ from countrygroups import EUROPEAN_UNION
 import urllib.request
 import os
 
-url = 'https://minedbuildings.blob.core.windows.net/global-buildings/dataset-links.csv'
-path_dl = '/p/projects/eubucco/data/0-raw-data/microsoft'
+# url = 'https://minedbuildings.blob.core.windows.net/global-buildings/dataset-links.csv'
+url = 'https://minedbuildings.z5.web.core.windows.net/global-buildings/dataset-links.csv'
+
+path_dl = '/p/projects/eubucco/data/0-raw-data/microsoft-242'
 
 ## Functions
 
@@ -39,8 +41,7 @@ def download_msft():
 # get the list of url to retrieve
 df = pd.read_csv(url)
 # df = pd.read_csv('../../Downloads/dataset-links.csv')
-# countries_eubucco = EUROPEAN_UNION.names + ['Switzerland']
-countries_eubucco = ['Norway','UnitedKingdom']
+countries_eubucco = EUROPEAN_UNION.names + ['Switzerland','Norway','UnitedKingdom']
 df = df[df.Location.isin(countries_eubucco)]
 
 check_all_countries_captured()
@@ -58,3 +59,6 @@ for location in set(df.Location):
     for _,part in df[df.Location==location].iterrows():
         print(part.QuadKey)
         urllib.request.urlretrieve(part.Url, os.path.join(path_location,str(part.QuadKey)+'.csv.gz'))
+
+print('Done')
+check_all_parts_downloaded()

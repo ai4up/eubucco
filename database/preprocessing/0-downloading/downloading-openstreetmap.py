@@ -32,7 +32,7 @@ import os
 # countries_to_import = ['austria','bulgaria','croatia','germany','greece','hungary',
 #                        'ireland_and_northern_ireland','italy','latvia','romania','sweden']
 
-countries_to_import = ['spain']
+countries_to_import = ['norway','united-kingdom']
 
 # countries_to_import =  #EU_27  # + ['switzerland']
 
