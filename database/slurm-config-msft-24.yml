@@ -20,23 +20,23 @@ jobs:
  #     cpus: 64
  #     time: "6:00:00"
 
-  - name: db-set-up-msft
-    script: /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/db-set-up.py
-    param_files:
-      - /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/params-microsoft24.csv
-    log_dir: /p/projects/eubucco/logs-tmp/v1/db-set-up-msft
-    resources:
-      cpus: 4
-      time: "01:00:00"
-
-  # - name: db-set-up-osm
+  # - name: db-set-up-msft
   #   script: /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/db-set-up.py
   #   param_files:
-  #     - /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/params-osm242.csv
+  #     - /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/params-microsoft24.csv
   #   log_dir: /p/projects/eubucco/logs-tmp/v1/db-set-up-msft
   #   resources:
   #     cpus: 4
-  #     time: "01:00:00"
+  #     time: "24:00:00"
+
+  - name: db-set-up-osm
+    script: /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/db-set-up.py
+    param_files:
+      - /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/params-osm242.csv
+    log_dir: /p/projects/eubucco/logs-tmp/v1/db-set-up-msft
+    resources:
+      cpus: 4
+      time: "24:00:00"
 
 
 # before running this the folders needs to cleaned from anything existing data

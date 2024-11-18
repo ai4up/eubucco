@@ -505,7 +505,14 @@ def create_source_files(gdf_bldgs,
 
 def raise_if_inconsistent(gdf_1, gdf_2, file_type):
     if len(gdf_1) != len(gdf_2):
-        raise ValueError(f'Num of bldgs in geometry file is not equivalent to num bldgs in correspdoning {file_type} files. df1: {len(gdf_1)}. df2: {len(gdf_2)}')
+        if abs(len(gdf_1) - len(gdf_2)) / max(len(gdf_1), len(gdf_2)) < 0.01:
+            diff1 = pd.concat([gdf_1, gdf_2]).drop_duplicates(keep=False)
+            diff2 = pd.concat([gdf_2, gdf_1]).drop_duplicates(keep=False)
+            gdf_1 = gdf_1[~gdf_1.isin(diff1)].dropna()
+            gdf_2 = gdf_2[~gdf_2.isin(diff2)].dropna()
+            print(f'!! Removed buildings because num of bldgs in geometry file is not equivalent to num bldgs in correspdoning {file_type} files. df1: {len(gdf_1)}. df2: {len(gdf_2)}')
+        else:
+            raise ValueError(f'Num of bldgs in geometry file is not equivalent to num bldgs in correspdoning {file_type} files. df1: {len(gdf_1)}. df2: {len(gdf_2)}')
 
 def get_stats(country_name, dataset_name, n_bldg_start, n_bldg_end, end, list_0_cities, num_stats):
     '''
