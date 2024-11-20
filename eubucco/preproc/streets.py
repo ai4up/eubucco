@@ -1,6 +1,7 @@
 import os
 import time
 
+import geopandas as gpd
 import osmnx as ox
 import momepy
 from networkx.exception import NetworkXPointlessConcept
@@ -38,7 +39,7 @@ def download_osm_streets_country(country,
 
 def download_osm_streets(city_path):
         path_in = f'{city_path}_boundary.csv'
-        path_out = f'{city_path}_streets_raw.csv'
+        path_out = f'{city_path}_streets_raw.gpkg'
         print(path_out)
 
         if os.path.isfile(path_out):
@@ -62,7 +63,7 @@ def download_osm_streets(city_path):
                                                                                                   'length',
                                                                                                   'geometry']]
 
-            ufo_helpers.save_csv_wkt(city_streets, path_out)
+            city_streets.to_file(path_out, driver='GPKG')
             return True
 
         except NetworkXPointlessConcept:
@@ -138,7 +139,7 @@ def parse_streets(city_path,
     start = time.time()
 
     paths = {}
-    for file in ['streets_raw', 'geom', 'streets', 'intersections', 'sbb']:
+    for file in ['geom', 'streets', 'intersections', 'sbb']:
         paths[file] = f'{city_path}_{file}.csv'
 
     if os.path.isfile(paths['streets']):
@@ -146,7 +147,7 @@ def parse_streets(city_path,
         return
 
     try:
-        streets = ufo_helpers.import_csv_w_wkt_to_gdf(paths['streets_raw'], CRS_UNI)
+        streets = gpd.read_file(f'{city_path}_streets_raw.gpkg')
         buildings = ufo_helpers.import_csv_w_wkt_to_gdf(paths['geom'], CRS_UNI)
 
         streets, n_streets, n_int = create_streets_and_intersections(
