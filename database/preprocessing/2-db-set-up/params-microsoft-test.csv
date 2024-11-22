@@ -1,3 +1,0 @@
-country,dataset_name,path_db_folder,path_stats,path_int_fol,only_geometries
-austria,Austria,/p/projects/eubucco/data/2-database-city-level-microsoft,/p/projects/eubucco/stats/2-db-set-up-microsoft,/p/projects/eubucco/data/1-intermediary-outputs-microsoft,True
-belgium,Belgium,/p/projects/eubucco/data/2-database-city-level-microsoft,/p/projects/eubucco/stats/2-db-set-up-microsoft,/p/projects/eubucco/data/1-intermediary-outputs-microsoft,True

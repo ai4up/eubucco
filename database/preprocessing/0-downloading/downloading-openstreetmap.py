@@ -3,39 +3,13 @@ from pyrosm.data import sources
 import os
 
 
-#EU_27 = ['austria','bulgaria','croatia','germany','greece','hungary','ireland_and_northern_ireland','italy','latvia','portugal','romania','sweden']
+EU_27 = ['austria','bulgaria','croatia','germany','greece','hungary','ireland_and_northern_ireland','italy','latvia','portugal','romania','sweden']
 
-# 'belgium', 'bulgaria', 'croatia', 'cyprus', 'czech_republic', 'denmark', 'estonia',
-#         'finland', 'france', 'germany', 'greece', 'hungary', 'ireland_and_northern_ireland', 'italy',
-#         'latvia', 'lithuania', 'luxembourg', 'malta',  'netherlands', 'poland', 'portugal', 'romania',
-#         'slovakia', 'slovenia', 'spain', 'sweden']
+countries_to_import24 = ['austria','bulgaria','croatia','germany','greece','hungary',
+                        'ireland_and_northern_ireland','italy','latvia','romania','sweden',
+                        'norway','united-kingdom']
 
-
-# EU_27 = [
-#     'cyprus',
-#     'czech_republic',
-#     'denmark',
-#     'estonia',
-#     'finland',
-#     'france',
-#     'lithuania',
-#     'luxembourg',
-#     'malta',
-#     'netherlands',
-#     'poland',
-#     'slovakia',
-#     'slovenia',
-#     'spain',
-#     'switzerland']
-
-
-# countries_to_import = ['austria','bulgaria','croatia','germany','greece','hungary',
-#                        'ireland_and_northern_ireland','italy','latvia','romania','sweden']
-
-countries_to_import = ['norway','united-kingdom']
-
-# countries_to_import =  #EU_27  # + ['switzerland']
-
+# countries_to_import24 =  #EU_27  # + ['switzerland',norway','united-kingdom']
 
 countries_w_sub_regions = ['france', 'germany', 'italy', 'netherlands', 'poland']
 

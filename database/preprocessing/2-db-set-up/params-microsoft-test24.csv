@@ -1,3 +1,0 @@
-"country","dataset_name","path_db_folder","path_inputs_parsing","path_int_fol"
-"cyprus","Cyprus-msft","/p/projects/eubucco/data/2-database-city-level-microsoft-circeular","/p/projects/eubucco/git-eubucco/database/preprocessing/1-parsing/inputs-parsing-microsoft.csv","/p/projects/eubucco/data/1-intermediary-outputs-microsoft-circeular"
-"malta","Malta-msft","/p/projects/eubucco/data/2-database-city-level-microsoft-circeular","/p/projects/eubucco/git-eubucco/database/preprocessing/1-parsing/inputs-parsing-microsoft.csv","/p/projects/eubucco/data/1-intermediary-outputs-microsoft-circeular"
