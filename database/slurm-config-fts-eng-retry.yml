@@ -1,0 +1,52 @@
+jobs:
+- log_dir: /p/projects/eubucco/logs/v0_1-db/feature-engineering
+  n: null
+  name: feature-engineering
+  param_files:
+  - /p/projects/eubucco/logs/v0_1-db/feature-engineering/params-retry.json
+  properties:
+    account: eubucco
+    conda_env: /home/nikolami/.conda/envs/ox112
+    exp_backoff_factor: 4
+    failure_threshold: 0.25
+    failure_threshold_activation: 50
+    keep_work_dir: false
+    left_over: null
+    log_level: INFO
+    max_retries: 3
+    poll_interval: 30
+    slack: &id001
+      channel: '#test-slurm-bot'
+      token: <to-be-added>
+  resources:
+    cpus: 4
+    time: '12:00:00'
+  script: /p/projects/eubucco/git-eubucco/database/feature-engineering/fts_eng.py
+  special_cases:
+  - files:
+      path: '{{city_path}}_geom.csv'
+      size_max: 20000000
+    name: small-cities
+    resources:
+      cpus: 1
+      time: 03:00:00
+  - files:
+      path: '{{city_path}}_geom.csv'
+      size_min: 100000000
+    name: large-cities
+    resources:
+      cpus: 8
+      mem: 60000
+      time: '24:00:00'
+properties:
+  account: eubucco
+  conda_env: /home/nikolami/.conda/envs/ox112
+  exp_backoff_factor: 4
+  failure_threshold: 0.25
+  failure_threshold_activation: 50
+  keep_work_dir: false
+  left_over: null
+  log_level: INFO
+  max_retries: 3
+  poll_interval: 30
+  slack: *id001

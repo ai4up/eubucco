@@ -41,51 +41,56 @@ def create_id(country,
 
     for i, path in enumerate(city_paths):
         print('looping through path {} / {}'.format(i, len(city_paths) - 1))
-        # define new, globally unique id for all buildings in _attrib.csv
-        file_path = path + '_attrib.csv'
-        df = pd.read_csv(file_path)
-        df = df.drop_duplicates(subset='id').reset_index(drop=True) # drop all left over duplicates
-        df.rename(columns={'id': 'id_source'}, inplace=True)
-        df.sort_values(by='id_source', inplace=True)
-        df['id'] = assign_unqiue_ids(path, len(df), df_id_mapper, db_version)
-        id_source_id_mapping = dict(zip(df['id_source'], df['id']))
-
-        if 'geometry' in df.columns:
-            df = df.drop(columns='geometry')
-
-        save_df(df, file_path.replace(path_old_db_folder, path_new_db_folder))
-
-        # intialize variables for checking that there are no id errors across files
-        len_df = [len(df)]
-        ids_df = [df.id.tolist()]
-        source_ids_df = [df.id_source.tolist()]
-        dupls_id_df = [df.duplicated(subset='id').any()]
-        dupls_source_id_df = [df.duplicated(subset='id_source').any()]
-
-        # update other files to use the new id as well
-        for ending in ['_geom', '_buffer', '_attrib_source', '_extra_attrib']:
-            file_path = path + ending + '.csv'
-
-            if not os.path.isfile(file_path):
-                print(f'Warning: file {file_path} does not exist')
-                continue
-            
-            df = pd.read_csv(file_path) 
+        try:
+            # define new, globally unique id for all buildings in _attrib.csv
+            file_path = path + '_attrib.csv'
+            df = pd.read_csv(file_path)
             df = df.drop_duplicates(subset='id').reset_index(drop=True) # drop all left over duplicates
             df.rename(columns={'id': 'id_source'}, inplace=True)
-            
-            if not 'buffer' in file_path:
-                df['id'] = df['id_source'].map(id_source_id_mapping)
-            
-            if ending in ['_geom','_attrib_source','_extra_attrib']: 
-                len_df.append(len(df))
-                ids_df.append(df.id.tolist())
-                source_ids_df.append(df.id_source.tolist())
-                dupls_id_df.append(df.duplicated(subset='id').any())
-                dupls_source_id_df.append(df.duplicated(subset='id_source').any())
+            df.sort_values(by='id_source', inplace=True)
+            df['id'] = assign_unqiue_ids(path, len(df), df_id_mapper, db_version)
+            id_source_id_mapping = dict(zip(df['id_source'], df['id']))
+
+            if 'geometry' in df.columns:
+                df = df.drop(columns='geometry')
+
+            save_df(df, file_path.replace(path_old_db_folder, path_new_db_folder))
+
+            # intialize variables for checking that there are no id errors across files
+            len_df = [len(df)]
+            ids_df = [df.id.tolist()]
+            source_ids_df = [df.id_source.tolist()]
+            dupls_id_df = [df.duplicated(subset='id').any()]
+            dupls_source_id_df = [df.duplicated(subset='id_source').any()]
+
+            # update other files to use the new id as well
+            for ending in ['_geom', '_buffer', '_attrib_source', '_extra_attrib']:
+                file_path = path + ending + '.csv'
+
+                if not os.path.isfile(file_path):
+                    print(f'Warning: file {file_path} does not exist')
+                    continue
                 
-                save_df(df, file_path.replace(path_old_db_folder, path_new_db_folder))
-        
-        test_ids(len_df, ids_df, source_ids_df,dupls_source_id_df,dupls_id_df)
+                df = pd.read_csv(file_path) 
+                df = df.drop_duplicates(subset='id').reset_index(drop=True) # drop all left over duplicates
+                df.rename(columns={'id': 'id_source'}, inplace=True)
+                
+                if not 'buffer' in file_path:
+                    df['id'] = df['id_source'].map(id_source_id_mapping)
+                
+                if ending in ['_geom','_attrib_source','_extra_attrib']: 
+                    len_df.append(len(df))
+                    ids_df.append(df.id.tolist())
+                    source_ids_df.append(df.id_source.tolist())
+                    dupls_id_df.append(df.duplicated(subset='id').any())
+                    dupls_source_id_df.append(df.duplicated(subset='id_source').any())
+                    
+                    save_df(df, file_path.replace(path_old_db_folder, path_new_db_folder))
+
+            test_ids(len_df, ids_df, source_ids_df,dupls_source_id_df,dupls_id_df)
+
+        except:
+            
+            print(f'Missing files for {path}')
 
     print('created unqiue ids. closing run.')

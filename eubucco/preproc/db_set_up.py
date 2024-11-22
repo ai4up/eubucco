@@ -293,27 +293,24 @@ def prepare_GADM(GADM_file, local_crs):
 
 def city_paths_from_gadm(path_db_folder,country,GADM_file):
     if country in ['cyprus', 'ireland']:
-        return [os.path.join(path_db_folder, country, city) for city in GADM_file.city_name]
+        return [os.path.join(path_db_folder, country, city, city) for city in GADM_file.city_name]
     else:
-        return [os.path.join(path_db_folder, country, region, city) for region, city in zip(
+        return [os.path.join(path_db_folder, country, region, city, city) for region, city in zip(
                                                                                     GADM_file.region_name,
                                                                                     GADM_file.city_name)]
 
 
 def create_folders(list_city_paths):
     for city_path in list_city_paths:
-        Path(city_path).mkdir(parents=True, exist_ok=False)
+        Path(os.path.split(city_path)[0]).mkdir(parents=True, exist_ok=False)
 
 
 def city_paths_to_txt(city_paths,country,path_db_folder):
-    city_names = [el.rsplit('/')[-1] for el in city_paths]
-    city_paths_full = [os.path.join(path, city) for path, city in zip(city_paths, city_names)]   
-    
     path_file = os.path.join(path_db_folder, country, f"paths_{country}.txt")
     if os.path.isfile(path_file): 
-        add_paths_to_file(city_paths_full,path_file,country,path_db_folder)
+        add_paths_to_file(city_paths,path_file,country,path_db_folder)
     else:
-        write_to_file(path_file,city_paths_full,'w')
+        write_to_file(path_file,city_paths,'w')
 
 
 def add_paths_to_file(city_paths_full,path_file,country,path_db_folder):
@@ -505,8 +502,14 @@ def create_source_files(gdf_bldgs,
 
 def raise_if_inconsistent(gdf_1, gdf_2, file_type):
     if len(gdf_1) != len(gdf_2):
-        raise ValueError(f'Num of bldgs in geometry file is not equivalent to num bldgs in correspdoning {file_type} files')
-
+        if abs(len(gdf_1) - len(gdf_2)) / max(len(gdf_1), len(gdf_2)) < 0.01:
+            diff1 = pd.concat([gdf_1, gdf_2]).drop_duplicates(keep=False)
+            diff2 = pd.concat([gdf_2, gdf_1]).drop_duplicates(keep=False)
+            gdf_1 = gdf_1[~gdf_1.isin(diff1)].dropna()
+            gdf_2 = gdf_2[~gdf_2.isin(diff2)].dropna()
+            print(f'!! Removed buildings because num of bldgs in geometry file is not equivalent to num bldgs in correspdoning {file_type} files. df1: {len(gdf_1)}. df2: {len(gdf_2)}')
+        else:
+            raise ValueError(f'Num of bldgs in geometry file is not equivalent to num bldgs in correspdoning {file_type} files. df1: {len(gdf_1)}. df2: {len(gdf_2)}')
 
 def get_stats(country_name, dataset_name, n_bldg_start, n_bldg_end, end, list_0_cities, num_stats):
     '''
@@ -527,10 +530,11 @@ def get_stats(country_name, dataset_name, n_bldg_start, n_bldg_end, end, list_0_
     stats['duration'] = '{} h {} m {} s'.format(h_div[0], m_div[0], round(m_div[1], 0))
     stats['date'] = date.today().strftime("%d/%m/%Y")
     stats['saved_cities'] = [list_0_cities]
-    stats['n_attrib_pre_dupl'] = num_stats['num_attrib0']
-    stats['n_attrib_post_dupl'] = num_stats['num_attrib1']
-    stats['n_x_attrib_pre_dupl'] = num_stats['num_x_attrib0']
-    stats['n_x_attrib_post_dupl'] = num_stats['num_x_attrib1']
+    if num_stats:
+        stats['n_attrib_pre_dupl'] = num_stats['num_attrib0']
+        stats['n_attrib_post_dupl'] = num_stats['num_attrib1']
+        stats['n_x_attrib_pre_dupl'] = num_stats['num_x_attrib0']
+        stats['n_x_attrib_post_dupl'] = num_stats['num_x_attrib1']
 
     return(pd.DataFrame(stats, index=['0']))
 
@@ -620,12 +624,14 @@ def db_set_up(country,
             path_db_folder,
             chunksize=int(5E5),
             only_region=None,
+            only_geometries = None,
             overwrite=False,
             boundaries=True,
             bldgs=True,
             path_stats='/p/projects/eubucco/stats/2-db-set-up',
             path_inputs_parsing='/p/projects/eubucco/git-eubucco/database/preprocessing/1-parsing/inputs-parsing.csv',
             path_int_fol='/p/projects/eubucco/data/1-intermediary-outputs',
+            path_root_folder_GADM = '/p/projects/eubucco/data/0-raw-data/gadm'
             ):
     '''
 
@@ -647,7 +653,8 @@ def db_set_up(country,
     start = time.time()
 
     # get file gadm, import gadm, get proper crs, get country info
-    GADM_file, country_name, level_city, _ = fetch_GADM_info_country(country)
+    GADM_file, country_name, level_city, _ = fetch_GADM_info_country(country,
+                                                                     path_root_folder=path_root_folder_GADM)
     GADM_file = clean_GADM_city_names(GADM_file, country_name, level_city)
     GADM_file = prepare_GADM(GADM_file, CRS_UNI)
 
@@ -674,22 +681,25 @@ def db_set_up(country,
         geom_filename = os.path.join(path_int_fol, country_name, dataset_name + '-3035_geoms.csv')
         chunks = pd.read_csv(geom_filename, chunksize=chunksize)
 
-        # reading in attribs and x-attribs files; checking for duplicates
-        df_bldg_attrib, df_bldg_x_attrib, dict_num_attribs = get_attribs(
-            path_int_fol, country_name, dataset_name)
-        try:
-            source_filename = os.path.join(path_int_fol, country_name, dataset_name + '_attrib_sources.csv')
-            df_sources = pd.read_csv(source_filename)
-        except BaseException:
-            df_sources = pd.DataFrame()
+        # reading in attribs and x-attribs files; checking for duplicates and creating source files
+        if only_geometries: 
+            dict_num_attribs={}
+        else: 
+            df_bldg_attrib, df_bldg_x_attrib, dict_num_attribs = get_attribs(path_int_fol, 
+                                                                            country_name, dataset_name)
+            try:
+                source_filename = os.path.join(path_int_fol, country_name, dataset_name + '_attrib_sources.csv')
+                df_sources = pd.read_csv(source_filename)
+            except BaseException:
+                df_sources = pd.DataFrame()
 
-        if df_sources.empty:
-            print('no_source file found - creating new one')
-            df_sources = create_new_df_source(df_bldg_attrib, dataset_name)
-        else:
-            df_sources['dataset_name'] = dataset_name
-            print('Checking for duplicates in source files')
-            df_sources = remove_dupls(df_sources, 'df_sources', 'id')
+            if df_sources.empty:
+                print('no_source file found - creating new one')
+                df_sources = create_new_df_source(df_bldg_attrib, dataset_name)
+            else:
+                df_sources['dataset_name'] = dataset_name
+                print('Checking for duplicates in source files')
+                df_sources = remove_dupls(df_sources, 'df_sources', 'id')
 
 
         for idx, chunk in enumerate(chunks):
@@ -701,20 +711,22 @@ def db_set_up(country,
             gdf_bldgs, list_saved_names, list_saved_paths, n_bldg_start, n_bldg_end = create_city_bldg_geom_files(
                 gdf, gadm_bounds_dataset, city_paths_dataset, only_region, idx)
 
-            create_city_bldg_attrib_files(gdf_bldgs,
-                                        df_bldg_attrib,
-                                        'attrib',
-                                        list_saved_names,
-                                        list_saved_paths,
-                                        idx)
-            if not df_bldg_x_attrib.empty:
+            if not only_geometries:
                 create_city_bldg_attrib_files(gdf_bldgs,
-                                            df_bldg_x_attrib,
-                                            'extra_attrib',
+                                            df_bldg_attrib,
+                                            'attrib',
                                             list_saved_names,
                                             list_saved_paths,
                                             idx)
-            create_source_files(gdf_bldgs, df_sources, list_saved_names, list_saved_paths, idx)
+                if not df_bldg_x_attrib.empty:
+                    create_city_bldg_attrib_files(gdf_bldgs,
+                                                df_bldg_x_attrib,
+                                                'extra_attrib',
+                                                list_saved_names,
+                                                list_saved_paths,
+                                                idx)
+            
+                create_source_files(gdf_bldgs, df_sources, list_saved_names, list_saved_paths, idx)
 
             n_bldg_start_sum += n_bldg_start
             n_bldg_end_sum += n_bldg_end
@@ -736,7 +748,7 @@ def db_set_up(country,
                             dict_num_attribs)
 
         # save stats file
-        Path(path_stats).mkdir(parents=True, exist_ok=False)
+        Path(path_stats).mkdir(parents=True, exist_ok=True)
         df_stats.to_csv(os.path.join(path_stats, dataset_name + '_stat.csv'), index=False)
 
         print(df_stats.iloc[0])

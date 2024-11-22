@@ -3,33 +3,13 @@ from pyrosm.data import sources
 import os
 
 
-#EU_27 = ['austria','bulgaria','croatia','germany','greece','hungary','ireland_and_northern_ireland','italy','latvia','portugal','romania','sweden']
+EU_27 = ['austria','bulgaria','croatia','germany','greece','hungary','ireland_and_northern_ireland','italy','latvia','portugal','romania','sweden']
 
-# 'belgium', 'bulgaria', 'croatia', 'cyprus', 'czech_republic', 'denmark', 'estonia',
-#         'finland', 'france', 'germany', 'greece', 'hungary', 'ireland_and_northern_ireland', 'italy',
-#         'latvia', 'lithuania', 'luxembourg', 'malta',  'netherlands', 'poland', 'portugal', 'romania',
-#         'slovakia', 'slovenia', 'spain', 'sweden']
+countries_to_import24 = ['austria','bulgaria','croatia','germany','greece','hungary',
+                        'ireland_and_northern_ireland','italy','latvia','romania','sweden',
+                        'norway','united-kingdom']
 
-
-EU_27 = [
-    'cyprus',
-    'czech_republic',
-    'denmark',
-    'estonia',
-    'finland',
-    'france',
-    'lithuania',
-    'luxembourg',
-    'malta',
-    'netherlands',
-    'poland',
-    'slovakia',
-    'slovenia',
-    'spain',
-    'switzerland']
-
-countries_to_import = EU_27  # + ['switzerland']
-
+# countries_to_import24 =  #EU_27  # + ['switzerland',norway','united-kingdom']
 
 countries_w_sub_regions = ['france', 'germany', 'italy', 'netherlands', 'poland']
 
@@ -42,7 +22,7 @@ dict_regions['netherlands'] = sources.subregions.netherlands.available
 dict_regions['poland'] = sources.subregions.poland.available
 
 
-path_output = "/p/projects/eubucco/data/0-raw-data/osm-pbf"
+path_output = "/p/projects/eubucco/data/0-raw-data/osm-pbf-24"
 
 
 for country in countries_to_import:

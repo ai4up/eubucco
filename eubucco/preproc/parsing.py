@@ -4,6 +4,7 @@ import socket
 import pandas as pd
 import geopandas as gpd
 import shapely
+from shapely.geometry import shape
 import ast
 import glob
 from datetime import date
@@ -13,6 +14,7 @@ from geojsplit import geojsplit
 from pyrosm.data import sources
 import subprocess
 from pathlib import Path
+import json
 
 from ufo_map.Utils.helpers import *
 from ufo_map.Preprocessing.parsing import *
@@ -115,15 +117,23 @@ def pt(dataset_name):
     return(True if dataset_name == 'hamburg-gov' else False)
 
 
-def get_params(i, path_to_param_file):
+def get_params(i, path_or_dict):
     '''
     Get parameter dictionary from an input csv.
     Takes on line i of the input csv.
     Converts each variable from col_list into a dictionary.
     '''
-    p = pd.read_csv(path_to_param_file).iloc[i - 1]
+    if type(path_or_dict)==str:
+        p = pd.read_csv(path_or_dict).iloc[i - 1]
+    elif type(path_or_dict)==dict:
+        p = pd.Series(path_or_dict)
+    else:
+         sys.exit('get_params: type of path_or_dict not supported.')
+    
+    print(p)
     p['type_map'] = ast.literal_eval(p['type_map'])  # converts either a dict or None
     p['extra_attrib'] = ast.literal_eval(p['extra_attrib'])  # converts either a list, a dict or None
+    
     col_list = ['id', 'height', 'type_source', 'age', 'floors', 'footprint']
     var_map = p[col_list]
     for i in range(len(var_map)):
@@ -223,25 +233,21 @@ def get_file_paths(dataset_name, path_input_folder, extra, extension):
     return(file_paths)
 
 
-def get_extra_attribs(gdf, extra_attrib, extension, var_map, extra, file_path):
+def get_extra_attribs(gdf, extra_attrib, extension, var_map, extra, file_path,id):
     '''Returns a pd.DataFrame with non-standard attributes potentially chosen.'''
     # create id if missing
-    if extension in ['shp', 'dxf', 'pbf']:
+    if extension in ['shp', 'dxf', 'pbf','csv.gz']:
         # if shp format and have id, take id column
         if var_map['id'] is not None:
             gdf['id'] = gdf[var_map['id']]
         # if shp format and don't have id, create one
         else:
-            gdf['source_file'] = os.path.split(file_path)[-1].split('.')[0]
-            gdf['id'] = gdf.index
-            gdf['id'] = gdf['source_file'] + gdf['id'].apply(str)
+            gdf['id'] = id
 
     elif extension in ['gml', 'xml']:
         # if gml and no id, create one
         if 'id' not in gdf.columns:
-            gdf['source_file'] = os.path.split(file_path)[-1].split('.')[0]
-            gdf['id'] = gdf.index
-            gdf['id'] = gdf['source_file'] + gdf['id'].apply(str)
+            gdf['id'] = id
 
     if isinstance(extra_attrib, list):
         return(gdf[['id'] + extra_attrib])
@@ -460,6 +466,54 @@ def clean_geom(gdf, dataset_name):
     return(gdf, count, list_geom_is_empty, list_geom_is_null)
 
 
+def parse_microsoft(file_path,
+                  dataset_name,
+                  var_map):
+    '''
+    Parser function for Microsoft data provided as zipped csvs with json structure.
+    Function design to parse a single file at the time.
+    Ensures that cleaned footprint geometries and attributes are present.
+    Reports the number of multipolygons encountered and removed.
+
+    Returns: tuple(pd.DataFrame,integer,dict)
+    '''
+    
+    gdf = pd.read_json(file_path,lines=True)
+    gdf['geometry'] = gdf['geometry'].apply(shape)
+    gdf = gpd.GeoDataFrame(pd.json_normalize(gdf['properties']),geometry=gdf['geometry'],crs=4326)
+
+    # reproject to uni crs!
+    gdf = gdf.to_crs(CRS_UNI)
+
+    # check for invalid geometries
+    dict_val = {}
+    # do we need to check here? gdf would not be created with wrong geom, no?
+    dict_val['invalid_geom'] = []
+
+    # in case we have an id, save ids and temporarily rename column id
+    if var_map['id'] is not None:
+        # a) save id in invalid geom
+        dict_val['invalid_geom_id'] = list(gdf[var_map['id']].loc[gdf.geometry.is_valid == False])
+        # b) rename id col in gdf, to simplify collecton of IDs in clean_geom
+        gdf = gdf.rename(columns={var_map['id']: 'id'})
+    else:
+        # where we don't have an id, we save index of original df
+        dict_val['invalid_geom_id'] = list(gdf.loc[gdf.geometry.is_valid == False].index)
+        # to save time only convert to str if dict_val is not empty
+        if dict_val['invalid_geom_id']:
+            dict_val['invalid_geom_id'] = [str(i) for i in dict_val['invalid_geom_id']]
+
+    # remove unecessary geometrical info, convert geoms to wkt and delecte empty or null geoms
+    gdf, count_multipoly, dict_val['empty_geom_id'], dict_val['null_geom_id'] = clean_geom(gdf, dataset_name)
+
+    # rename gdf id col to old name, to later capture it in clean_attributes
+    # TODO: future version should name gdf columns already in parsing_tabular to be coherent with parsing_gml
+    if var_map['id'] is not None:
+        gdf = gdf.rename(columns={'id': var_map['id']})
+
+    return(gdf, count_multipoly, dict_val)
+
+
 def parse_tabular(file_path,
                   dataset_name,
                   var_map):
@@ -469,7 +523,7 @@ def parse_tabular(file_path,
     Ensures that cleaned footprint geometries in wkt and attributes are present.
     Reports the number of multipolygons encountered and removed.
 
-    Returns: tuple(pd.DataFrame,integer)
+    Returns: tuple(pd.DataFrame,integer,dict)
     '''
 
     # read file as gpd
@@ -769,7 +823,7 @@ def clean_attributes(df,
     Returns: tuple(pd.DataFrame,pd.DataFrame)
     '''
 
-    if extension in ['shp', 'dxf', 'pbf']:
+    if extension in ['shp', 'dxf', 'pbf','csv.gz']:
         # get variables/columns existing in the inputs
         list_var_source = [var_map[i] for i in var_map.keys() if var_map[i] is not None]
         list_var = [i for i in var_map.keys() if var_map[i] is not None]
@@ -794,7 +848,7 @@ def clean_attributes(df,
             df = df[list_var + ['height', 'geometry']]
 
     else:
-        sys.exit('The extension provided is unknown.')
+        sys.exit('Cleaning attributes: The extension provided is unknown.')
 
     print('Variables parsed: {}'.format(list_var))
 
@@ -873,15 +927,14 @@ def parse(path_to_param_file='/p/projects/eubucco/git-eubucco/database/preproces
     max_ram_percent = psutil.virtual_memory().percent
     tot_count_multipoly = 0
 
+    param = arg_as_param
     if arg_as_param is not None:
-        param = arg_as_param
+        p = get_params(param, path_to_param_file)
+
     else:
-        args = arg_parser(['i'])
-        param = args.i
-    print(param)
+        p = get_params(param, json.load(sys.stdin))
 
     # import parameters
-    p = get_params(param, path_to_param_file)
     print(p['country'])
     print(p['dataset_name'])
     print(p['extension'])
@@ -919,6 +972,12 @@ def parse(path_to_param_file='/p/projects/eubucco/git-eubucco/database/preproces
                                                            p['dataset_name'],
                                                            p['var_map']
                                                            )
+        elif p['extension'] == 'csv.gz':
+            gdf, count_multipoly, dict_val = parse_microsoft(file_path,
+                                                           p['dataset_name'],
+                                                           p['var_map']
+                                                           )        
+        
         elif p['extension'] in ['gml', 'xml']:
             if p['dataset_name'] == 'spain-gov':
                 gdf, count_multipoly, dict_val, local_crs_file = parse_gml(file_path, p['dataset_name'], p['bldg_elem'],
@@ -929,10 +988,9 @@ def parse(path_to_param_file='/p/projects/eubucco/git-eubucco/database/preproces
             else:
                 gdf, count_multipoly, dict_val = parse_gml(file_path, p['dataset_name'], p['bldg_elem'],
                                                            p['var_map'], p['local_crs'], p['extra'],
-                                                           p['extra_attrib'], len(file_paths))
-
+                                                           p['extra_attrib'], len(file_paths))                
         else:
-            sys.exit('The extension provided is unknown.')
+            sys.exit('Parsing: The extension provided is unknown.')
 
         df_result_geom, df_result_attrib, id_counter = clean_attributes(gdf,
                                                                         p['extension'],
@@ -951,7 +1009,8 @@ def parse(path_to_param_file='/p/projects/eubucco/git-eubucco/database/preproces
                                                        p['extension'],
                                                        p['var_map'],
                                                        p['extra'],
-                                                       file_path)
+                                                       file_path,
+                                                       df_result_attrib.id)
 
         # append part to main results/metrics
         df_results_geom = df_results_geom.append(df_result_geom)
