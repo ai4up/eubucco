@@ -187,108 +187,8 @@ def create_new_df_source(df_attrib, dataset_name):
     return df_sources
 
 
-def fetch_GADM_info_country(country_name,
-                            levels=None,
-                            path_sheet='gadm_table.csv',
-                            path_root_folder='/p/projects/eubucco/data/0-raw-data/gadm'):
-    '''
-        Goes in the GADM sheet and picks up the info.
-
-        Returns:
-
-        * GADM_file - gpd.GeoDataFrame
-        * country_name - string
-        * level_city or all_levels - string or list of string
-        * local crs - string ('EPSG:XXXX')
-    '''
-    # open sheet
-    GADM_sheet = pd.read_csv(os.path.join(path_root_folder, path_sheet))
-
-    # filter by country name
-    GADM_country = GADM_sheet[GADM_sheet['country_name'] == country_name]
-
-    # get GADM city file
-    GADM_file = gpd.read_file(
-        os.path.join(
-            path_root_folder,
-            GADM_country.country_name.iloc[0],
-            'gadm36_{}_{}.shp'.format(
-                GADM_country.gadm_code.iloc[0],
-                GADM_country.level_city.iloc[0])),
-        crs=4326)
-
-    if levels == 'all':
-        return(GADM_file, GADM_country.country_name.iloc[0], eval(GADM_country.all_levels.iloc[0]), GADM_country.local_crs.iloc[0])
-    else:
-        return(GADM_file, GADM_country.country_name.iloc[0], GADM_country.level_city.iloc[0], GADM_country.local_crs.iloc[0])
 
 
-def clean_GADM_city_names(GADM_file, country_name, level_city):
-    '''
-        Handles cases in GADM when several cities in the same country have
-        the same name. First tries to create a new name "city_name (region_name)",
-        and if several cities have the same name within a region, then adds
-        an index at the end of the name to differenciate them.
-
-        Returns: cleaned gpd.GeoDataFrame
-    '''
-
-    # select useful columns
-    if country_name in ['cyprus', 'ireland']:
-        GADM_file = GADM_file[['NAME_1', 'geometry']]
-        GADM_file.insert(0, 'region_name', GADM_file.NAME_1)
-    else:
-        GADM_file = GADM_file[['NAME_1', f'NAME_{level_city}', 'geometry']]
-    GADM_file.columns = ['region_name', 'city_name', 'geometry']
-    GADM_file['country_name'] = country_name
-
-    # replace "/" in GADM_file, region names
-    if GADM_file.city_name.str.contains("/").any():
-        GADM_file['city_name'] = GADM_file.city_name.str.replace("/", "-")
-
-    # replace "/" in GADM_file, city names
-    if GADM_file.region_name.str.contains("/").any():
-        GADM_file['region_name'] = GADM_file.region_name.str.replace("/", "-")
-
-    # deal with duplicates
-    g_d = GADM_file[GADM_file.duplicated(subset=['city_name'])]
-    # add region_name to city name where we have duplicates
-    g_d['city_name'] = g_d['city_name'] + ' (' + g_d['region_name'] + ')'
-    # in cases where we have more than one duplicated; add orignal index as str behind dupl
-    if country_name in ['germany', 'spain']:
-        g_d_2 = g_d[g_d.duplicated(subset=['city_name'])]
-        g_d = g_d.drop(g_d_2.index)
-        g_d_2['city_name'] = g_d_2['city_name'] + '_' + g_d_2.index.map(str)
-        g_d = g_d.append(g_d_2)
-    GADM_file = GADM_file.drop(g_d.index).append(g_d).loc[GADM_file.city_name.apply(type) == str]
-    print('-----')
-    print('GADM duplicates after cleaning:')
-    print(GADM_file.loc[GADM_file.duplicated()])
-    print('country name: ', country_name)
-
-    return(GADM_file)
-
-
-def prepare_GADM(GADM_file, local_crs):
-    '''
-        Reproject gadm to local crs and creates several transformations of the boundary
-        encoded as WKT strings.
-
-        Returns: gpd.GeoDataFrame
-    '''
-    GADM_file['boundary_GADM_WGS84'] = GADM_file.geometry.apply(lambda x: x.wkt)
-
-    GADM_file_local = GADM_file.to_crs(local_crs)
-
-    GADM_file_local['boundary_GADM'] = GADM_file_local.geometry.apply(lambda x: x.wkt)
-    GADM_file_local['boundary_GADM_500m_buffer'] = GADM_file_local.geometry.buffer(500).apply(lambda x: x.wkt)
-    GADM_file_local['boundary_GADM_2k_buffer'] = GADM_file_local.geometry.buffer(2000).apply(lambda x: x.wkt)
-
-    GADM_file_local = GADM_file_local.drop(columns=['geometry'])
-
-    print('GADM prepared.')
-
-    return(GADM_file_local)
 
 
 def city_paths_from_gadm(path_db_folder,country,GADM_file):
@@ -634,7 +534,6 @@ def db_set_up(country,
             path_stats='/p/projects/eubucco/stats/2-db-set-up',
             path_inputs_parsing='/p/projects/eubucco/git-eubucco/database/preprocessing/1-parsing/inputs-parsing.csv',
             path_int_fol='/p/projects/eubucco/data/1-intermediary-outputs',
-            path_root_folder_GADM = '/p/projects/eubucco/data/0-raw-data/gadm'
             ):
     '''
 
@@ -654,12 +553,6 @@ def db_set_up(country,
         Returns: None
     '''
     start = time.time()
-
-    # get file gadm, import gadm, get proper crs, get country info
-    GADM_file, country_name, level_city, _ = fetch_GADM_info_country(country,
-                                                                     path_root_folder=path_root_folder_GADM)
-    GADM_file = clean_GADM_city_names(GADM_file, country_name, level_city)
-    GADM_file = prepare_GADM(GADM_file, CRS_UNI)
 
     # only take gadm bounds and cities from dataset_name
     gadm_bounds_dataset = mask_gadm(GADM_file, dataset_name, country_name, path_inputs_parsing)
