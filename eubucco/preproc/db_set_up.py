@@ -32,6 +32,24 @@ def check_edge_cases(gadm_name):
     return gadm_name
 """
 
+def city_paths_from_lau(path_db_folder,country,LAU_NUTS_extra):
+        LAU_NUTS_extra = LAU_NUTS_extra[LAU_NUTS_extra.country == country]
+        return [os.path.join(path_db_folder, country, nuts3, city) 
+                for nuts3, city in zip(
+                                       LAU_NUTS_extra.NUTS_ID_3,
+                                       LAU_NUTS_extra.LAU_ID)]
+
+def create_dirs(path_db_folder,country,path_lau_extra):
+
+        path_root = os.path.join(path_db_folder,country)
+        if os.path.isdir(path_root):
+            print('Folder structure exist already. Skipping folder creation.')
+        else:
+            print('Creating folder structure for the country')
+            LAU_NUTS_extra = pd.read_csv(path_lau_extra)
+            dir_paths = city_paths_from_lau(path_db_folder,country,LAU_NUTS_extra)
+            for lau_path in dir_paths:
+                Path(os.path.split(lau_path)[0]).mkdir(parents=True, exist_ok=False)
 
 def mask_gadm(gadm_file, dataset_name, country_name, path_inputs_parsing):
     """
@@ -534,6 +552,8 @@ def db_set_up(country,
             path_stats='/p/projects/eubucco/stats/2-db-set-up',
             path_inputs_parsing='/p/projects/eubucco/git-eubucco/database/preprocessing/1-parsing/inputs-parsing.csv',
             path_int_fol='/p/projects/eubucco/data/1-intermediary-outputs',
+            path_lau = '/p/projects/eubucco/data/0-raw-data/lau/lau_nuts.gpkg',
+            path_lau_extra = '/p/projects/eubucco/data/0-raw-data/lau/lau_nuts_extra.csv'
             ):
     '''
 
@@ -553,6 +573,9 @@ def db_set_up(country,
         Returns: None
     '''
     start = time.time()
+
+    # create folders for a country if this is the first part ran
+    create_dirs(path_db_folder,country,path_lau_extra)
 
     # only take gadm bounds and cities from dataset_name
     gadm_bounds_dataset = mask_gadm(GADM_file, dataset_name, country_name, path_inputs_parsing)
