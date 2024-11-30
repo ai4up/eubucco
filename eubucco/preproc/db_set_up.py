@@ -51,57 +51,82 @@ def create_dirs(path_db_folder,country,path_lau_extra):
             for lau_path in dir_paths:
                 Path(os.path.split(lau_path)[0]).mkdir(parents=True, exist_ok=False)
 
-def mask_gadm(gadm_file, dataset_name, country_name, path_inputs_parsing):
-    """
-    Function to create a temporary gadm file that only consists of gadm bounds of the specific gov or osm dataset.
-    Case 1: one dataset per country -> no masking, we take all gadm bounds for this countryname
-    Case 2: current dataset is remaining one of several datasets in a country (f.e. austria-osm), marked with "rest" in gadm_level and gadm_name col,
-            exclude all gadm bounds of regions/cities of other datasets in this country
-    Case 3: current dataset is one of several in a country, take only gadm bound relevant for this dataset
-
-    """
+def load_lau(path_lau, path_lau_extra,path_inputs_parsing):
+    # loading data
     inputs_parsing = pd.read_csv(path_inputs_parsing)
+    lau_nuts = gpd.read_file(path_lau)
+    lau_extra = pd.read_csv(path_lau_extra)
+    lau_nuts = pd.merge(lau_nuts,lau_extra,on='LAU_ID')
+    return(lau_nuts,inputs_parsing)
 
-    # get gadm_level and gadm_name
-    gadm_level = inputs_parsing.loc[inputs_parsing.dataset_name == dataset_name].gadm_level.values[0]
-    gadm_name = inputs_parsing.loc[inputs_parsing.dataset_name == dataset_name].gadm_name.values[0]
+def mask_lau(lau_nuts,inputs_parsing, dataset_name, country):
+    """
+    # mask the NUTS that correspond to a dataset.
+    """
+
+    # get lau_level and lau_name
+    nuts_level = inputs_parsing.loc[inputs_parsing.dataset_name == dataset_name].nuts_level.values[0]
+    nuts_name = inputs_parsing.loc[inputs_parsing.dataset_name == dataset_name].nuts_name.values[0]
+    is_has_lau_nuts3 = inputs_parsing.loc[inputs_parsing.dataset_name == dataset_name].is_has_lau_nuts3.values[0]
 
     # check if gadm_level is 'all'; then no value is given and we mask all
-    if gadm_level == 'all':
-        gadm_file_temp = gadm_file
-    # if rest, mask all apart from the other gov datasets
-    elif gadm_level == 'rest':
-        # read in the gadm_level and gadm_name info from inputs_parsing
-        gadm_level = list(inputs_parsing[inputs_parsing.country == country_name].gadm_level)
-        gadm_name = list(inputs_parsing[inputs_parsing.country == country_name].gadm_name)
-        # exclude the rest command from the list
-        gadm_level = ([lev for lev in gadm_level if lev != 'rest'])
-        gadm_name = [nam for nam in gadm_name if nam != 'rest']
-        # assign to GADM_temp all regions and cities apart from the ones in gadm_level and gad_names
-        gadm_file_temp = gadm_file
-        for i in range(len(gadm_level)):
-            # only if gadm_level is not nan (f.e. because we left out friuli in italy,
-            # but its still in inputs-parsing.csv)
-            if not is_nan(gadm_level[i]):
-                # check for potential edge cases, f.e. Thüringen
-                #gadm_name[i] = check_edge_cases(gadm_name[i])
-                # mask
-                gadm_file_temp = gadm_file_temp.loc[gadm_file_temp[gadm_level[i]] != gadm_name[i]]
+    if nuts_level == 'all':
+        nuts_file_temp = lau_nuts[lau_nuts.country==country]
 
-    # in case gadm_level is nan - raise error
-    elif is_nan(gadm_level):
-        raise ValueError("No gadm_level provided")
+    # if region level, 
+    elif nuts_level in ['nuts2','nuts1']:
+        if is_has_lau_nuts3 == 'no':
+            
+            if dataset_name not in ('spain-osm','trentino-alto-adige-gov'):
+                # we mask the whole region (two regions taken from osm)
+                nuts_file_temp = lau_nuts[lau_nuts.NUTS_ID_region == nuts_name]
+            else:
+                nuts_file_temp = lau_nuts[lau_nuts.NUTS_ID_region.isin(ast.literal_eval(nuts_name))]
 
-    # edge case to fill up empty cities in italy or spain
-    elif dataset_name in ['italy-osm', 'spain-osm']:
-        gadm_name = ast.literal_eval(gadm_name)
-        gadm_file_temp = gadm_file.loc[gadm_file[gadm_level].isin(gadm_name)]
+        else: raise ValueError("is_has_lau_nuts3 inconsistent")    
 
-    # if value given, sjoin only with regions/cities of gov dataset
-    else:
-        #gadm_name = check_edge_cases(gadm_name)
-        gadm_file_temp = gadm_file.loc[gadm_file[gadm_level] == gadm_name]
-    return gadm_file_temp
+    elif nuts_level == 'rest':
+
+        # remove regions
+        remove = inputs_parsing[(inputs_parsing.country == country) & 
+                     (inputs_parsing.nuts_level.isin(['nuts2','nuts1']))]['nuts_name'].values
+        
+        
+        # handle cases with multiple regions in a nuts_name
+        processed_remove = []
+        for item in remove:
+            if '[' in item: processed_remove.extend(ast.literal_eval(item))
+            else: processed_remove.append(item)
+                
+        nuts_file_temp = lau_nuts[(lau_nuts.country == country) & 
+                                    ~(lau_nuts.NUTS_ID_region.isin(processed_remove))]
+
+        if is_has_lau_nuts3 == 'has_lau':
+            # additionally remove this lau
+            remove = inputs_parsing[(inputs_parsing.country == country) &
+                            (inputs_parsing.nuts_level == 'lau')]['nuts_name'].values
+
+            nuts_file_temp = nuts_file_temp[~(nuts_file_temp.LAU_ID.isin(remove))]
+
+        if is_has_lau_nuts3 == 'has_nuts3':
+            # additionally remove a nuts
+            remove = inputs_parsing[(inputs_parsing.country == country) &
+                            (inputs_parsing.nuts_level == 'nuts3')]['nuts_name'].values
+
+            nuts_file_temp = nuts_file_temp[~(nuts_file_temp.NUTS_ID.isin(remove))]
+
+
+    elif nuts_level == 'nuts3':
+        # mask just the nuts3
+        nuts_file_temp = lau_nuts[(lau_nuts.NUTS_ID == nuts_name)]
+        
+    elif nuts_level == 'lau': 
+        # mask just the nuts3
+        nuts_file_temp = lau_nuts[(lau_nuts.LAU_ID == nuts_name)]
+
+    else: raise ValueError("nuts_level value is incorrect.")
+
+    return nuts_file_temp
 
 
 def is_nan(x):
@@ -577,8 +602,10 @@ def db_set_up(country,
     # create folders for a country if this is the first part ran
     create_dirs(path_db_folder,country,path_lau_extra)
 
-    # only take gadm bounds and cities from dataset_name
-    gadm_bounds_dataset = mask_gadm(GADM_file, dataset_name, country_name, path_inputs_parsing)
+    # only take lau bounds and cities from dataset_name
+    lau_nuts,inputs_parsing = load_lau(path_lau, path_lau_extra,path_inputs_parsing)
+    lau = mask_lau(lau_nuts,inputs_parsing, dataset_name, country)    
+    
     city_paths_dataset = city_paths_from_gadm(path_db_folder,country_name,gadm_bounds_dataset)
 
     if not overwrite:
