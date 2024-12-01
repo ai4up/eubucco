@@ -51,6 +51,8 @@ def create_dirs(path_db_folder,country,path_lau_extra):
             for lau_path in dir_paths:
                 Path(os.path.split(lau_path)[0]).mkdir(parents=True, exist_ok=False)
 
+        city_paths_to_txt(dir_paths,country,path_db_folder)
+
 def load_lau(path_lau, path_lau_extra,path_inputs_parsing):
     # loading data
     inputs_parsing = pd.read_csv(path_inputs_parsing)
