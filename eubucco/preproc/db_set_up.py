@@ -129,6 +129,36 @@ def mask_lau(lau_nuts,inputs_parsing, dataset_name, country):
     return nuts_file_temp
 
 
+def test_lau_mask(inputs_parsing,lau_nuts):
+    """
+       Ensures that all masks strictly reproduce 
+       all LAUs and otherwise returns missing or duplicated LAUs
+    """ 
+    
+    inputs_parsing = inputs_parsing.loc[0:62] #hardcoded
+
+    test_results = pd.DataFrame()
+
+    for _,row in inputs_parsing.iterrows():
+        # print(row.dataset_name)
+        lau = db_set_up.mask_lau(lau_nuts,inputs_parsing, row.dataset_name, row.country) 
+        test_results = pd.concat([test_results,lau])
+    
+    print(f'Similar lengths: {len(test_results) == len(lau_nuts)}')
+    print('----------------')
+    print(f'length test_results: {len(test_results)}')
+    print(f'length lau_nuts: {len(lau_nuts)}')
+    print('----------------')
+
+    duplicates = test_results[test_results.duplicated()]
+    missing_rows = lau_nuts[~lau_nuts.LAU_ID.isin(test_results.LAU_ID)]
+
+    print(f'length duplicates: {len(duplicates)}')
+    print(f'length missing rows: {len(missing_rows)}')
+    
+    return duplicates,missing_rows
+
+
 def is_nan(x):
     return (x != x)
 
