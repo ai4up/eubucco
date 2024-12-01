@@ -245,23 +245,6 @@ def get_attribs(path_int_fol, country_name, dataset_name):
     return bldg_attrib, bldg_x_attrib, dict_attrib_nums
 
 
-def create_new_df_source(df_attrib, dataset_name):
-    # create new csv to store sources per building (row)
-    df_sources = pd.DataFrame()
-    df_sources['id'] = df_attrib['id']
-    df_sources['height'] = df_attrib['source_file']
-    df_sources['type_source'] = df_attrib['source_file']
-    df_sources['type'] = df_attrib['source_file']
-    df_sources['age'] = df_attrib['source_file']
-    df_sources['floors'] = df_attrib['source_file']
-    df_sources['dataset_name'] = dataset_name
-
-    print('Checking for duplicates in source files')
-    df_sources = remove_dupls(df_sources, 'df_sources', 'id')
-
-    return df_sources
-
-
 def city_paths_to_txt(city_paths,country,path_db_folder):
     # city_names = [el.rsplit('/')[-1] for el in city_paths]
     # city_paths_full = [os.path.join(path, city) for path, city in zip(city_paths, city_names)]   
@@ -412,33 +395,6 @@ def create_city_bldg_attrib_files(gdf_bldgs,
         bldg_attrib_city.to_csv(f'{city_path}_{file_type}_{part}.csv', index=False)
 
     print('City attributes created for {} bldgs'.format(len(bldg_attrib)))
-
-
-def create_source_files(gdf_bldgs,
-                        df_sources,
-                        list_saved_names,
-                        list_saved_paths,
-                        part):
-    '''
-        Matches a processed building attributes sources dataset by ids with GADM city names and saves a csv with
-        ids and sources for geom, attribs and extra attribs.
-
-        Returns: None
-
-        !!TODO!!:
-            * add support for importing neighboring regions within a country for getting buildings within buffer.
-    '''
-    print('Creating attribute source files per city...')
-    # merge chunk with df_source on id
-    df_sources = df_sources.merge(gdf_bldgs, on='id', validate='1:1')
-    raise_if_inconsistent(gdf_bldgs, df_sources, 'attrib_source')
-
-    # save per city
-    for city_name, city_path in zip(list_saved_names, list_saved_paths):
-        df_sources_city = df_sources[df_sources.city_name == city_name].drop(columns='city_name')
-        df_sources_city.to_csv(f'{city_path}_attrib_source_{part}.csv', index=False)
-
-    print('City attribute sources created for {} bldgs'.format(len(df_sources)))
 
 
 def raise_if_inconsistent(gdf_1, gdf_2, file_type):
@@ -605,29 +561,11 @@ def db_set_up(country,
     list_saved_paths_sum = []
 
     # reading in gov geoms as chunks
-    geom_filename = os.path.join(path_int_fol, country_name, dataset_name + '-3035_geoms.csv')
+    geom_filename = os.path.join(path_int_fol, country, dataset_name + '-3035_geoms.csv')
     chunks = pd.read_csv(geom_filename, chunksize=chunksize)
 
-    # reading in attribs and x-attribs files; checking for duplicates and creating source files
-    if only_geometries: 
-        dict_num_attribs={}
-    else: 
-        df_bldg_attrib, df_bldg_x_attrib, dict_num_attribs = get_attribs(path_int_fol, 
-                                                                        country_name, dataset_name)
-        try:
-            source_filename = os.path.join(path_int_fol, country_name, dataset_name + '_attrib_sources.csv')
-            df_sources = pd.read_csv(source_filename)
-        except BaseException:
-            df_sources = pd.DataFrame()
-
-        if df_sources.empty:
-            print('no_source file found - creating new one')
-            df_sources = create_new_df_source(df_bldg_attrib, dataset_name)
-        else:
-            df_sources['dataset_name'] = dataset_name
-            print('Checking for duplicates in source files')
-            df_sources = remove_dupls(df_sources, 'df_sources', 'id')
-
+    # reading in attribs and x-attribs files; checking for duplicates
+    df_bldg_attrib, df_bldg_x_attrib, dict_num_attribs = get_attribs(path_int_fol, country, dataset_name)
 
     for idx, chunk in enumerate(chunks):
         print('-----')
@@ -653,8 +591,6 @@ def db_set_up(country,
                                             list_saved_paths,
                                             idx)
         
-            create_source_files(gdf_bldgs, df_sources, list_saved_names, list_saved_paths, idx)
-
         n_bldg_start_sum += n_bldg_start
         n_bldg_end_sum += n_bldg_end
 
@@ -666,7 +602,7 @@ def db_set_up(country,
     end = time.time() - start
 
     # calculate stats
-    df_stats = get_stats(country_name,
+    df_stats = get_stats(country,
                         dataset_name,
                         n_bldg_start_sum,
                         n_bldg_end_sum,
