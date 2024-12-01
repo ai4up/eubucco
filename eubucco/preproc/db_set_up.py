@@ -273,7 +273,6 @@ def write_to_file(path_file,city_paths,mode):
 def create_city_bldg_geom_files(gdf_bldg,
                                 gadm_file,
                                 list_city_paths,
-                                only_region,
                                 part
                                 ):
     '''
@@ -308,23 +307,10 @@ def create_city_bldg_geom_files(gdf_bldg,
         gadm_file['boundary_GADM'].apply(wkt.loads)).set_crs(CRS_UNI)
     # append to gdf_bldg
     gdf_bldg['city_name'] = get_city_per_bldg(gdf_bldg, gdf_gadm_file)
-    # do second sjoin on larger buffer
-    gdf_bldg_buff = gpd.sjoin(gdf_bldg, gadm_file[['city_name', 'boundary_GADM_500m_buffer']].set_geometry(
-        gadm_file['boundary_GADM_500m_buffer'].apply(wkt.loads)).set_crs(gadm_file.crs)).drop(columns=['index_right'])
-    # be aware that at this stage gdf_bldg.city_name_left contais nan values
-    # for bldgs that do not intersect with any gadm bound
-
+    
     print('Num bldgs after sjoin: {}'.format(len(gdf_bldg)))
 
-    if only_region is not None:
-        list_city_paths = [path for path in list_city_paths if only_region in path]
-        list_city_names = [os.path.split(city_path)[-1] for city_path in list_city_paths]
-        discarded_cities = [city_name for city_name in set(gdf_bldg.city_name) if city_name not in list_city_names]
-        if discarded_cities != []:
-            print(f'Discarded buildings from cities: {discarded_cities}')
-
-    else:
-        list_city_names = [os.path.split(city_path)[-1] for city_path in list_city_paths]
+    list_city_names = [os.path.split(city_path)[-1] for city_path in list_city_paths]
 
     n_bldg_end = 0
 
@@ -339,16 +325,12 @@ def create_city_bldg_geom_files(gdf_bldg,
 
         # if bldgs in city
         if len(city) != 0:
-            # take all bldgs that intersect with city buffer
-            city_plus_buffer = gdf_bldg_buff.loc[gdf_bldg_buff.city_name_right == city_name]
-            # remove all bldgs that are within city bounds
-            buffer_area = city_plus_buffer.loc[city_plus_buffer.city_name_left != city_name]
 
             n_bldg_end += len(city)
 
             # save bldgs of city and bldgs in buffer
             ufo_helpers.save_csv_wkt(city[['id', 'geometry']], f'{city_path}_geom_{part}.csv')
-            ufo_helpers.save_csv_wkt(buffer_area[['id', 'geometry']], f'{city_path}_buffer_{part}.csv')
+
             list_saved_cities.append(city_name)
             list_saved_paths.append(city_path)
 
@@ -520,9 +502,6 @@ def db_set_up(country,
             dataset_name,
             path_db_folder,
             chunksize=int(5E5),
-            only_region=None,
-            only_geometries = None,
-            overwrite=False,
             path_stats='/p/projects/eubucco/stats/2-db-set-up',
             path_inputs_parsing='/p/projects/eubucco/git-eubucco/database/preprocessing/1-parsing/inputs-parsing.csv',
             path_int_fol='/p/projects/eubucco/data/1-intermediary-outputs',
@@ -574,16 +553,15 @@ def db_set_up(country,
         gdf = gpd.GeoDataFrame(chunk, geometry=chunk['geometry'].apply(wkt.loads), crs=CRS_UNI)
 
         gdf_bldgs, list_saved_names, list_saved_paths, n_bldg_start, n_bldg_end = create_city_bldg_geom_files(
-            gdf, gadm_bounds_dataset, city_paths_dataset, only_region, idx)
+            gdf, gadm_bounds_dataset, city_paths_dataset, idx)
 
-        if not only_geometries:
-            create_city_bldg_attrib_files(gdf_bldgs,
+        create_city_bldg_attrib_files(gdf_bldgs,
                                         df_bldg_attrib,
                                         'attrib',
                                         list_saved_names,
                                         list_saved_paths,
                                         idx)
-            if not df_bldg_x_attrib.empty:
+        if not df_bldg_x_attrib.empty:
                 create_city_bldg_attrib_files(gdf_bldgs,
                                             df_bldg_x_attrib,
                                             'extra_attrib',
