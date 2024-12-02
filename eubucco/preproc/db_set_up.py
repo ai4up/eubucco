@@ -49,9 +49,9 @@ def create_dirs(path_db_folder,country,path_lau_extra):
             LAU_NUTS_extra = pd.read_csv(path_lau_extra)
             dir_paths = city_paths_from_lau(path_db_folder,country,LAU_NUTS_extra)
             for lau_path in dir_paths:
-                Path(os.path.split(lau_path)[0]).mkdir(parents=True, exist_ok=False)
-
-        city_paths_to_txt(dir_paths,country,path_db_folder)
+                Path(os.path.split(lau_path)[0]).mkdir(parents=True, exist_ok=True)
+            city_paths_to_txt(dir_paths,country,path_db_folder)
+        
 
 def load_lau(path_lau, path_lau_extra,path_inputs_parsing):
     # loading data
@@ -165,7 +165,7 @@ def is_nan(x):
     return (x != x)
 
 
-def get_city_per_bldg(gdf_bldg, gdf_GADM):
+def get_city_per_bldg(gdf_bldg, lau):
     """
     uses the ufo-maps urban atlas function to allocate check for each bldg with which gadm
     bound it has largest intersection.
@@ -173,13 +173,13 @@ def get_city_per_bldg(gdf_bldg, gdf_GADM):
 
     # get list of geoms for calculations
     geometries = list(gdf_bldg.geometry)
-    gadm_geometries = list(gdf_GADM.geometry)
-    # get sindex of gadm geoms
-    gadm_sindex = gdf_GADM.sindex
-    # classes are the list of cities in gadm file
-    gadm_classes = list(gdf_GADM.city_name)
+    lau_geometries = list(lau.geometry)
+    # get sindex of lau geoms
+    lau_sindex = lau.sindex
+    # classes are the list of cities in lau file
+    lau_classes = list(lau.LAU_ID)
     # get list with one city per bldg
-    bldg_in_city_list = building_in_ua(geometries, gadm_sindex, gadm_geometries, gadm_classes)
+    bldg_in_city_list = building_in_ua(geometries, lau_sindex, lau_geometries, lau_classes)
     return bldg_in_city_list
 
 
@@ -271,7 +271,7 @@ def write_to_file(path_file,city_paths,mode):
 
 
 def create_city_bldg_geom_files(gdf_bldg,
-                                gadm_file,
+                                lau,
                                 list_city_paths,
                                 part
                                 ):
@@ -302,26 +302,24 @@ def create_city_bldg_geom_files(gdf_bldg,
     n_bldg_start2 = len(gdf_bldg)
 
     # alocate bldgs on boundaries based on max intersecting area
-    # prepare GADM file for intersecting with gdf_bldg
-    gdf_gadm_file = gadm_file[['city_name', 'boundary_GADM']].set_geometry(
-        gadm_file['boundary_GADM'].apply(wkt.loads)).set_crs(CRS_UNI)
     # append to gdf_bldg
-    gdf_bldg['city_name'] = get_city_per_bldg(gdf_bldg, gdf_gadm_file)
+    print(gdf_bldg)
+    gdf_bldg['LAU_ID'] = get_city_per_bldg(gdf_bldg, lau)
     
     print('Num bldgs after sjoin: {}'.format(len(gdf_bldg)))
 
-    list_city_names = [os.path.split(city_path)[-1] for city_path in list_city_paths]
+    list_LAU_IDs = [os.path.split(city_path)[-1] for city_path in list_city_paths]
 
     n_bldg_end = 0
 
     print('Creating building geom city files...')
     # intialise list with cities where we don't have bldgs
-    list_saved_cities = []
+    list_saved_LAUs = []
     list_saved_paths = []
-    for city_name, city_path in zip(list_city_names, list_city_paths):
+    for LAU_ID, city_path in zip(list_LAU_IDs, list_city_paths):
 
         # take only bldgs of city
-        city = gdf_bldg.loc[gdf_bldg.city_name == city_name]
+        city = gdf_bldg.loc[gdf_bldg.LAU_ID == LAU_ID]
 
         # if bldgs in city
         if len(city) != 0:
@@ -331,11 +329,11 @@ def create_city_bldg_geom_files(gdf_bldg,
             # save bldgs of city and bldgs in buffer
             ufo_helpers.save_csv_wkt(city[['id', 'geometry']], f'{city_path}_geom_{part}.csv')
 
-            list_saved_cities.append(city_name)
+            list_saved_LAUs.append(LAU_ID)
             list_saved_paths.append(city_path)
 
     # remove all bldgs that did not match with any gadm bound (either nan or not in list city names)
-    gdf_bldg_out = gdf_bldg.loc[gdf_bldg.city_name.isin(list_city_names)].drop(columns='geometry')
+    gdf_bldg_out = gdf_bldg.loc[gdf_bldg.LAU_ID.isin(list_LAU_IDs)].drop(columns='geometry')
 
     print('--')
     print('Chunk num bldgs: {}'.format(n_bldg_start))
@@ -343,10 +341,10 @@ def create_city_bldg_geom_files(gdf_bldg,
     print('Chunk num after remove dupls & invalid geoms: {}'.format(n_bldg_start2))
     print('Num bldgs in gdf: {}, Num bldgs outside of gadm: {}, Num bldgs allocated to cities: {}'.format(
         len(gdf_bldg_out), len(gdf_bldg) - len(gdf_bldg_out), n_bldg_end))
-    print('Geoms created in {} cities.'.format(len(list_saved_cities)))
+    print('Geoms created in {} cities.'.format(len(list_saved_LAUs)))
     print('--')
 
-    return(gdf_bldg_out, list_saved_cities, list_saved_paths, n_bldg_start2, n_bldg_end)
+    return(gdf_bldg_out, list_saved_LAUs, list_saved_paths, n_bldg_start2, n_bldg_end)
 
 
 def create_city_bldg_attrib_files(gdf_bldgs,
@@ -371,9 +369,9 @@ def create_city_bldg_attrib_files(gdf_bldgs,
     bldg_attrib = bldg_attrib.merge(gdf_bldgs, on='id', validate='1:1')
     raise_if_inconsistent(gdf_bldgs, bldg_attrib, file_type)
 
-    for city_name, city_path in zip(list_saved_names, list_saved_paths):
+    for LAU_ID, city_path in zip(list_saved_names, list_saved_paths):
         # save in parts
-        bldg_attrib_city = bldg_attrib[bldg_attrib.city_name == city_name].drop(columns='city_name')
+        bldg_attrib_city = bldg_attrib[bldg_attrib.LAU_ID == LAU_ID].drop(columns='LAU_ID')
         bldg_attrib_city.to_csv(f'{city_path}_{file_type}_{part}.csv', index=False)
 
     print('City attributes created for {} bldgs'.format(len(bldg_attrib)))
@@ -529,6 +527,7 @@ def db_set_up(country,
 
     # create folders for a country if this is the first part ran
     create_dirs(path_db_folder,country,path_lau_extra)
+    city_paths_dataset = ufo_helpers.get_all_paths(country, path_root_folder=path_db_folder)
 
     # only take lau bounds and cities from dataset_name
     lau_nuts,inputs_parsing = load_lau(path_lau, path_lau_extra,path_inputs_parsing)
@@ -536,7 +535,7 @@ def db_set_up(country,
  
     n_bldg_start_sum = 0
     n_bldg_end_sum = 0
-    list_saved_names_sum = []
+    list_saved_LAUs_sum = []
     list_saved_paths_sum = []
 
     # reading in gov geoms as chunks
@@ -552,20 +551,20 @@ def db_set_up(country,
 
         gdf = gpd.GeoDataFrame(chunk, geometry=chunk['geometry'].apply(wkt.loads), crs=CRS_UNI)
 
-        gdf_bldgs, list_saved_names, list_saved_paths, n_bldg_start, n_bldg_end = create_city_bldg_geom_files(
-            gdf, gadm_bounds_dataset, city_paths_dataset, idx)
+        gdf_bldgs, list_saved_LAUs, list_saved_paths, n_bldg_start, n_bldg_end = create_city_bldg_geom_files(
+            gdf, lau, city_paths_dataset, idx)
 
         create_city_bldg_attrib_files(gdf_bldgs,
                                         df_bldg_attrib,
                                         'attrib',
-                                        list_saved_names,
+                                        list_saved_LAUs,
                                         list_saved_paths,
                                         idx)
         if not df_bldg_x_attrib.empty:
                 create_city_bldg_attrib_files(gdf_bldgs,
                                             df_bldg_x_attrib,
                                             'extra_attrib',
-                                            list_saved_names,
+                                            list_saved_LAUs,
                                             list_saved_paths,
                                             idx)
         
@@ -573,7 +572,7 @@ def db_set_up(country,
         n_bldg_end_sum += n_bldg_end
 
         # collect all city names & paths where we have bldgs
-        list_saved_names_sum.extend(list_saved_names)
+        list_saved_LAUs_sum.extend(list_saved_LAUs)
         list_saved_paths_sum.extend(list_saved_paths)
 
     # calculate end time
@@ -585,7 +584,7 @@ def db_set_up(country,
                         n_bldg_start_sum,
                         n_bldg_end_sum,
                         end,
-                        list_saved_names_sum,
+                        list_saved_LAUs_sum,
                         dict_num_attribs)
 
     # save stats file
