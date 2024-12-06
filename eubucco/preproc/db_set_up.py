@@ -7,6 +7,8 @@ import time
 from datetime import date
 import glob
 import ast
+from shapely.wkt import loads
+import shutil
 
 import ufo_map.Utils.helpers as ufo_helpers
 from ufo_map.Feature_engineering.urban_atlas import building_in_ua
@@ -31,6 +33,34 @@ def check_edge_cases(gadm_name):
         gadm_name = 'Thüringen'
     return gadm_name
 """
+
+def merge_per_nuts(country,path_root_folder):
+
+    city_paths_dataset = ufo_helpers.get_all_paths(country, path_root_folder=path_root_folder)
+
+    nuts3 = set([x.split('/')[-2] for x in city_paths_dataset])
+    paths_per_nuts3 = {n:[lau for lau in city_paths_dataset if n in lau] 
+                    for n in nuts3}
+
+    for n in nuts3:
+
+        df_nuts3 = pd.DataFrame()
+        print(n)
+        
+        for lau in paths_per_nuts3[n]:
+            tmp = pd.read_csv(f'{lau}_geom.csv')
+            tmp = pd.merge(tmp,pd.read_csv(f'{lau}_attrib.csv',),on='id')
+            df_nuts3 = pd.concat([df_nuts3,tmp])
+        
+        df_nuts3 = gpd.GeoDataFrame(df_nuts3, 
+                            geometry=df_nuts3['geometry'].apply(loads),
+                            crs=3035)
+        nuts_folder_path = os.path.split(paths_per_nuts3[n][0])[0]
+        df_nuts3.to_file(f'{nuts_folder_path}.gpkg')
+        shutil.rmtree(nuts_folder_path)
+    print('================')
+    print('All files merged')
+
 
 def city_paths_from_lau(path_db_folder,country,LAU_NUTS_extra):
         LAU_NUTS_extra = LAU_NUTS_extra[LAU_NUTS_extra.country == country]
@@ -303,7 +333,6 @@ def create_city_bldg_geom_files(gdf_bldg,
 
     # alocate bldgs on boundaries based on max intersecting area
     # append to gdf_bldg
-    print(gdf_bldg)
     gdf_bldg['LAU_ID'] = get_city_per_bldg(gdf_bldg, lau)
     
     print('Num bldgs after sjoin: {}'.format(len(gdf_bldg)))
@@ -327,7 +356,7 @@ def create_city_bldg_geom_files(gdf_bldg,
             n_bldg_end += len(city)
 
             # save bldgs of city and bldgs in buffer
-            ufo_helpers.save_csv_wkt(city[['id', 'geometry']], f'{city_path}_geom_{part}.csv')
+            ufo_helpers.save_csv_wkt(city[['id', 'geometry','LAU_ID']], f'{city_path}_geom_{part}.csv')
 
             list_saved_LAUs.append(LAU_ID)
             list_saved_paths.append(city_path)
