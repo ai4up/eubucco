@@ -10,4 +10,4 @@ from preproc import create_overview # noqa: E402
 # function parameters are passed by slurm-pipeline via stdin
 params = json.load(sys.stdin)
 print(params)
-create_overview.create_stats_main(**params)
+create_overview.create_overview_laus(**params)

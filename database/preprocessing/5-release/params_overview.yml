@@ -1,168 +1,120 @@
 - country: austria
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
 - country: belgium
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
 - country: bulgaria
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
 - country: croatia
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
 - country: cyprus
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
 - country: czechia
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
 - country: denmark
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
 - country: estonia
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
 - country: finland
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
 - country: france
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
 - country: germany
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-  
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
+
 - country: greece
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
 - country: hungary
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
 - country: ireland
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
 - country: italy
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
 - country: latvia
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
 - country: lithuania
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
 - country: luxembourg
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
 - country: malta
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
 - country: netherlands
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
 - country: poland
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
 - country: portugal
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
 - country: romania
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
 - country: slovakia
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
 - country: slovenia
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
 - country: spain
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-  
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
 - country: sweden
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
-
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
 - country: switzerland
- db_version: 0.1
- path_db_folder: /p/projects/eubucco/data/2-database-city-level-v0_1
- path_out: /p/projects/eubucco/stats/2-db-set-up/overview/overview-v0_1
- path_root_id: /p/projects/eubucco/data/0-raw-data/id_look_up/country-ids
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
+ 
+- country: norway
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov
 
+- country: uk
+  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1
+  source: gov

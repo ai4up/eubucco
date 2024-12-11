@@ -603,3 +603,35 @@ def create_stats_main(country,
     else:
         df_out.to_csv(os.path.join(path_out, country + '_overview.csv'), index=False)
     print('Everything saved successully. Closing run.')
+
+
+
+def create_overview_laus(country,
+                         path_db_folder,
+                         source,
+                         path_out='/p/projects/eubucco/stats/2-db-set-up/overview/v1'):
+    """
+        Function checks every NUTS3 according to the path file, and compute metrics for each LAU present.
+        Function then allocates 0s for LAUs present in the path file but not in the data.
+    """
+
+    paths = get_all_paths(country, path_root_folder=path_db_folder)
+    nuts3_path = list(set([os.path.split(x)[0] for x in paths]))
+
+    df_stats = pd.DataFrame()
+
+    for path in nuts3_path:
+
+        df = gpd.read_file(f'{path}.gpkg')
+        df['area'] = round(df.geometry.area,0)
+        df = df.groupby('LAU_ID')['area'].sum().reset_index()
+        df.insert(0,'NUTS3_ID', path.split('/')[-1])
+        df_stats = pd.concat([df_stats,df])
+
+    df_all = pd.DataFrame([path.split('/')[-2:] for path in paths], columns=["NUTS3_ID", "LAU_ID"])
+    missing = df_all[~df_all.LAU_ID.isin(df_stats.LAU_ID)]
+    missing.insert(2,'area',0)
+
+    df_stats = pd.concat([df_stats,missing])
+    df_stats.to_csv(os.path.join(path_out,f'{source}_{country}_overview.csv'),index=False)
+    print('Done!')
