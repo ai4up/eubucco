@@ -42,17 +42,23 @@ def merge_per_nuts(country,path_root_folder):
     paths_per_nuts3 = {n:[lau for lau in city_paths_dataset if n in lau]
                     for n in nuts3}
 
+    list_missing_laus = []
+
     for n in nuts3:
 
         df_nuts3 = pd.DataFrame()
         print(n)
 
         for lau in paths_per_nuts3[n]:
-            tmp = pd.read_csv(f'{lau}_geom.csv')
-            tmp = pd.merge(tmp,pd.read_csv(f'{lau}_attrib.csv',),on='id')
-            df_nuts3 = pd.concat([df_nuts3,tmp])
+            try:
+                tmp = pd.read_csv(f'{lau}_geom.csv')
+                tmp = pd.merge(tmp,pd.read_csv(f'{lau}_attrib.csv',),on='id')
+                df_nuts3 = pd.concat([df_nuts3,tmp])
+            except:
+                print(f'{lau} missing')
+                list_missing_laus.append(lau)
 
-        df_nuts3 = gpd.GeoDataFrame(df_nuts3,
+        df_nuts3 = gpd.GeoDataFrame(df_nuts3, 
                             geometry=df_nuts3['geometry'].apply(loads),
                             crs=3035)
         nuts_folder_path = os.path.split(paths_per_nuts3[n][0])[0]
@@ -60,6 +66,7 @@ def merge_per_nuts(country,path_root_folder):
         shutil.rmtree(nuts_folder_path)
     print('================')
     print('All files merged')
+    print(list_missing_laus)
 
 
 def city_paths_from_lau(path_db_folder,country,LAU_NUTS_extra):
