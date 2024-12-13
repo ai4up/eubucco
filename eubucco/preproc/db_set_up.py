@@ -81,15 +81,14 @@ def create_dirs(path_db_folder,country,path_lau_extra):
             for lau_path in dir_paths:
                 Path(os.path.split(lau_path)[0]).mkdir(parents=True, exist_ok=True)
             city_paths_to_txt(dir_paths,country,path_db_folder)
-        
 
-def load_lau(path_lau, path_lau_extra,path_inputs_parsing):
-    # loading data
-    inputs_parsing = pd.read_csv(path_inputs_parsing)
+
+def load_lau(path_lau, path_lau_extra):
     lau_nuts = gpd.read_file(path_lau)
     lau_extra = pd.read_csv(path_lau_extra)
-    lau_nuts = pd.merge(lau_nuts,lau_extra,on='LAU_ID')
-    return(lau_nuts,inputs_parsing)
+    lau_nuts = pd.merge(lau_nuts, lau_extra, on='LAU_ID')
+    return lau_nuts
+
 
 def mask_lau(lau_nuts,inputs_parsing, dataset_name, country):
     """
@@ -559,9 +558,10 @@ def db_set_up(country,
     city_paths_dataset = ufo_helpers.get_all_paths(country, path_root_folder=path_db_folder)
 
     # only take lau bounds and cities from dataset_name
-    lau_nuts,inputs_parsing = load_lau(path_lau, path_lau_extra,path_inputs_parsing)
-    lau = mask_lau(lau_nuts,inputs_parsing, dataset_name, country)   
- 
+    lau_nuts = load_lau(path_lau, path_lau_extra)
+    inputs_parsing = pd.read_csv(path_inputs_parsing)
+    lau = mask_lau(lau_nuts, inputs_parsing, dataset_name, country)
+
     n_bldg_start_sum = 0
     n_bldg_end_sum = 0
     list_saved_LAUs_sum = []
