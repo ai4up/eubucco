@@ -39,7 +39,7 @@ def merge_per_nuts(country,path_root_folder):
     city_paths_dataset = ufo_helpers.get_all_paths(country, path_root_folder=path_root_folder)
 
     nuts3 = set([x.split('/')[-2] for x in city_paths_dataset])
-    paths_per_nuts3 = {n:[lau for lau in city_paths_dataset if n in lau]
+    paths_per_nuts3 = {n:[lau for lau in city_paths_dataset if f'/{n}/' in lau]
                     for n in nuts3}
 
     list_missing_laus = []
