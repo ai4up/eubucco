@@ -1,4 +1,4 @@
-"country","dataset_name","extension","path_input_folder","local_crs","id","height","type_source","age","floors","footprint","type_map","bldg_elem","extra","extra_attrib","gadm_level","gadm_name"
+"country","dataset_name","extension","path_input_folder","local_crs","id","height","type_source","age","floors","footprint","type_map","bldg_elem","extra","extra_attrib","nuts_level","nuts_name"
 "austria","Austria-msft","csv.gz","/p/projects/eubucco/data/0-raw-data/microsoft-242/Austria","EPSG:4326","None","height","None","None","None","None","None","None","None","['confidence']","all","all"
 "belgium","Belgium-msft","csv.gz","/p/projects/eubucco/data/0-raw-data/microsoft-242/Belgium","EPSG:4326","None","height","None","None","None","None","None","None","None","['confidence']","all","all"
 "bulgaria","Bulgaria-msft","csv.gz","/p/projects/eubucco/data/0-raw-data/microsoft-242/Bulgaria","EPSG:4326","None","height","None","None","None","None","None","None","None","['confidence']","all","all"
