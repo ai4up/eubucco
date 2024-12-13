@@ -39,20 +39,20 @@ def merge_per_nuts(country,path_root_folder):
     city_paths_dataset = ufo_helpers.get_all_paths(country, path_root_folder=path_root_folder)
 
     nuts3 = set([x.split('/')[-2] for x in city_paths_dataset])
-    paths_per_nuts3 = {n:[lau for lau in city_paths_dataset if n in lau] 
+    paths_per_nuts3 = {n:[lau for lau in city_paths_dataset if n in lau]
                     for n in nuts3}
 
     for n in nuts3:
 
         df_nuts3 = pd.DataFrame()
         print(n)
-        
+
         for lau in paths_per_nuts3[n]:
             tmp = pd.read_csv(f'{lau}_geom.csv')
             tmp = pd.merge(tmp,pd.read_csv(f'{lau}_attrib.csv',),on='id')
             df_nuts3 = pd.concat([df_nuts3,tmp])
-        
-        df_nuts3 = gpd.GeoDataFrame(df_nuts3, 
+
+        df_nuts3 = gpd.GeoDataFrame(df_nuts3,
                             geometry=df_nuts3['geometry'].apply(loads),
                             crs=3035)
         nuts_folder_path = os.path.split(paths_per_nuts3[n][0])[0]
@@ -64,7 +64,7 @@ def merge_per_nuts(country,path_root_folder):
 
 def city_paths_from_lau(path_db_folder,country,LAU_NUTS_extra):
         LAU_NUTS_extra = LAU_NUTS_extra[LAU_NUTS_extra.country == country]
-        return [os.path.join(path_db_folder, country, nuts3, city) 
+        return [os.path.join(path_db_folder, country, nuts3, city)
                 for nuts3, city in zip(
                                        LAU_NUTS_extra.NUTS_ID_3,
                                        LAU_NUTS_extra.LAU_ID)]
@@ -104,32 +104,32 @@ def mask_lau(lau_nuts,inputs_parsing, dataset_name, country):
     if nuts_level == 'all':
         nuts_file_temp = lau_nuts[lau_nuts.country==country]
 
-    # if region level, 
+    # if region level,
     elif nuts_level in ['nuts2','nuts1']:
         if is_has_lau_nuts3 == 'no':
-            
+
             if dataset_name not in ('spain-osm','trentino-alto-adige-gov'):
                 # we mask the whole region (two regions taken from osm)
                 nuts_file_temp = lau_nuts[lau_nuts.NUTS_ID_region == nuts_name]
             else:
                 nuts_file_temp = lau_nuts[lau_nuts.NUTS_ID_region.isin(ast.literal_eval(nuts_name))]
 
-        else: raise ValueError("is_has_lau_nuts3 inconsistent")    
+        else: raise ValueError("is_has_lau_nuts3 inconsistent")
 
     elif nuts_level == 'rest':
 
         # remove regions
-        remove = inputs_parsing[(inputs_parsing.country == country) & 
+        remove = inputs_parsing[(inputs_parsing.country == country) &
                      (inputs_parsing.nuts_level.isin(['nuts2','nuts1']))]['nuts_name'].values
-        
-        
+
+
         # handle cases with multiple regions in a nuts_name
         processed_remove = []
         for item in remove:
             if '[' in item: processed_remove.extend(ast.literal_eval(item))
             else: processed_remove.append(item)
-                
-        nuts_file_temp = lau_nuts[(lau_nuts.country == country) & 
+
+        nuts_file_temp = lau_nuts[(lau_nuts.country == country) &
                                     ~(lau_nuts.NUTS_ID_region.isin(processed_remove))]
 
         if is_has_lau_nuts3 == 'has_lau':
@@ -150,8 +150,8 @@ def mask_lau(lau_nuts,inputs_parsing, dataset_name, country):
     elif nuts_level == 'nuts3':
         # mask just the nuts3
         nuts_file_temp = lau_nuts[(lau_nuts.NUTS_ID == nuts_name)]
-        
-    elif nuts_level == 'lau': 
+
+    elif nuts_level == 'lau':
         # mask just the nuts3
         nuts_file_temp = lau_nuts[(lau_nuts.LAU_ID == nuts_name)]
 
@@ -162,19 +162,19 @@ def mask_lau(lau_nuts,inputs_parsing, dataset_name, country):
 
 def test_lau_mask(inputs_parsing,lau_nuts):
     """
-       Ensures that all masks strictly reproduce 
+       Ensures that all masks strictly reproduce
        all LAUs and otherwise returns missing or duplicated LAUs
-    """ 
-    
+    """
+
     inputs_parsing = inputs_parsing.loc[0:62] #hardcoded
 
     test_results = pd.DataFrame()
 
     for _,row in inputs_parsing.iterrows():
         # print(row.dataset_name)
-        lau = db_set_up.mask_lau(lau_nuts,inputs_parsing, row.dataset_name, row.country) 
+        lau = db_set_up.mask_lau(lau_nuts,inputs_parsing, row.dataset_name, row.country)
         test_results = pd.concat([test_results,lau])
-    
+
     print(f'Similar lengths: {len(test_results) == len(lau_nuts)}')
     print('----------------')
     print(f'length test_results: {len(test_results)}')
@@ -186,7 +186,7 @@ def test_lau_mask(inputs_parsing,lau_nuts):
 
     print(f'length duplicates: {len(duplicates)}')
     print(f'length missing rows: {len(missing_rows)}')
-    
+
     return duplicates,missing_rows
 
 
@@ -276,10 +276,10 @@ def get_attribs(path_int_fol, country_name, dataset_name):
 
 def city_paths_to_txt(city_paths,country,path_db_folder):
     # city_names = [el.rsplit('/')[-1] for el in city_paths]
-    # city_paths_full = [os.path.join(path, city) for path, city in zip(city_paths, city_names)]   
-    
+    # city_paths_full = [os.path.join(path, city) for path, city in zip(city_paths, city_names)]
+
     path_file = os.path.join(path_db_folder, country, f"paths_{country}.txt")
-    if os.path.isfile(path_file): 
+    if os.path.isfile(path_file):
         add_paths_to_file(city_paths,path_file,country,path_db_folder)
     else:
         write_to_file(path_file,city_paths,'w')
@@ -333,7 +333,7 @@ def create_city_bldg_geom_files(gdf_bldg,
     # alocate bldgs on boundaries based on max intersecting area
     # append to gdf_bldg
     gdf_bldg['LAU_ID'] = get_city_per_bldg(gdf_bldg, lau)
-    
+
     print('Num bldgs after sjoin: {}'.format(len(gdf_bldg)))
 
     list_LAU_IDs = [os.path.split(city_path)[-1] for city_path in list_city_paths]
@@ -596,7 +596,7 @@ def db_set_up(country,
                                             list_saved_LAUs,
                                             list_saved_paths,
                                             idx)
-        
+
         n_bldg_start_sum += n_bldg_start
         n_bldg_end_sum += n_bldg_end
 
