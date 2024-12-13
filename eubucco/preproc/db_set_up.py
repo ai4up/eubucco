@@ -83,13 +83,6 @@ def create_dirs(path_db_folder,country,path_lau_extra):
             city_paths_to_txt(dir_paths,country,path_db_folder)
 
 
-def load_lau(path_lau, path_lau_extra):
-    lau_nuts = gpd.read_file(path_lau)
-    lau_extra = pd.read_csv(path_lau_extra)
-    lau_nuts = pd.merge(lau_nuts, lau_extra, on='LAU_ID')
-    return lau_nuts
-
-
 def mask_lau(lau_nuts,inputs_parsing, dataset_name, country):
     """
     # mask the NUTS that correspond to a dataset.
@@ -558,7 +551,7 @@ def db_set_up(country,
     city_paths_dataset = ufo_helpers.get_all_paths(country, path_root_folder=path_db_folder)
 
     # only take lau bounds and cities from dataset_name
-    lau_nuts = load_lau(path_lau, path_lau_extra)
+    lau_nuts = ufo_helpers.load_lau(path_lau, path_lau_extra)
     inputs_parsing = pd.read_csv(path_inputs_parsing)
     lau = mask_lau(lau_nuts, inputs_parsing, dataset_name, country)
 
