@@ -3,41 +3,18 @@ from pyrosm.data import sources
 import os
 
 
-#EU_27 = ['austria','bulgaria','croatia','germany','greece','hungary','ireland_and_northern_ireland','italy','latvia','portugal','romania','sweden']
+EU_27 = ['austria','belgium', 'bulgaria', 'croatia', 'cyprus', 'czech_republic', 'denmark', 'estonia',
+        'finland', 'france', 'germany', 'greece', 'hungary', 'ireland_and_northern_ireland', 'italy',
+        'latvia', 'lithuania', 'luxembourg', 'malta',  'netherlands', 'poland', 'portugal', 'romania',
+        'slovakia', 'slovenia', 'spain', 'sweden']
 
-# 'belgium', 'bulgaria', 'croatia', 'cyprus', 'czech_republic', 'denmark', 'estonia',
-#         'finland', 'france', 'germany', 'greece', 'hungary', 'ireland_and_northern_ireland', 'italy',
-#         'latvia', 'lithuania', 'luxembourg', 'malta',  'netherlands', 'poland', 'portugal', 'romania',
-#         'slovakia', 'slovenia', 'spain', 'sweden']
-
-
-# EU_27 = [
-#     'cyprus',
-#     'czech_republic',
-#     'denmark',
-#     'estonia',
-#     'finland',
-#     'france',
-#     'lithuania',
-#     'luxembourg',
-#     'malta',
-#     'netherlands',
-#     'poland',
-#     'slovakia',
-#     'slovenia',
-#     'spain',
-#     'switzerland']
-
-
-# countries_to_import = ['austria','bulgaria','croatia','germany','greece','hungary',
-#                        'ireland_and_northern_ireland','italy','latvia','romania','sweden']
-
-countries_to_import = ['norway','united-kingdom']
-
-# countries_to_import =  #EU_27  # + ['switzerland']
-
+countries_to_import =  EU_27  + ['switzerland','norway']
 
 countries_w_sub_regions = ['france', 'germany', 'italy', 'netherlands', 'poland']
+
+# uk - great_britain (with or without subregions didnt work)
+# ran the command below directly in ~/uk folder via terminal
+# wget https://download.geofabrik.de/europe/united-kingdom-latest.osm.pbf
 
 dict_regions = {}
 
@@ -46,7 +23,6 @@ dict_regions['germany'] = sources.subregions.germany.available
 dict_regions['italy'] = sources.subregions.italy.available
 dict_regions['netherlands'] = sources.subregions.netherlands.available
 dict_regions['poland'] = sources.subregions.poland.available
-
 
 path_output = "/p/projects/eubucco/data/0-raw-data/osm-pbf-24"
 
@@ -69,3 +45,4 @@ for country in countries_to_import:
     else:
 
         get_data(country, directory=os.path.join(path_output, country), update=True)
+
