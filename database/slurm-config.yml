@@ -88,8 +88,7 @@ jobs:
 
   # - name: download-streets
   #   script: /p/projects/eubucco/git-eubucco/database/preprocessing/6-streets/downloading-streets.py
-  #   param_files:
-  #     - /p/projects/eubucco/git-eubucco/database/preprocessing/6-streets/params.yml
+  #   param_generator_file: /p/projects/eubucco/git-eubucco/database/preprocessing/6-streets/params.yml
   #   log_dir: /p/projects/eubucco/logs/v0_1-db/download-streets
   #   resources:
   #     cpus: 1

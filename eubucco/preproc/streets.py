@@ -3,6 +3,7 @@ import time
 
 import osmnx as ox
 import momepy
+import geopandas as gpd
 from networkx.exception import NetworkXPointlessConcept
 
 import ufo_map.Preprocessing.preproc_streets as ufo_streets
@@ -12,13 +13,13 @@ CRS_UNI = 'EPSG:3035'
 
 
 def download_osm_streets_country(country,
-                         data_dir='/p/projects/eubucco/data/2-database-city-level-v0_1',
-                         path_stats='/p/projects/eubucco/stats/6-streets'):
+                         data_dir='/p/projects/eubucco/data/2-database-nuts-level-v1-osm',
+                         path_stats='/p/projects/eubucco/stats/6-streets',
+                         path_lau = '/p/projects/eubucco/data/0-raw-data/lau/lau_nuts.gpkg',
+                         path_lau_extra = '/p/projects/eubucco/data/0-raw-data/lau/lau_nuts_extra.csv'):
     '''
-        Downloads OpenStreetMap street network for a country at a city-level and saves a city-level
-        <city>_streets.csv file in the relevant city-level folder with OSM edges encoded as WKT strings.
-
-        Requires an appropriate gadm_table.csv file and folder structure + boundary files previously created in db set-up.
+        Downloads OpenStreetMap street network for a country at the NUTS-level and saves it as
+        <nuts-id>_streets.gpkg file.
 
         Returns: None
     '''
@@ -26,9 +27,13 @@ def download_osm_streets_country(country,
     success = []
     start = time.time()
 
-    paths = ufo_helpers.get_all_paths(country, path_root_folder=data_dir)
-    for city_path in paths:
-        success.append(download_osm_streets(city_path))
+    nuts = ufo_helpers.load_nuts(path_lau, path_lau_extra)
+    nuts = nuts[nuts['country'] == country]
+    nuts_w_buffer = nuts.to_crs(CRS_UNI).buffer(2000).to_crs(4326)
+
+    for nuts_id, area in nuts_w_buffer.geometry.iteritems():
+        path_out = os.path.join(data_dir, country, f'{nuts_id}_streets_raw.gpkg')
+        success.append(download_osm_streets(area, path_out))
 
     duration = time.time() - start
     stats = {'country': country, 'n_cities_wo_streets': success.count(False)}
@@ -36,38 +41,31 @@ def download_osm_streets_country(country,
     ufo_helpers.write_stats(stats, duration, path_stats, filename)
 
 
-def download_osm_streets(city_path):
-        path_in = f'{city_path}_boundary.csv'
-        path_out = f'{city_path}_streets_raw.csv'
-        print(path_out)
+def download_osm_streets(area, path_out):
+    if os.path.isfile(path_out):
+        print(f'OSM street network for city has already been downloaded: {path_out}')
+        return True
 
-        if os.path.isfile(path_out):
-            print(f'OSM street network for city has already been downloaded: {path_out}')
-            return True
+    try:
+        city_network = ox.graph_from_polygon(area,
+                                                simplify=True,
+                                                network_type='drive')
 
-        boundary = ufo_helpers.import_csv_w_wkt_to_gdf(
-            path_in, CRS_UNI, geometry_col='boundary_GADM_2k_buffer').to_crs(4326).geometry.iloc[0]
+        city_streets = ox.utils_graph.graph_to_gdfs(city_network,
+                                                    nodes=False,
+                                                    edges=True,
+                                                    node_geometry=False,
+                                                    fill_edge_geometry=True).to_crs(CRS_UNI)[['osmid',
+                                                                                                'highway',
+                                                                                                'length',
+                                                                                                'geometry']]
 
-        try:
-            city_network = ox.graph_from_polygon(boundary,
-                                                 simplify=True,
-                                                 network_type='drive')
+        city_streets.to_file(path_out, driver='GPKG')
+        return True
 
-            city_streets = ox.utils_graph.graph_to_gdfs(city_network,
-                                                        nodes=False,
-                                                        edges=True,
-                                                        node_geometry=False,
-                                                        fill_edge_geometry=True).to_crs(CRS_UNI)[['osmid',
-                                                                                                  'highway',
-                                                                                                  'length',
-                                                                                                  'geometry']]
-
-            ufo_helpers.save_csv_wkt(city_streets, path_out)
-            return True
-
-        except NetworkXPointlessConcept:
-            print(f'NetworkXPointlessConcept exception: Presumably no street network for city {path_in}')
-            return False
+    except NetworkXPointlessConcept:
+        print(f'NetworkXPointlessConcept exception: Presumably no street network for {path_out}')
+        return False
 
 
 def create_streets_and_intersections(streets, buildings, path_int):
@@ -138,7 +136,7 @@ def parse_streets(city_path,
     start = time.time()
 
     paths = {}
-    for file in ['streets_raw', 'geom', 'streets', 'intersections', 'sbb']:
+    for file in ['geom', 'streets', 'intersections', 'sbb']:
         paths[file] = f'{city_path}_{file}.csv'
 
     if os.path.isfile(paths['streets']):
@@ -146,7 +144,7 @@ def parse_streets(city_path,
         return
 
     try:
-        streets = ufo_helpers.import_csv_w_wkt_to_gdf(paths['streets_raw'], CRS_UNI)
+        streets = gpd.read_file(f'{city_path}_streets_raw.gpkg')
         buildings = ufo_helpers.import_csv_w_wkt_to_gdf(paths['geom'], CRS_UNI)
 
         streets, n_streets, n_int = create_streets_and_intersections(
