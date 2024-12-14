@@ -104,6 +104,12 @@ def mask_lau(lau_nuts,inputs_parsing, dataset_name, country):
     if nuts_level == 'all':
         nuts_file_temp = lau_nuts[lau_nuts.country==country]
 
+        # hardcoded UK / northern ireland weird distribution in Geofabrik
+        if dataset_name == 'northern-ireland-osm':
+            nuts_file_temp = lau_nuts[lau_nuts.NUTS_ID_region == 'UKN']
+        if dataset_name == 'uk-osm':
+            nuts_file_temp = lau_nuts[lau_nuts.NUTS_ID_region != 'UKN']
+
     # if region level,
     elif nuts_level in ['nuts2','nuts1']:
         if is_has_lau_nuts3 == 'no':
