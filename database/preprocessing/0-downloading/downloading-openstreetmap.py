@@ -19,7 +19,8 @@ countries_w_sub_regions = ['france', 'germany', 'italy', 'netherlands', 'poland'
 dict_regions = {}
 
 dict_regions['france'] = sources.subregions.france.available
-dict_regions['germany'] = sources.subregions.germany.available
+dict_regions['germany'] = sources.subregions.germany.available # note: remove regbez
+dict_regions['germany'] = [reg for reg in dict_regions['germany'] if 'regbez' not in reg] # <- not tested
 dict_regions['italy'] = sources.subregions.italy.available
 dict_regions['netherlands'] = sources.subregions.netherlands.available
 dict_regions['poland'] = sources.subregions.poland.available
