@@ -94,74 +94,73 @@ def mask_lau(lau_nuts,inputs_parsing, dataset_name, country):
     """
     # mask the NUTS that correspond to a dataset.
     """
+    # hardcoded UK / northern ireland weird distribution in Geofabrik
+    if dataset_name == 'northern-ireland-osm':
+        nuts_file_temp = lau_nuts[lau_nuts.NUTS_ID_region == 'UKN']
+    else:
+        # get lau_level and lau_name
+        nuts_level = inputs_parsing.loc[inputs_parsing.dataset_name == dataset_name].nuts_level.values[0]
+        nuts_name = inputs_parsing.loc[inputs_parsing.dataset_name == dataset_name].nuts_name.values[0]
+        is_has_lau_nuts3 = inputs_parsing.loc[inputs_parsing.dataset_name == dataset_name].is_has_lau_nuts3.values[0]
 
-    # get lau_level and lau_name
-    nuts_level = inputs_parsing.loc[inputs_parsing.dataset_name == dataset_name].nuts_level.values[0]
-    nuts_name = inputs_parsing.loc[inputs_parsing.dataset_name == dataset_name].nuts_name.values[0]
-    is_has_lau_nuts3 = inputs_parsing.loc[inputs_parsing.dataset_name == dataset_name].is_has_lau_nuts3.values[0]
+        # check if gadm_level is 'all'; then no value is given and we mask all
+        if nuts_level == 'all':
+            nuts_file_temp = lau_nuts[lau_nuts.country==country]
+            # hardcoded UK / northern ireland weird distribution in Geofabrik
+            if dataset_name == 'uk-osm':
+                nuts_file_temp = lau_nuts[lau_nuts.NUTS_ID_region != 'UKN']
 
-    # check if gadm_level is 'all'; then no value is given and we mask all
-    if nuts_level == 'all':
-        nuts_file_temp = lau_nuts[lau_nuts.country==country]
+        # if region level,
+        elif nuts_level in ['nuts2','nuts1']:
+            if is_has_lau_nuts3 == 'no':
 
-        # hardcoded UK / northern ireland weird distribution in Geofabrik
-        if dataset_name == 'northern-ireland-osm':
-            nuts_file_temp = lau_nuts[lau_nuts.NUTS_ID_region == 'UKN']
-        if dataset_name == 'uk-osm':
-            nuts_file_temp = lau_nuts[lau_nuts.NUTS_ID_region != 'UKN']
+                if dataset_name not in ('spain-osm','trentino-alto-adige-gov'):
+                    # we mask the whole region (two regions taken from osm)
+                    nuts_file_temp = lau_nuts[lau_nuts.NUTS_ID_region == nuts_name]
+                else:
+                    nuts_file_temp = lau_nuts[lau_nuts.NUTS_ID_region.isin(ast.literal_eval(nuts_name))]
 
-    # if region level,
-    elif nuts_level in ['nuts2','nuts1']:
-        if is_has_lau_nuts3 == 'no':
+            else: raise ValueError("is_has_lau_nuts3 inconsistent")
 
-            if dataset_name not in ('spain-osm','trentino-alto-adige-gov'):
-                # we mask the whole region (two regions taken from osm)
-                nuts_file_temp = lau_nuts[lau_nuts.NUTS_ID_region == nuts_name]
-            else:
-                nuts_file_temp = lau_nuts[lau_nuts.NUTS_ID_region.isin(ast.literal_eval(nuts_name))]
+        elif nuts_level == 'rest':
 
-        else: raise ValueError("is_has_lau_nuts3 inconsistent")
-
-    elif nuts_level == 'rest':
-
-        # remove regions
-        remove = inputs_parsing[(inputs_parsing.country == country) &
-                     (inputs_parsing.nuts_level.isin(['nuts2','nuts1']))]['nuts_name'].values
-
-
-        # handle cases with multiple regions in a nuts_name
-        processed_remove = []
-        for item in remove:
-            if '[' in item: processed_remove.extend(ast.literal_eval(item))
-            else: processed_remove.append(item)
-
-        nuts_file_temp = lau_nuts[(lau_nuts.country == country) &
-                                    ~(lau_nuts.NUTS_ID_region.isin(processed_remove))]
-
-        if is_has_lau_nuts3 == 'has_lau':
-            # additionally remove this lau
+            # remove regions
             remove = inputs_parsing[(inputs_parsing.country == country) &
-                            (inputs_parsing.nuts_level == 'lau')]['nuts_name'].values
-
-            nuts_file_temp = nuts_file_temp[~(nuts_file_temp.LAU_ID.isin(remove))]
-
-        if is_has_lau_nuts3 == 'has_nuts3':
-            # additionally remove a nuts
-            remove = inputs_parsing[(inputs_parsing.country == country) &
-                            (inputs_parsing.nuts_level == 'nuts3')]['nuts_name'].values
-
-            nuts_file_temp = nuts_file_temp[~(nuts_file_temp.NUTS_ID.isin(remove))]
+                         (inputs_parsing.nuts_level.isin(['nuts2','nuts1']))]['nuts_name'].values
 
 
-    elif nuts_level == 'nuts3':
-        # mask just the nuts3
-        nuts_file_temp = lau_nuts[(lau_nuts.NUTS_ID == nuts_name)]
+            # handle cases with multiple regions in a nuts_name
+            processed_remove = []
+            for item in remove:
+                if '[' in item: processed_remove.extend(ast.literal_eval(item))
+                else: processed_remove.append(item)
 
-    elif nuts_level == 'lau':
-        # mask just the nuts3
-        nuts_file_temp = lau_nuts[(lau_nuts.LAU_ID == nuts_name)]
+            nuts_file_temp = lau_nuts[(lau_nuts.country == country) &
+                                        ~(lau_nuts.NUTS_ID_region.isin(processed_remove))]
 
-    else: raise ValueError("nuts_level value is incorrect.")
+            if is_has_lau_nuts3 == 'has_lau':
+                # additionally remove this lau
+                remove = inputs_parsing[(inputs_parsing.country == country) &
+                                (inputs_parsing.nuts_level == 'lau')]['nuts_name'].values
+
+                nuts_file_temp = nuts_file_temp[~(nuts_file_temp.LAU_ID.isin(remove))]
+
+            if is_has_lau_nuts3 == 'has_nuts3':
+                # additionally remove a nuts
+                remove = inputs_parsing[(inputs_parsing.country == country) &
+                                (inputs_parsing.nuts_level == 'nuts3')]['nuts_name'].values
+
+                nuts_file_temp = nuts_file_temp[~(nuts_file_temp.NUTS_ID.isin(remove))]
+
+        elif nuts_level == 'nuts3':
+            # mask just the nuts3
+            nuts_file_temp = lau_nuts[(lau_nuts.NUTS_ID == nuts_name)]
+
+        elif nuts_level == 'lau':
+            # mask just the nuts3
+            nuts_file_temp = lau_nuts[(lau_nuts.LAU_ID == nuts_name)]
+
+        else: raise ValueError("nuts_level value is incorrect.")
 
     return nuts_file_temp
 
@@ -241,6 +240,10 @@ def get_attribs(path_int_fol, country_name, dataset_name):
     """
     path_attrib = os.path.join(path_int_fol, country_name, dataset_name + '_attrib.csv')
     path_x_attrib = os.path.join(path_int_fol, country_name, dataset_name + '_extra_attrib.csv')
+
+    if dataset_name == 'northern-ireland-osm':
+        path_attrib = os.path.join(path_int_fol, 'ireland', 'ireland-osm_attrib.csv') 
+        path_x_attrib = os.path.join(path_int_fol,'ireland-osm_extra_attrib.csv')
 
     # read in attrib file
     bldg_attrib = pd.read_csv(path_attrib)
@@ -536,7 +539,7 @@ def db_set_up(country,
             chunksize=int(5E5),
             path_stats='/p/projects/eubucco/stats/2-db-set-up',
             path_inputs_parsing='/p/projects/eubucco/git-eubucco/database/preprocessing/1-parsing/inputs-parsing.csv',
-            path_int_fol='/p/projects/eubucco/data/1-intermediary-outputs',
+            path_int_fol='/p/projects/eubucco/data/1-intermediary-outputs-v0_1',
             path_lau = '/p/projects/eubucco/data/0-raw-data/lau/lau_nuts.gpkg',
             path_lau_extra = '/p/projects/eubucco/data/0-raw-data/lau/lau_nuts_extra.csv'
             ):
@@ -574,7 +577,11 @@ def db_set_up(country,
     list_saved_paths_sum = []
 
     # reading in gov geoms as chunks
-    geom_filename = os.path.join(path_int_fol, country, dataset_name + '-3035_geoms.csv')
+    if dataset_name == 'northern-ireland-osm':
+        geom_filename = os.path.join(path_int_fol, 'ireland', 'ireland-osm-3035_geoms.csv')
+    else:    
+        geom_filename = os.path.join(path_int_fol, country, dataset_name + '-3035_geoms.csv')
+    
     chunks = pd.read_csv(geom_filename, chunksize=chunksize)
 
     # reading in attribs and x-attribs files; checking for duplicates
