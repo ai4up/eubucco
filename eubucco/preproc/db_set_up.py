@@ -71,7 +71,7 @@ def merge_per_nuts(country,path_root_folder):
             list_missing_nuts.append(n)
             print(f'WARNING: NUTS {n} missing')        
 
-        shutil.rmtree(nuts_folder_path)
+        if os.path.exists(nuts_folder_path): shutil.rmtree(nuts_folder_path)
 
     print('================')
     print('All files merged')
