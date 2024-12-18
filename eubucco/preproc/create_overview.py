@@ -622,16 +622,25 @@ def create_overview_laus(country,
 
     for path in nuts3_path:
 
-        df = gpd.read_file(f'{path}.gpkg')
-        df['area'] = round(df.geometry.area,0)
-        df = df.groupby('LAU_ID')['area'].sum().reset_index()
-        df.insert(0,'NUTS3_ID', path.split('/')[-1])
-        df_stats = pd.concat([df_stats,df])
+        try:
+            df = gpd.read_file(f'{path}.gpkg')
+            df['area'] = round(df.geometry.area,0)
+            df = df.groupby('LAU_ID')['area'].sum().reset_index()
+            df.insert(0,'NUTS3_ID', path.split('/')[-1])
+            df_stats = pd.concat([df_stats,df])
+        except:
+            print(f'{path} missing.')
 
     df_all = pd.DataFrame([path.split('/')[-2:] for path in paths], columns=["NUTS3_ID", "LAU_ID"])
-    missing = df_all[~df_all.LAU_ID.isin(df_stats.LAU_ID)]
-    missing.insert(2,'area',0)
 
-    df_stats = pd.concat([df_stats,missing])
+    if df.empty:
+        df_stats = df_all
+        df_stats.insert(2,'area',0)
+
+    else:
+        missing = df_all[~df_all.LAU_ID.isin(df_stats.LAU_ID)]
+        missing.insert(2,'area',0)
+        df_stats = pd.concat([df_stats,missing])
+
     df_stats.to_csv(os.path.join(path_out,f'{source}_{country}_overview.csv'),index=False)
     print('Done!')
