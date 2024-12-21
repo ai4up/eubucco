@@ -633,7 +633,7 @@ def create_overview_laus(country,
 
     df_all = pd.DataFrame([path.split('/')[-2:] for path in paths], columns=["NUTS3_ID", "LAU_ID"])
 
-    if df.empty:
+    if df_stats.empty:
         df_stats = df_all
         df_stats.insert(2,'area',0)
 
