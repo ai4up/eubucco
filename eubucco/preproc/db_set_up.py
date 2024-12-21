@@ -634,7 +634,11 @@ def db_set_up(country,
     # only take lau bounds and cities from dataset_name
     lau_nuts = ufo_helpers.load_lau(path_lau, path_lau_extra)
     inputs_parsing = pd.read_csv(path_inputs_parsing)
-    lau = mask_lau(lau_nuts, inputs_parsing, dataset_name, country)
+    if 'france-gov' in dataset_name: 
+        lau = mask_lau(lau_nuts, inputs_parsing, 'france-gov', country)
+    else:
+        lau = mask_lau(lau_nuts, inputs_parsing, dataset_name, country)
+
 
     n_bldg_start_sum = 0
     n_bldg_end_sum = 0
@@ -704,5 +708,7 @@ def db_set_up(country,
     print('################')
 
     # merge chunks for processed cities where we saved bldgs
-    print('merging all paths')
-    merge(list_saved_paths_sum, None, path_db_folder)
+    # no merge for France-gov as chunks are processed by indep. workers for potentially same cities
+    if 'france-gov' not in dataset_name: 
+        print('merging all paths')
+        merge(list_saved_paths_sum, None, path_db_folder)
