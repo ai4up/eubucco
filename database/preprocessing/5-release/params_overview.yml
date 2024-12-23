@@ -6,14 +6,6 @@
   path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1-gov
   source: gov
  
-- country: bulgaria
-  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1-gov
-  source: gov
- 
-- country: croatia
-  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1-gov
-  source: gov
- 
 - country: cyprus
   path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1-gov
   source: gov
@@ -41,25 +33,8 @@
 - country: germany
   path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1-gov
   source: gov
- 
 
-- country: greece
-  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1-gov
-  source: gov
- 
-- country: hungary
-  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1-gov
-  source: gov
- 
-- country: ireland
-  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1-gov
-  source: gov
- 
 - country: italy
-  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1-gov
-  source: gov
- 
-- country: latvia
   path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1-gov
   source: gov
  
@@ -83,14 +58,6 @@
   path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1-gov
   source: gov
  
-- country: portugal
-  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1-gov
-  source: gov
- 
-- country: romania
-  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1-gov
-  source: gov
- 
 - country: slovakia
   path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1-gov
   source: gov
@@ -103,22 +70,10 @@
   path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1-gov
   source: gov
  
-- country: sweden
-  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1-gov
-  source: gov
- 
 - country: switzerland
   path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1-gov
   source: gov
  
-- country: norway
-  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1-gov
-  source: gov
-
-- country: uk
-  path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1-gov
-  source: gov
-
 - country: austria
   path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1-osm
   source: osm
@@ -163,7 +118,6 @@
   path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1-osm
   source: osm
  
-
 - country: greece
   path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1-osm
   source: osm
@@ -239,7 +193,6 @@
 - country: uk
   path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1-osm
   source: osm
-
 
 - country: austria
   path_db_folder: /p/projects/eubucco/data/2-database-nuts-level-v1-msft
