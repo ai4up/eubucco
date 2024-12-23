@@ -621,16 +621,16 @@ def create_overview_laus(country,
     df_stats = pd.DataFrame()
 
     for path in nuts3_path:
-
-        # try:
+        
+        try:
             df = gpd.read_file(f'{path}.gpkg')
             df['area'] = round(df.geometry.area,0)
             df = df.groupby('LAU_ID').agg(area=('area', 'sum'),     
                                                   n_bldgs=('area', 'count')).reset_index()   
             df.insert(0,'NUTS3_ID', path.split('/')[-1])
             df_stats = pd.concat([df_stats,df])
-        # except:
-        #     print(f'{path} missing.')
+        except:
+            print(f'{path} missing.')
 
     df_all = pd.DataFrame([path.split('/')[-2:] for path in paths], columns=["NUTS3_ID", "LAU_ID"])
 
