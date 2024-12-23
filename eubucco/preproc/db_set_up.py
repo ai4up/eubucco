@@ -34,6 +34,49 @@ def check_edge_cases(gadm_name):
     return gadm_name
 """
 
+# create new folder structure
+def create_buffer(country,
+                  path_db_set_up,
+                  path_out_buffer
+                  ):
+    
+    # TODO: deal with cases where country is incomplete
+
+    Path(os.path.join(path_out_buffer,country)).mkdir(parents=True, exist_ok=True)
+
+    # glob NUTS
+    path_nuts = glob.glob(os.path.join(path_db_set_up,country,'*.gpkg'))
+    print(path_nuts)
+
+    # load NUTS thing
+    buffer_gdf = gpd.read_file('/p/projects/eubucco/data/0-raw-data/lau/buffer_nuts.gpkg')
+
+    # each NUTS:
+    for path in path_nuts:
+
+        out_buffer = gpd.GeoDataFrame()
+        nuts = os.path.split(path)[-1].split('.')[0]
+        print(nuts)
+
+        nuts_plus_buffer = buffer_gdf[buffer_gdf.NUTS_ID == nuts]
+        nuts_plus_buffer['geometry'] = nuts_plus_buffer['geometry'].buffer(500)
+
+        # load relevant nuts one by one, join, add to gdf
+        print(nuts_plus_buffer['list_buffer_nuts'])
+        touching_nuts = ast.literal_eval(nuts_plus_buffer['list_buffer_nuts'].iloc[0])
+        
+        for touching_nut in touching_nuts:
+            
+            gdf_touching = gpd.read_file(os.path.join(path_db_set_up,country,touching_nut+'.gpkg'))
+            gdf_touching = gpd.sjoin(gdf_touching,nuts_plus_buffer)
+            out_buffer = pd.concat([out_buffer,gdf_touching])
+        
+        out_buffer.to_file(os.path.join(path_out_buffer,country,nuts+'_buffer.gpkg'))
+
+    print('Done.')
+
+
+
 def merge_per_nuts(country,path_root_folder):
 
     city_paths_dataset = ufo_helpers.get_all_paths(country, path_root_folder=path_root_folder)
