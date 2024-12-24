@@ -64,14 +64,17 @@ def create_buffer(country,
         # load relevant nuts one by one, join, add to gdf
         print(nuts_plus_buffer['list_buffer_nuts'])
         touching_nuts = ast.literal_eval(nuts_plus_buffer['list_buffer_nuts'].iloc[0])
-        
-        for touching_nut in touching_nuts:
+
+        if touching_nuts != []:
+            for touching_nut in touching_nuts:
+                
+                gdf_touching = gpd.read_file(os.path.join(path_db_set_up,country,touching_nut+'.gpkg'))
+                gdf_touching = gpd.sjoin(gdf_touching,nuts_plus_buffer)
+                out_buffer = pd.concat([out_buffer,gdf_touching])
             
-            gdf_touching = gpd.read_file(os.path.join(path_db_set_up,country,touching_nut+'.gpkg'))
-            gdf_touching = gpd.sjoin(gdf_touching,nuts_plus_buffer)
-            out_buffer = pd.concat([out_buffer,gdf_touching])
-        
-        out_buffer.to_file(os.path.join(path_out_buffer,country,nuts+'_buffer.gpkg'))
+            out_buffer.to_file(os.path.join(path_out_buffer,country,nuts+'_buffer.gpkg'))
+        else:
+            print(f'No touching nuts for {nuts}')
 
     print('Done.')
 
