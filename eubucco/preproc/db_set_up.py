@@ -17,6 +17,30 @@ from utils.extra_cases import average_flanders_dupls
 # declare global var
 CRS_UNI = 'EPSG:3035'
 
+FRANCE_OSM_PARTS = ['alsace-latest.osm',
+'aquitaine-latest.osm',
+'auvergne-latest.osm',
+'basse-normandie-latest.osm',
+'bourgogne-latest.osm',
+'bretagne-latest.osm',
+'centre-latest.osm',
+'champagne-ardenne-latest.osm',
+'corse-latest.osm',
+'franche-comte-latest.osm',
+'haute-normandie-latest.osm',
+'picardie-latest.osm',
+'lorraine-latest.osm',
+'rhone-alpes-latest.osm',
+'provence-alpes-cote-d-azur-latest.osm',
+'ile-de-france-latest.osm',
+'languedoc-roussillon-latest.osm',
+'limousin-latest.osm',
+'midi-pyrenees-latest.osm',
+'nord-pas-de-calais-latest.osm',
+'pays-de-la-loire-latest.osm',
+'poitou-charentes-latest.osm']
+
+
 # LOW
 """
 def check_edge_cases(gadm_name):
@@ -149,7 +173,12 @@ def merge_per_nuts_fix_gov(country,path_root_folder):
 
             try:
                 paths_parts = glob.glob(lau+'*')
-                parts = list(set([path.split('_')[-1] for path in paths_parts]))
+
+                if country=='france' and 'gov' in path_root_folder:
+                    # take both parts
+                    parts = list(set(["_".join(path.split('_')[-2:]) for path in paths_parts]))
+                else:
+                    parts = list(set([path.split('_')[-1] for path in paths_parts]))
                 
                 for part in parts:
                     tmp = pd.read_csv(f'{lau}_geom_'+part)
@@ -170,7 +199,7 @@ def merge_per_nuts_fix_gov(country,path_root_folder):
             list_missing_nuts.append(n)
             print(f'WARNING: NUTS {n} missing')        
 
-        if os.path.exists(nuts_folder_path): shutil.rmtree(nuts_folder_path)
+        # if os.path.exists(nuts_folder_path): shutil.rmtree(nuts_folder_path)
 
     print('================')
     print('All files merged')
@@ -418,11 +447,11 @@ def write_to_file(path_file,city_paths,mode):
         for element in city_paths:
             f.write(element + "\n")
 
-
 def create_city_bldg_geom_files(gdf_bldg,
                                 lau,
                                 list_city_paths,
-                                part
+                                part,
+                                dataset_name
                                 ):
     '''
         Matches a processed building footprints dataset with GADM city boundaries and saves two csv with geom/id for
@@ -444,6 +473,7 @@ def create_city_bldg_geom_files(gdf_bldg,
 
     # counting initial num bldgs and dropping duplicates
     n_bldg_start = len(gdf_bldg)
+
     gdf_bldg = remove_dupls(gdf_bldg, 'bldg geoms', 'id')
     # remove invalid geoms from gdf
     n_invalid = len(gdf_bldg.loc[~gdf_bldg.is_valid])
@@ -474,8 +504,12 @@ def create_city_bldg_geom_files(gdf_bldg,
 
             n_bldg_end += len(city)
 
+            if 'france-gov' in dataset_name:
+                ufo_helpers.save_csv_wkt(city[['id', 'geometry','LAU_ID']], 
+                                         f"{city_path}_geom_{dataset_name.split('-')[-1]}_{part}.csv")
+            else:
             # save bldgs of city and bldgs in buffer
-            ufo_helpers.save_csv_wkt(city[['id', 'geometry','LAU_ID']], f'{city_path}_geom_{part}.csv')
+                ufo_helpers.save_csv_wkt(city[['id', 'geometry','LAU_ID']], f'{city_path}_geom_{part}.csv')
 
             list_saved_LAUs.append(LAU_ID)
             list_saved_paths.append(city_path)
@@ -500,7 +534,8 @@ def create_city_bldg_attrib_files(gdf_bldgs,
                                   file_type,
                                   list_saved_names,
                                   list_saved_paths,
-                                  part):
+                                  part,
+                                  dataset_name):
     '''
         Matches a processed building attributes dataset by ids with GADM city names and saves a csv with
         ids and attributes.
@@ -520,7 +555,11 @@ def create_city_bldg_attrib_files(gdf_bldgs,
     for LAU_ID, city_path in zip(list_saved_names, list_saved_paths):
         # save in parts
         bldg_attrib_city = bldg_attrib[bldg_attrib.LAU_ID == LAU_ID].drop(columns='LAU_ID')
-        bldg_attrib_city.to_csv(f'{city_path}_{file_type}_{part}.csv', index=False)
+        
+        if 'france-gov' in dataset_name:
+            bldg_attrib_city.to_csv(f"{city_path}_{file_type}_{dataset_name.split('-')[-1]}_{part}.csv", index=False)
+        else:
+            bldg_attrib_city.to_csv(f'{city_path}_{file_type}_{part}.csv', index=False)
 
     print('City attributes created for {} bldgs'.format(len(bldg_attrib)))
 
@@ -678,6 +717,9 @@ def db_set_up(country,
     city_paths_dataset = ufo_helpers.get_all_paths(country, path_root_folder=path_db_folder)
 
     # only take lau bounds and cities from dataset_name
+    if dataset_name in FRANCE_OSM_PARTS:
+        path_lau = '/p/projects/eubucco/data/0-raw-data/lau/lau_nuts_fr_osm.gpkg'
+        path_lau_extra = '/p/projects/eubucco/data/0-raw-data/lau/lau_nuts_extra_fr_osm.csv'
     lau_nuts = ufo_helpers.load_lau(path_lau, path_lau_extra)
     inputs_parsing = pd.read_csv(path_inputs_parsing)
     if 'france-gov' in dataset_name: 
@@ -709,21 +751,23 @@ def db_set_up(country,
         gdf = gpd.GeoDataFrame(chunk, geometry=chunk['geometry'].apply(wkt.loads), crs=CRS_UNI)
 
         gdf_bldgs, list_saved_LAUs, list_saved_paths, n_bldg_start, n_bldg_end = create_city_bldg_geom_files(
-            gdf, lau, city_paths_dataset, idx)
+            gdf, lau, city_paths_dataset, idx, dataset_name)
 
         create_city_bldg_attrib_files(gdf_bldgs,
                                         df_bldg_attrib,
                                         'attrib',
                                         list_saved_LAUs,
                                         list_saved_paths,
-                                        idx)
+                                        idx,
+                                        dataset_name)
         if not df_bldg_x_attrib.empty:
                 create_city_bldg_attrib_files(gdf_bldgs,
                                             df_bldg_x_attrib,
                                             'extra_attrib',
                                             list_saved_LAUs,
                                             list_saved_paths,
-                                            idx)
+                                            idx,
+                                            dataset_name)
 
         n_bldg_start_sum += n_bldg_start
         n_bldg_end_sum += n_bldg_end
