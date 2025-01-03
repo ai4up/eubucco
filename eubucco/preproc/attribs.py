@@ -28,6 +28,7 @@ def attrib_cleaning(data_dir: str, out_dir: str, type_mapping_path: str, db_vers
             df = type_mapping(df, type_mapping_path)
             df = age_cleaning(df)
             df = height_cleaning(df)
+            df = floors_cleaning(df)
 
             out_dir = Path(out_dir).mkdir(parents=True, exist_ok=True)
             out_path = out_dir / f.name
@@ -40,7 +41,13 @@ def attrib_cleaning(data_dir: str, out_dir: str, type_mapping_path: str, db_vers
 
 def height_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     df = _estimate_height_from_floors(df)
-    df['height'] = df['height'].astype(float)
+    df['height'] = _to_numeric(df['height'])
+
+    return df
+
+
+def floors_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    df['floors'] = _to_numeric(df['floors'])
 
     return df
 
@@ -48,7 +55,7 @@ def height_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 def age_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     df_fr_es = df[df['LAU_ID'].str[:2].isin(['FR', 'ES'])]
     df['age'] = df_fr_es['age'].dropna().str[:4]  # extract year from YYYY-MM-DD encoded string
-    df['age'] = df['age'].astype(float)
+    df['age'] = _to_numeric(df['age'])
 
     return df
 
@@ -64,7 +71,7 @@ def type_mapping(df: gpd.GeoDataFrame, type_mapping_path: str) -> gpd.GeoDataFra
     return df
 
 
-def unique_ids(df, db_version):
+def unique_ids(df: gpd.GeoDataFrame, db_version: str) -> gpd.GeoDataFrame:
     df['id_source'] = df['id']
     df['id'] = 'v' + str(db_version) + '-' + df['LAU_ID'] + '-' + pd.Series(range(len(df)), dtype=str)
 
@@ -82,7 +89,7 @@ def _all_files(data_dir: str, pattern: str = None) -> List[Path]:
     return files
 
 
-def _estimate_height_from_floors(df):
+def _estimate_height_from_floors(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     df['height_source'] = df['height']
     df['height_source'] = df['height_source'].fillna('floors')
     df['height'] = df['height'].fillna(df['floors'] * FLOOR_HEIGHT)
@@ -100,3 +107,15 @@ def _harmonize_type(source_type: pd.Series, type_mapping: Dict[str, str]) -> pd.
     harm_type = source_type.map(type_mapping).astype(CategoricalDtype(categories=types))
 
     return harm_type
+
+
+def _to_numeric(s: pd.Series) -> pd.Series:
+    nan_count_before = s.isna().sum()
+    s = pd.to_numeric(s, errors='coerce')
+    nan_count_after = s.isna().sum()
+    failure_count = nan_count_before - nan_count_after
+
+    if failure_count > 0:
+        logger.warning(f'Coercing {s.name} to numeric failed for {failure_count} rows.')
+
+    return s
