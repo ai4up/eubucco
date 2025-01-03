@@ -19,8 +19,17 @@ logger = logging.getLogger(__name__)
 
 
 def attrib_cleaning(data_dir: str, out_dir: str, type_mapping_path: str, db_version: str, file_pattern: str = None) -> None:
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
     for f in _all_files(data_dir, file_pattern):
         try:
+            out_path = out_dir / f.name
+
+            if out_path.is_file():
+                logger.info(f'Attributes already cleaned for {f.name}...')
+                continue
+
             logger.info(f'Cleaning attributes for {f.name}...')
             df = gpd.read_parquet(f)
 
@@ -31,9 +40,6 @@ def attrib_cleaning(data_dir: str, out_dir: str, type_mapping_path: str, db_vers
             df = floors_cleaning(df)
             df = _encode_missing_in_string_columns(df)
 
-            out_dir = Path(out_dir)
-            out_dir.mkdir(parents=True, exist_ok=True)
-            out_path = out_dir / f.name
             df.to_parquet(out_path)
 
         except Exception:
