@@ -29,6 +29,7 @@ def attrib_cleaning(data_dir: str, out_dir: str, type_mapping_path: str, db_vers
             df = age_cleaning(df)
             df = height_cleaning(df)
             df = floors_cleaning(df)
+            df = _encode_missing_in_string_columns(df)
 
             out_dir = Path(out_dir)
             out_dir.mkdir(parents=True, exist_ok=True)
@@ -63,11 +64,11 @@ def age_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 def type_mapping(df: gpd.GeoDataFrame, type_mapping_path: str) -> gpd.GeoDataFrame:
     bldg_types = pd.read_csv(type_mapping_path)
-    type_mapping = bldg_types.set_index("type_source")["type"].to_dict()
-    res_type_mapping = bldg_types.set_index("type_source")["residential_type"].to_dict()
+    type_mapping = bldg_types.set_index('type_source')['type'].to_dict()
+    res_type_mapping = bldg_types.set_index('type_source')['residential_type'].to_dict()
 
-    df["type"] = _harmonize_type(df["type_source"], type_mapping)
-    df["residential_type"] = _harmonize_type(df["type_source"], res_type_mapping)
+    df['type'] = _harmonize_type(df['type_source'], type_mapping)
+    df['residential_type'] = _harmonize_type(df['type_source'], res_type_mapping)
 
     return df
 
@@ -80,7 +81,7 @@ def unique_ids(df: gpd.GeoDataFrame, db_version: str) -> gpd.GeoDataFrame:
 
 
 def _all_files(data_dir: str, pattern: str = None) -> List[Path]:
-    paths = Path(data_dir).rglob("*")
+    paths = Path(data_dir).rglob('*')
     files = [p for p in paths if p.is_file()]
 
     if pattern:
@@ -120,3 +121,12 @@ def _to_numeric(s: pd.Series) -> pd.Series:
         logger.warning(f'Coercing {s.name} to numeric failed for {failure_count} rows.')
 
     return s
+
+
+def _encode_missing_in_string_columns(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    string_cols = ['id', 'id_source', 'block_id', 'LAU_ID', 'h3_index', 'type_source', 'height_source', 'source_file']
+    for col in string_cols:
+        if col in df.columns:
+            df[col] = df[col].replace(np.nan, None).astype('string')
+
+    return df
