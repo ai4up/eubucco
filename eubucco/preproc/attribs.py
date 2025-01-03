@@ -30,7 +30,8 @@ def attrib_cleaning(data_dir: str, out_dir: str, type_mapping_path: str, db_vers
             df = height_cleaning(df)
             df = floors_cleaning(df)
 
-            out_dir = Path(out_dir).mkdir(parents=True, exist_ok=True)
+            out_dir = Path(out_dir)
+            out_dir.mkdir(parents=True, exist_ok=True)
             out_path = out_dir / f.name
             df.to_parquet(out_path)
 
