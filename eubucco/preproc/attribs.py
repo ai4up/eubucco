@@ -62,7 +62,9 @@ def floors_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 def age_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     df_fr_es = df[df['LAU_ID'].str[:2].isin(['FR', 'ES'])]
-    df['age'] = df_fr_es['age'].dropna().str[:4]  # extract year from YYYY-MM-DD encoded string
+    if not df_fr_es.empty:
+        df['age'] = df_fr_es['age'].dropna().str[:4]  # extract year from YYYY-MM-DD encoded string
+
     df['age'] = _to_numeric(df['age'])
 
     return df
