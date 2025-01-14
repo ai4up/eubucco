@@ -31,7 +31,12 @@ def attrib_cleaning(data_dir: str, out_dir: str, type_mapping_path: str, db_vers
                 continue
 
             logger.info(f'Cleaning attributes for {f.name}...')
-            df = gpd.read_parquet(f)
+            if 'parquet' in f.suffix:
+                df = gpd.read_parquet(f)
+            elif 'gpkg' in f.suffix:
+                df = gpd.read_file(f)
+            else:
+                raise ValueError(f'Unsupported file format: {f.suffix}')
 
             df = unique_ids(df, db_version)
             df = type_mapping(df, type_mapping_path)
