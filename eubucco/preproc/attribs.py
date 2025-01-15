@@ -66,11 +66,7 @@ def floors_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 
 def age_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    df_fr_es = df[df['LAU_ID'].str[:2].isin(['FR', 'ES'])]
-    if not df_fr_es.empty:
-        df['age'] = df_fr_es['age'].dropna().str[:4]  # extract year from YYYY-MM-DD encoded string
-
-    df['age'] = _to_numeric(df['age'])
+    df['age'] = df['age'].dropna().astype(str).apply(_extract_year)
 
     return df
 
@@ -134,6 +130,18 @@ def _to_numeric(s: pd.Series) -> pd.Series:
         logger.warning(f'Coercing {s.name} to numeric failed for {failure_count} rows.')
 
     return s
+
+
+def _extract_year(s: str) -> float:
+    try:
+        s = float(s[:4])  # extract year from YYYY-MM-DD encoded string
+        if s < 1000:
+            return np.nan
+
+        return s
+
+    except Exception:
+        return np.nan
 
 
 def _encode_missing_in_string_columns(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
