@@ -24,7 +24,7 @@ def attrib_cleaning(data_dir: str, out_dir: str, type_mapping_path: str, db_vers
 
     for f in _all_files(data_dir, file_pattern):
         try:
-            out_path = out_dir / f.name
+            out_path = out_dir / f"{f.stem}.parquet"
 
             if out_path.is_file():
                 logger.info(f'Attributes already cleaned for {f.name}...')
