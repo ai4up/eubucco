@@ -1,3 +1,4 @@
+import logging
 import os
 from pathlib import Path
 
@@ -7,8 +8,23 @@ import numpy as np
 
 from preproc.attribs import _encode_missing_in_string_columns
 
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler()]
+)
+logger = logging.getLogger(__name__)
+
 
 def merge_gov_osm_msft(region_id: str, gov_dir: str, osm_dir: str, msft_dir: str, out_dir: str) -> None:
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / f"{region_id}.parquet"
+
+    if out_path.is_file():
+        logger.info(f'Gov, OSM, and MSFT data already merged for {region_id}.')
+        return
+
     gov_path = os.path.join(gov_dir, f"{region_id}.parquet")
     osm_path = os.path.join(osm_dir, f"{region_id}.parquet")
     msft_path = _find_file(msft_dir, f"{region_id}.gpkg")
@@ -25,9 +41,6 @@ def merge_gov_osm_msft(region_id: str, gov_dir: str, osm_dir: str, msft_dir: str
     gov_osm = merge_building_datasets(gov, osm, fillna=True)
     gov_osm_msft = merge_building_datasets(gov_osm, msft, fillna=False)
 
-    out_dir = Path(out_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / f"{region_id}.parquet"
     gov_osm_msft.to_parquet(out_path)
 
 
