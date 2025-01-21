@@ -97,17 +97,16 @@ def _find_file(data_dir: str, pattern: str) -> Path:
     try:
         return next(Path(data_dir).rglob(pattern))
     except StopIteration:
-        raise Exception(f"File {pattern} could not be found in {data_dir}.")
+        logger.warning(f"File {pattern} could not be found in {data_dir}.")
+        return None
 
 
 def _read_geodata(path: str) -> gpd.GeoDataFrame:
     try:
         if str(path).endswith('.parquet'):
             return gpd.read_parquet(path)
-        elif str(path).endswith('.gpkg'):
-            return gpd.read_file(path)
         else:
-            raise ValueError(f'Unsupported file format: {path}')
+            return gpd.read_file(path)
 
     except FileNotFoundError:
         return gpd.GeoDataFrame(geometry=[], crs=3035)
