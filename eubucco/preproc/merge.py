@@ -92,7 +92,7 @@ def merge_building_datasets(gdf1: gpd.GeoDataFrame, gdf2: gpd.GeoDataFrame, fill
         gdf1['filled_height'] = height_missings & gdf1['height'].notna()
         gdf1['filled_age'] = age_missings & gdf1['age'].notna()
 
-    return pd.concat([gdf1, non_intersecting, intersecting_below_thresh])
+    return pd.concat([gdf1, non_intersecting, intersecting_below_thresh], ignore_index=True)
 
 
 def _find_file(data_dir: str, pattern: str) -> Path:
