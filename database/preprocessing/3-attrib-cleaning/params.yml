@@ -1,10 +1,8 @@
-# - data_dir: /p/projects/eubucco/data/2-database-nuts-level-v1-gov
-#   out_dir: /p/projects/eubucco/data/3-attrib-cleaning-v1-gov
-#   type_mapping_path: 
-#   db_version: 1.0
-#   file_pattern: "^[A-Za-z]{2}[A-Za-z0-9]{3}\\.parquet$"
-- data_dir: /p/projects/eubucco/data/3-ml-inputs-v1/test-dataset
-  out_dir: /p/projects/eubucco/data/3-ml-inputs-v1/test-dataset-attrib-cleaning
-  type_mapping_path: /p/projects/eubucco/data/0-raw-data/type-matches/osm_type_matches_v1.csv
-  db_version: 1.0
-  file_pattern: ".*\\.parquet$"
+- data_dir: /p/projects/eubucco/data/2-database-nuts-level-v1-gov
+  out_dir: /p/projects/eubucco/data/3-attrib-cleaning-v1-gov
+  type_mapping_path: /p/projects/eubucco/data/0-raw-data/type-matches/building-type-categories-v1.csv
+  file_pattern: "^[A-Za-z]{2}[A-Za-z0-9]{3}\\.gpkg$"
+- data_dir: /p/projects/eubucco/data/2-database-nuts-level-v1-osm
+  out_dir: /p/projects/eubucco/data/3-attrib-cleaning-v1-osm
+  type_mapping_path: /p/projects/eubucco/data/0-raw-data/type-matches/building-type-categories-v1.csv
+  file_pattern: "^[A-Za-z]{2}[A-Za-z0-9]{3}\\.gpkg$"

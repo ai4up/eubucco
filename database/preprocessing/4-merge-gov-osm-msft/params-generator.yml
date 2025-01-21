@@ -2,6 +2,7 @@ gov_dir: [/p/projects/eubucco/data/3-attrib-cleaning-v1-gov]
 osm_dir: [/p/projects/eubucco/data/3-attrib-cleaning-v1-osm]
 msft_dir: [/p/projects/eubucco/data/2-database-nuts-level-v1-msft]
 out_dir: [/p/projects/eubucco/data/4-merged-dataset]
+db_version: [1.0]
 region_id:
   - AT111
   - AT112

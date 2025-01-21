@@ -18,7 +18,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def attrib_cleaning(data_dir: str, out_dir: str, type_mapping_path: str, db_version: str, file_pattern: str = None) -> None:
+def attrib_cleaning(data_dir: str, out_dir: str, type_mapping_path: str, file_pattern: str = None) -> None:
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -38,7 +38,6 @@ def attrib_cleaning(data_dir: str, out_dir: str, type_mapping_path: str, db_vers
             else:
                 raise ValueError(f'Unsupported file format: {f.suffix}')
 
-            df = unique_ids(df, db_version)
             df = type_mapping(df, type_mapping_path)
             df = age_cleaning(df)
             df = height_cleaning(df)
@@ -78,13 +77,6 @@ def type_mapping(df: gpd.GeoDataFrame, type_mapping_path: str) -> gpd.GeoDataFra
 
     df['type'] = _harmonize_type(df['type_source'], type_mapping)
     df['residential_type'] = _harmonize_type(df['type_source'], res_type_mapping)
-
-    return df
-
-
-def unique_ids(df: gpd.GeoDataFrame, db_version: str) -> gpd.GeoDataFrame:
-    df['id_source'] = df['id']
-    df['id'] = 'v' + str(db_version) + '-' + df['LAU_ID'] + '-' + pd.Series(range(len(df)), dtype=str)
 
     return df
 
@@ -145,7 +137,7 @@ def _extract_year(s: str) -> float:
 
 
 def _encode_missing_in_string_columns(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    string_cols = ['id', 'id_source', 'block_id', 'LAU_ID', 'h3_index', 'type_source', 'height_source', 'source_file']
+    string_cols = ['id', 'block_id', 'LAU_ID', 'h3_index', 'type_source', 'height_source', 'source_file']
     for col in string_cols:
         if col in df.columns:
             df[col] = df[col].replace(np.nan, None).astype('string')

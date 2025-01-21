@@ -17,7 +17,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def merge_gov_osm_msft(region_id: str, gov_dir: str, osm_dir: str, msft_dir: str, out_dir: str) -> None:
+def merge_gov_osm_msft(region_id: str, gov_dir: str, osm_dir: str, msft_dir: str, out_dir: str, db_version: str) -> None:
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / f"{region_id}.parquet"
@@ -41,6 +41,7 @@ def merge_gov_osm_msft(region_id: str, gov_dir: str, osm_dir: str, msft_dir: str
 
     gov_osm = merge_building_datasets(gov, osm, fillna=True)
     gov_osm_msft = merge_building_datasets(gov_osm, msft, fillna=False)
+    gov_osm_msft = _generate_unique_id(gov_osm_msft, db_version)
 
     gov_osm_msft.to_parquet(out_path)
 
@@ -125,3 +126,10 @@ def _intersection_to_area_ratio(s1: gpd.GeoSeries, s2: gpd.GeoSeries) -> pd.Seri
     area = np.minimum(s1.area, s2.area)
 
     return intersection / area
+
+
+def _generate_unique_id(df: gpd.GeoDataFrame, db_version: str) -> gpd.GeoDataFrame:
+    df['id_source'] = df['id']
+    df['id'] = 'v' + str(db_version) + '-' + df['LAU_ID'] + '-' + pd.Series(range(len(df)), dtype=str)
+
+    return df
