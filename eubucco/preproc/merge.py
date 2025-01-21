@@ -5,6 +5,8 @@ import pandas as pd
 import geopandas as gpd
 import numpy as np
 
+from preproc.attribs import _encode_missing_in_string_columns
+
 
 def merge_gov_osm_msft(region_id: str, gov_dir: str, osm_dir: str, msft_dir: str, out_dir: str) -> None:
     gov_path = os.path.join(gov_dir, f"{region_id}.parquet")
@@ -14,6 +16,7 @@ def merge_gov_osm_msft(region_id: str, gov_dir: str, osm_dir: str, msft_dir: str
     gov = _read_geodata(gov_path).to_crs(3035)
     osm = _read_geodata(osm_path).to_crs(3035)
     msft = _read_geodata(msft_path).to_crs(3035)
+    msft = _encode_missing_in_string_columns(msft)
 
     gov['dataset'] = 'gov'
     osm['dataset'] = 'osm'
