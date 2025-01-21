@@ -32,6 +32,12 @@ def merge_gov_osm_msft(region_id: str, gov_dir: str, osm_dir: str, msft_dir: str
 
 
 def merge_building_datasets(gdf1: gpd.GeoDataFrame, gdf2: gpd.GeoDataFrame, fillna: bool) -> gpd.GeoDataFrame:
+    if gdf1.empty:
+        return gdf2
+
+    if gdf2.empty:
+        return gdf1
+
     # determine intersecting buildings
     int_idx2, int_idx1 = gdf1.sindex.query(gdf2.geometry, predicate='intersects')
 
