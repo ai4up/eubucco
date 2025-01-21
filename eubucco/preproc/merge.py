@@ -67,7 +67,7 @@ def merge_building_datasets(gdf1: gpd.GeoDataFrame, gdf2: gpd.GeoDataFrame, fill
     non_intersecting = gdf2.drop(gdf2_int.index)
 
     # add new slightly intersecting buildings
-    gdf2_largest_int = gdf2_int.sort_values('ioa', ascending=False).drop_duplicates(keep='first')
+    gdf2_largest_int = gdf2_int.sort_values('ioa', ascending=False).drop_duplicates(subset=['id'], keep='first')
     intersecting_below_thresh = gdf2_largest_int[gdf2_largest_int['ioa'] < 0.2]
 
     # use gdf2 to fill missing attributes in gdf1
