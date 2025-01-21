@@ -5,6 +5,7 @@ from pathlib import Path
 import pandas as pd
 import geopandas as gpd
 import numpy as np
+from pyogrio.errors import DataSourceError
 
 from preproc.attribs import _encode_missing_in_string_columns
 
@@ -108,7 +109,7 @@ def _read_geodata(path: str) -> gpd.GeoDataFrame:
         else:
             return gpd.read_file(path)
 
-    except FileNotFoundError:
+    except (FileNotFoundError, DataSourceError):
         return gpd.GeoDataFrame(geometry=[], crs=3035)
 
 
