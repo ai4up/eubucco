@@ -130,6 +130,10 @@ def _intersection_to_area_ratio(s1: gpd.GeoSeries, s2: gpd.GeoSeries) -> pd.Seri
 
 def _generate_unique_id(df: gpd.GeoDataFrame, db_version: str) -> gpd.GeoDataFrame:
     df['id_source'] = df['id']
-    df['id'] = 'v' + str(db_version) + '-' + df['LAU_ID'] + '-' + pd.Series(range(len(df)), dtype=str)
+    df['id'] = (
+        'v' + str(db_version) + '-' +
+        df['LAU_ID'] + '-' +
+        df.groupby('LAU_ID').cumcount().astype(str)
+    )
 
     return df
