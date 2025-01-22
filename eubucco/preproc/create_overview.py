@@ -10,6 +10,7 @@ from pathlib import Path
 
 from ufo_map.Utils.helpers import get_all_paths, arg_parser
 from preproc.parsing import get_params
+from utils.load import all_files
 
 # Declare global variables
 CRS_UNI = 'EPSG:3035'
@@ -605,47 +606,50 @@ def create_stats_main(country,
     print('Everything saved successully. Closing run.')
 
 
+def create_overview_laus(data_dir: str, out_path: str, pattern: str = r'.*\.parquet$'):
+    metrics = []
+    for f in all_files(data_dir, pattern):
 
-def create_overview_laus(country,
-                         path_db_folder,
-                         source,
-                         path_out='/p/projects/eubucco/stats/2-db-set-up/overview/v1'):
-    """
-        Function checks every NUTS3 according to the path file, and compute metrics for each LAU present.
-        Function then allocates 0s for LAUs present in the path file but not in the data.
-    """
+        gdf = gpd.read_parquet(f)
+        gdf = gdf[gdf['ioa'].fillna(0) < 0.1]  # recommended intersection tolerance
+        gdf['area'] = gdf.geometry.area
 
-    paths = get_all_paths(country, path_root_folder=path_db_folder)
-    nuts3_path = list(set([os.path.split(x)[0] for x in paths]))
+        region_metrics = gdf.groupby('LAU_ID').agg(
+            n=('area', 'count'),
+            n_gov=('dataset', lambda x: (x == 'gov').count()),
+            n_osm=('dataset', lambda x: (x == 'osm').count()),
+            n_msft=('dataset', lambda x: (x == 'msft').count()),
+            n_type=('type', lambda x: x.notna().sum()),
+            n_height=('height', lambda x: x.notna().sum()),
+            n_age=('age', lambda x: x.notna().sum()),
+            n_residential=('type', lambda x: (x == 'residential').count()),
+            n_commercial=('type', lambda x: (x == 'commercial').count()),
+            n_industrial=('type', lambda x: (x == 'industrial').count()),
+            n_agricultural=('type', lambda x: (x == 'agricultural').count()),
+            n_public=('type', lambda x: (x == 'public').count()),
+            n_others=('type', lambda x: (x == 'others').count()),
+            area=('area', 'sum'),
+            area_gov=('area', lambda x: x.where(gdf['dataset'] == 'gov').sum()),
+            area_osm=('area', lambda x: x.where(gdf['dataset'] == 'osm').sum()),
+            area_msft=('area', lambda x: x.where(gdf['dataset'] == 'msft').sum()),
+            area_residential=('area', lambda x: x.where(gdf['type'] == 'residential').sum()),
+            area_commercial=('area', lambda x: x.where(gdf['type'] == 'commercial').sum()),
+            area_industrial=('area', lambda x: x.where(gdf['type'] == 'industrial').sum()),
+            area_agricultural=('area', lambda x: x.where(gdf['type'] == 'agricultural').sum()),
+            area_public=('area', lambda x: x.where(gdf['type'] == 'public').sum()),
+            area_others=('area', lambda x: x.where(gdf['type'] == 'others').sum()),
+            n_filled_type=('filled_type', 'sum'),
+            n_filled_height=('filled_height', 'sum'),
+            n_filled_age=('filled_age', 'sum'),
+            n_ioa_0=('ioa', lambda x: x.isna().sum()),
+            n_ioa_5=('ioa', lambda x: x.between(0, 0.05).sum()),
+            n_ioa_10=('ioa', lambda x: x.between(0.05, 0.1).sum()),
+        ).astype(int).reset_index()
 
-    df_stats = pd.DataFrame()
+        region_metrics.insert(0, 'country', f.stem[:2])
+        region_metrics.insert(1, 'NUTS3_ID', f.stem)
 
-    for path in nuts3_path:
-        
-        try:
-            df = gpd.read_file(f'{path}.gpkg')
-            df['area'] = round(df.geometry.area,0)
-            df = df.groupby('LAU_ID').agg(area=('area', 'sum'),     
-                                                  n_bldgs=('area', 'count')).reset_index()   
-            df.insert(0,'NUTS3_ID', path.split('/')[-1])
-            df_stats = pd.concat([df_stats,df])
-        except:
-            print(f'{path} missing.')
+        metrics.append(region_metrics)
 
-    df_all = pd.DataFrame([path.split('/')[-2:] for path in paths], columns=["NUTS3_ID", "LAU_ID"])
-
-    if df_stats.empty:
-        df_stats = df_all
-        df_stats.insert(2,'area',0)
-        df_stats.insert(3,'n_bldgs',0)
-
-    else:
-        missing = df_all[~df_all.LAU_ID.isin(df_stats.LAU_ID)]
-        missing.insert(2,'area',0)
-        missing.insert(3,'n_bldgs',0)
-        df_stats = pd.concat([df_stats,missing])
-
-    print(df_stats.n_bldgs.sum())
-
-    df_stats.to_csv(os.path.join(path_out,f'{source}_{country}_overview.csv'),index=False)
-    print('Done!')
+    metrics = pd.concat(metrics, ignore_index=True)
+    metrics.to_csv(out_path, index=False)

@@ -8,6 +8,8 @@ import geopandas as gpd
 import numpy as np
 from pandas.api.types import CategoricalDtype
 
+from utils.load import all_files
+
 FLOOR_HEIGHT = 3  # meter
 
 logging.basicConfig(
@@ -22,7 +24,7 @@ def attrib_cleaning(data_dir: str, out_dir: str, dataset_type: str = None, type_
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    for f in _all_files(data_dir, file_pattern):
+    for f in all_files(data_dir, file_pattern):
         try:
             out_path = out_dir / f"{f.stem}.parquet"
 
@@ -84,17 +86,6 @@ def type_mapping(df: gpd.GeoDataFrame, type_mapping_path: str) -> gpd.GeoDataFra
     df['residential_type'] = _harmonize_type(df['type_source'], res_type_mapping)
 
     return df
-
-
-def _all_files(data_dir: str, pattern: str = None) -> List[Path]:
-    paths = Path(data_dir).rglob('*')
-    files = [p for p in paths if p.is_file()]
-
-    if pattern:
-        pattern = re.compile(pattern)
-        files = [f for f in files if pattern.match(f.name)]
-
-    return files
 
 
 def _read_geodata(path: Path) -> gpd.GeoDataFrame:

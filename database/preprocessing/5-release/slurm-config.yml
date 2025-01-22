@@ -1,0 +1,19 @@
+jobs:
+  - name: run-overview
+    script: /p/projects/eubucco/git-eubucco/database/preprocessing/5-release/run-overview.py
+    param_files: [/p/projects/eubucco/git-eubucco/database/preprocessing/5-release/params_overview.yml]
+    log_dir: /p/projects/eubucco/logs/v1_0-db/release
+    resources:
+      cpus: 4
+      time: "12:00:00"
+
+properties:
+  conda_env: eubucco-features
+  account: eubucco
+  log_level: INFO
+  exp_backoff_factor: 4
+  max_retries: 1
+  poll_interval: 30
+  slack:
+    channel: "#test-slurm-bot"
+    token: <to-be-added>
