@@ -5,7 +5,7 @@ import psutil
 import ast
 
 from ufo_map.Utils.helpers import get_all_paths, arg_parser, import_csv_w_wkt_to_gdf
-from preproc.db_set_up import fetch_GADM_info_country
+from ufo_map.Preprocessing.admin_boundaries import fetch_GADM_info_country
 from preproc.parsing import get_params
 
 
