@@ -31,13 +31,7 @@ def attrib_cleaning(data_dir: str, out_dir: str, type_mapping_path: str, file_pa
                 continue
 
             logger.info(f'Cleaning attributes for {f.name}...')
-            if 'parquet' in f.suffix:
-                df = gpd.read_parquet(f)
-            elif 'gpkg' in f.suffix:
-                df = gpd.read_file(f)
-            else:
-                raise ValueError(f'Unsupported file format: {f.suffix}')
-
+            df = _read_geodata(f)
             df = type_mapping(df, type_mapping_path)
             df = age_cleaning(df)
             df = height_cleaning(df)
@@ -90,6 +84,15 @@ def _all_files(data_dir: str, pattern: str = None) -> List[Path]:
         files = [f for f in files if pattern.match(f.name)]
 
     return files
+
+
+def _read_geodata(path: Path) -> gpd.GeoDataFrame:
+    if 'parquet' in path.suffix:
+        return gpd.read_parquet(path)
+    elif 'gpkg' in path.suffix:
+        return gpd.read_file(path)
+    else:
+        raise ValueError(f'Unsupported file format: {path.suffix}')
 
 
 def _estimate_height_from_floors(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
