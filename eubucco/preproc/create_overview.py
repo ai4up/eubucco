@@ -609,8 +609,16 @@ def create_stats_main(country,
 def create_overview_laus(data_dir: str, out_path: str, pattern: str = r'.*\.parquet$'):
     metrics = []
     for f in all_files(data_dir, pattern):
-
         gdf = gpd.read_parquet(f)
+
+        if 'ioa' not in gdf.columns:
+            gdf['ioa'] = None
+
+        if 'filled_type' not in gdf.columns:
+            gdf['filled_type'] = None
+            gdf['filled_height'] = None
+            gdf['filled_age'] = None
+
         gdf = gdf[gdf['ioa'].fillna(0) < 0.1]  # recommended intersection tolerance
         gdf['area'] = gdf.geometry.area
 
