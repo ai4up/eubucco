@@ -7,7 +7,6 @@ import geopandas as gpd
 import numpy as np
 from pyogrio.errors import DataSourceError
 
-from preproc.attribs import _encode_missing_in_string_columns
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -28,12 +27,11 @@ def merge_gov_osm_msft(region_id: str, gov_dir: str, osm_dir: str, msft_dir: str
 
     gov_path = os.path.join(gov_dir, f"{region_id}.parquet")
     osm_path = os.path.join(osm_dir, f"{region_id}.parquet")
-    msft_path = _find_file(msft_dir, f"{region_id}.gpkg")
+    msft_path = os.path.join(msft_dir, f"{region_id}.parquet")
 
     gov = _read_geodata(gov_path).to_crs(3035)
     osm = _read_geodata(osm_path).to_crs(3035)
     msft = _read_geodata(msft_path).to_crs(3035)
-    msft = _encode_missing_in_string_columns(msft)
 
     gov['dataset'] = 'gov'
     osm['dataset'] = 'osm'
@@ -95,14 +93,6 @@ def merge_building_datasets(gdf1: gpd.GeoDataFrame, gdf2: gpd.GeoDataFrame, fill
     return pd.concat([gdf1, non_intersecting, intersecting_below_thresh], ignore_index=True)
 
 
-def _find_file(data_dir: str, pattern: str) -> Path:
-    try:
-        return next(Path(data_dir).rglob(pattern))
-    except StopIteration:
-        logger.warning(f"File {pattern} could not be found in {data_dir}.")
-        return None
-
-
 def _read_geodata(path: str) -> gpd.GeoDataFrame:
     try:
         if str(path).endswith('.parquet'):
@@ -111,6 +101,7 @@ def _read_geodata(path: str) -> gpd.GeoDataFrame:
             return gpd.read_file(path)
 
     except (FileNotFoundError, DataSourceError):
+        logger.warning(f"File {path} could not be found.")
         return gpd.GeoDataFrame(geometry=[], crs=3035)
 
 

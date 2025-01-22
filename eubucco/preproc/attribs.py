@@ -18,7 +18,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def attrib_cleaning(data_dir: str, out_dir: str, type_mapping_path: str, file_pattern: str = None) -> None:
+def attrib_cleaning(data_dir: str, out_dir: str, dataset_type: str = None, type_mapping_path: str = None, file_pattern: str = None) -> None:
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -32,17 +32,28 @@ def attrib_cleaning(data_dir: str, out_dir: str, type_mapping_path: str, file_pa
 
             logger.info(f'Cleaning attributes for {f.name}...')
             df = _read_geodata(f)
-            df = type_mapping(df, type_mapping_path)
-            df = age_cleaning(df)
-            df = height_cleaning(df)
-            df = floors_cleaning(df)
-            df = _encode_missing_in_string_columns(df)
 
+            if dataset_type == 'msft':
+                df = msft_height_cleaning(df)
+            else:
+                df = type_mapping(df, type_mapping_path)
+                df = age_cleaning(df)
+                df = height_cleaning(df)
+                df = floors_cleaning(df)
+
+            df = _encode_missing_in_string_columns(df)
             df.to_parquet(out_path)
 
         except Exception:
             logger.exception(
                 f'Exception occurred while cleaning attributes for file {f.name}. Skipping {f.name} and continuing...')
+
+
+def msft_height_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    df['height_source'] = _to_numeric(df['height'].replace(-1, np.nan))
+    df['height'] = np.nan
+
+    return df
 
 
 def height_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
