@@ -7,9 +7,6 @@ from shapely import wkt
 import geopandas as gpd
 import ast
 from pathlib import Path
-from collections import defaultdict
-
-from deco import concurrent, synchronized
 
 from ufo_map.Utils.helpers import get_all_paths, arg_parser
 from preproc.parsing import get_params
@@ -609,13 +606,12 @@ def create_stats_main(country,
     print('Everything saved successully. Closing run.')
 
 
-@synchronized
 def create_overview_laus(data_dir: str, out_dir: str, lau_geometry_path: str, pattern: str = r'.*\.parquet$'):
-    metrics = defaultdict(dict)
+    metrics = []
     for f in all_files(data_dir, pattern):
-        metrics[f.stem] = _calculate_lau_metrics(f)
+        metrics.append(_calculate_lau_metrics(f))
 
-    df_metrics = pd.concat(metrics.values(), ignore_index=True).set_index('LAU_ID')
+    df_metrics = pd.concat(metrics, ignore_index=True).set_index('LAU_ID')
 
     out_path = os.path.join(out_dir, 'lau-overview-metrics.gpkg')
     gdf_metrics = _add_lau_geometry(df_metrics, lau_geometry_path)
@@ -626,7 +622,6 @@ def create_overview_laus(data_dir: str, out_dir: str, lau_geometry_path: str, pa
     gdf_nuts_metrics.reset_index().to_file(out_path, driver='GPKG')
 
 
-@concurrent
 def _calculate_lau_metrics(f: Path):
     gdf = gpd.read_parquet(f)
 
