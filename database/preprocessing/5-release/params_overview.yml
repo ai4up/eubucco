@@ -1,2 +1,3 @@
 - data_dir: /p/projects/eubucco/data/4-merged-dataset
-  out_path: /p/projects/eubucco/data/overview-metrics/lau-overview-metrics-v1.csv
+  out_dir: /p/projects/eubucco/data/overview-metrics
+  lau_geometry_path: /p/projects/eubucco/data/0-raw-data/lau/lau_nuts.gpkg

@@ -606,7 +606,7 @@ def create_stats_main(country,
     print('Everything saved successully. Closing run.')
 
 
-def create_overview_laus(data_dir: str, out_path: str, pattern: str = r'.*\.parquet$'):
+def create_overview_laus(data_dir: str, out_dir: str, lau_geometry_path: str, pattern: str = r'.*\.parquet$'):
     metrics = []
     for f in all_files(data_dir, pattern):
         gdf = gpd.read_parquet(f)
@@ -624,18 +624,18 @@ def create_overview_laus(data_dir: str, out_path: str, pattern: str = r'.*\.parq
 
         region_metrics = gdf.groupby('LAU_ID').agg(
             n=('area', 'count'),
-            n_gov=('dataset', lambda x: (x == 'gov').count()),
-            n_osm=('dataset', lambda x: (x == 'osm').count()),
-            n_msft=('dataset', lambda x: (x == 'msft').count()),
+            n_gov=('dataset', lambda x: (x == 'gov').sum()),
+            n_osm=('dataset', lambda x: (x == 'osm').sum()),
+            n_msft=('dataset', lambda x: (x == 'msft').sum()),
             n_type=('type', lambda x: x.notna().sum()),
             n_height=('height', lambda x: x.notna().sum()),
             n_age=('age', lambda x: x.notna().sum()),
-            n_residential=('type', lambda x: (x == 'residential').count()),
-            n_commercial=('type', lambda x: (x == 'commercial').count()),
-            n_industrial=('type', lambda x: (x == 'industrial').count()),
-            n_agricultural=('type', lambda x: (x == 'agricultural').count()),
-            n_public=('type', lambda x: (x == 'public').count()),
-            n_others=('type', lambda x: (x == 'others').count()),
+            n_residential=('type', lambda x: (x == 'residential').sum()),
+            n_commercial=('type', lambda x: (x == 'commercial').sum()),
+            n_industrial=('type', lambda x: (x == 'industrial').sum()),
+            n_agricultural=('type', lambda x: (x == 'agricultural').sum()),
+            n_public=('type', lambda x: (x == 'public').sum()),
+            n_others=('type', lambda x: (x == 'others').sum()),
             area=('area', 'sum'),
             area_gov=('area', lambda x: x.where(gdf['dataset'] == 'gov').sum()),
             area_osm=('area', lambda x: x.where(gdf['dataset'] == 'osm').sum()),
@@ -659,5 +659,31 @@ def create_overview_laus(data_dir: str, out_path: str, pattern: str = r'.*\.parq
 
         metrics.append(region_metrics)
 
-    metrics = pd.concat(metrics, ignore_index=True)
-    metrics.to_csv(out_path, index=False)
+    df_metrics = pd.concat(metrics, ignore_index=True).set_index('LAU_ID')
+
+    gdf_lau = gpd.read_file(lau_geometry_path).set_index('LAU_ID')
+    gdf_lau_metrics = gdf_lau.join(df_metrics)
+    out_path = os.path.join(out_dir, 'lau-overview-metrics.gpkg')
+    gdf_lau_metrics.reset_index().to_file(out_path, driver='GPKG')
+
+    gdf_nuts_metrics = _aggregate_to_nuts(gdf_lau_metrics)
+    out_path = os.path.join(out_dir, 'nuts-overview-metrics.gpkg')
+    gdf_nuts_metrics.reset_index().to_file(out_path, driver='GPKG')
+
+
+def _aggregate_to_nuts(metrics_lau: gpd.GeoDataFrame):
+    aggfunc = _sum_numeric_columns(metrics_lau)
+    aggfunc.pop('NUTS_ID')
+    metrics_nuts = metrics_lau.dissolve('NUTS_ID', aggfunc=aggfunc)
+
+    return metrics_nuts
+
+
+def _sum_numeric_columns(gdf):
+    numeric_cols = gdf.select_dtypes(include='number').columns
+    string_cols = gdf.select_dtypes(include='object').columns
+
+    agg_dict = {col: 'sum' for col in numeric_cols}
+    agg_dict.update({col: 'first' for col in string_cols})
+
+    return agg_dict
