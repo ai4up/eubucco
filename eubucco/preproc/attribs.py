@@ -43,12 +43,26 @@ def attrib_cleaning(data_dir: str, out_dir: str, dataset_type: str = None, type_
                 df = height_cleaning(df)
                 df = floors_cleaning(df)
 
+            df = _remove_duplicates(df)
             df = _encode_missing_in_string_columns(df)
             df.to_parquet(out_path)
 
         except Exception:
             logger.exception(
                 f'Exception occurred while cleaning attributes for file {f.name}. Skipping {f.name} and continuing...')
+
+
+def _remove_duplicates(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    '''Drop duplicates, keeping the row with the least NaN values'''
+    df['attr_nan_count'] = df[['height', 'type', 'age']].isna().sum(axis=1)
+    df = df.sort_values(by='attr_nan_count', ascending=True)
+
+    df = df.drop_duplicates(subset=['id_source'], keep='first')
+    df = df.drop_duplicates(subset=['geometry'], keep='first')
+
+    df = df.drop(columns=['attr_nan_count'])
+
+    return df
 
 
 def msft_height_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
@@ -109,10 +123,7 @@ def _estimate_height_from_floors(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 
 def _harmonize_type(source_type: pd.Series, type_mapping: Dict[str, str]) -> pd.Series:
-    '''
-        Maps buildings types from the source dataset to harmonized types for each building in a city.
-    '''
-
+    '''Maps buildings types from the source dataset to harmonized types for each building in a city.'''
     types = set(type_mapping.values())
     types.remove(np.nan)
     harm_type = source_type.map(type_mapping).astype(CategoricalDtype(categories=types))

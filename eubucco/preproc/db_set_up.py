@@ -390,16 +390,6 @@ def get_attribs(path_int_fol, country_name, dataset_name):
     len0 = len(bldg_attrib)
     print('Num attribs in raw file: {}'.format(len0))
 
-    # HARDcoded extra cases flanders
-    if dataset_name == 'flanders-gov':
-        # 1. cut all duplicates with same rows
-        bldg_attrib = bldg_attrib.drop_duplicates()
-        len1 = len(bldg_attrib)
-        # 2. solving it with groupby func and averaging per same ids
-        bldg_attrib = average_flanders_dupls(bldg_attrib)
-        len2 = len(bldg_attrib)
-        print('Extra case flanders, dropped {} duplicates and merged {}'.format(len0 - len1, len1 - len2))
-
     # Check for x-attribs
     try:
         bldg_x_attrib = pd.read_csv(path_x_attrib)
