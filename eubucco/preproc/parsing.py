@@ -1050,6 +1050,8 @@ def parse(path_to_param_file='/p/projects/eubucco/git-eubucco/database/preproces
     df_stats.to_csv(os.path.join(path_stats, p['dataset_name'] + '_stat.csv'), index=False)
     print(df_stats.iloc[0])
 
+    os.makedirs(os.path.join(path_output, p['country']),exist_ok=True)
+
     df_results_geom.to_csv(os.path.join(path_output, p['country'], p['dataset_name'] + '-3035_geoms.csv'), index=False)
     print('Geometries saved successfully.')
 

@@ -1,0 +1,14 @@
+- data_dir: /p/projects/eubucco/data/2-database-nuts-level-v1-gov
+  out_dir: /p/projects/eubucco/data/3-attrib-cleaning-v1-gov
+  dataset_type: gov
+  type_mapping_path: /p/projects/eubucco/data/0-raw-data/type-matches/building-type-categories-v1.csv
+  file_pattern: "^[A-Za-z]{2}[A-Za-z0-9]{3}\\.gpkg$"
+- data_dir: /p/projects/eubucco/data/2-database-nuts-level-v1-osm
+  out_dir: /p/projects/eubucco/data/3-attrib-cleaning-v1-osm
+  dataset_type: osm
+  type_mapping_path: /p/projects/eubucco/data/0-raw-data/type-matches/building-type-categories-v1.csv
+  file_pattern: "^[A-Za-z]{2}[A-Za-z0-9]{3}\\.gpkg$"
+- data_dir: /p/projects/eubucco/data/2-database-nuts-level-v1-msft
+  out_dir: /p/projects/eubucco/data/3-attrib-cleaning-v1-msft
+  dataset_type: msft
+  file_pattern: "^[A-Za-z]{2}[A-Za-z0-9]{3}\\.gpkg$"

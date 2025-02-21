@@ -10,6 +10,7 @@ from pathlib import Path
 
 from ufo_map.Utils.helpers import get_all_paths, arg_parser
 from preproc.parsing import get_params
+from utils.load import all_files
 
 # Declare global variables
 CRS_UNI = 'EPSG:3035'
@@ -603,3 +604,94 @@ def create_stats_main(country,
     else:
         df_out.to_csv(os.path.join(path_out, country + '_overview.csv'), index=False)
     print('Everything saved successully. Closing run.')
+
+
+def create_overview_laus(data_dir: str, out_dir: str, lau_geometry_path: str, pattern: str = r'.*\.parquet$'):
+    metrics = []
+    for f in all_files(data_dir, pattern):
+        metrics.append(_calculate_lau_metrics(f))
+
+    df_metrics = pd.concat(metrics, ignore_index=True).set_index('LAU_ID')
+
+    out_path = os.path.join(out_dir, 'lau-overview-metrics.gpkg')
+    gdf_metrics = _add_lau_geometry(df_metrics, lau_geometry_path)
+    gdf_metrics.reset_index().to_file(out_path, driver='GPKG')
+
+    out_path = os.path.join(out_dir, 'nuts-overview-metrics.gpkg')
+    gdf_nuts_metrics = _aggregate_to_nuts(gdf_metrics)
+    gdf_nuts_metrics.reset_index().to_file(out_path, driver='GPKG')
+
+
+def _calculate_lau_metrics(f: Path):
+    gdf = gpd.read_parquet(f)
+
+    if 'ioa' not in gdf.columns:
+        gdf['ioa'] = None
+
+    if 'filled_type' not in gdf.columns:
+        gdf['filled_type'] = None
+        gdf['filled_height'] = None
+        gdf['filled_age'] = None
+
+    gdf = gdf[gdf['ioa'].fillna(0) < 0.1]  # recommended intersection tolerance
+    gdf['area'] = gdf.geometry.area
+
+    region_metrics = gdf.groupby('LAU_ID').agg(
+        n=('area', 'count'),
+        n_gov=('dataset', lambda x: (x == 'gov').sum()),
+        n_osm=('dataset', lambda x: (x == 'osm').sum()),
+        n_msft=('dataset', lambda x: (x == 'msft').sum()),
+        n_type=('type', lambda x: x.notna().sum()),
+        n_height=('height', lambda x: x.notna().sum()),
+        n_age=('age', lambda x: x.notna().sum()),
+        n_residential=('type', lambda x: (x == 'residential').sum()),
+        n_commercial=('type', lambda x: (x == 'commercial').sum()),
+        n_industrial=('type', lambda x: (x == 'industrial').sum()),
+        n_agricultural=('type', lambda x: (x == 'agricultural').sum()),
+        n_public=('type', lambda x: (x == 'public').sum()),
+        n_others=('type', lambda x: (x == 'others').sum()),
+        area=('area', 'sum'),
+        area_gov=('area', lambda x: x.where(gdf['dataset'] == 'gov').sum()),
+        area_osm=('area', lambda x: x.where(gdf['dataset'] == 'osm').sum()),
+        area_msft=('area', lambda x: x.where(gdf['dataset'] == 'msft').sum()),
+        area_residential=('area', lambda x: x.where(gdf['type'] == 'residential').sum()),
+        area_commercial=('area', lambda x: x.where(gdf['type'] == 'commercial').sum()),
+        area_industrial=('area', lambda x: x.where(gdf['type'] == 'industrial').sum()),
+        area_agricultural=('area', lambda x: x.where(gdf['type'] == 'agricultural').sum()),
+        area_public=('area', lambda x: x.where(gdf['type'] == 'public').sum()),
+        area_others=('area', lambda x: x.where(gdf['type'] == 'others').sum()),
+        n_filled_type=('filled_type', 'sum'),
+        n_filled_height=('filled_height', 'sum'),
+        n_filled_age=('filled_age', 'sum'),
+        n_ioa_0=('ioa', lambda x: x.isna().sum()),
+        n_ioa_5=('ioa', lambda x: x.between(0, 0.05).sum()),
+        n_ioa_10=('ioa', lambda x: x.between(0.05, 0.1).sum()),
+    ).astype(int).reset_index()
+
+    region_metrics.insert(0, 'country', f.stem[:2])
+    region_metrics.insert(1, 'NUTS3_ID', f.stem)
+
+    return region_metrics
+
+
+def _add_lau_geometry(metrics: pd.DataFrame, geometry_path: str):
+    gdf_lau = gpd.read_file(geometry_path).set_index('LAU_ID')
+    return gdf_lau.join(metrics)
+
+
+def _aggregate_to_nuts(metrics_lau: gpd.GeoDataFrame):
+    aggfunc = _sum_numeric_columns(metrics_lau)
+    aggfunc.pop('NUTS_ID')
+    metrics_nuts = metrics_lau.dissolve('NUTS_ID', aggfunc=aggfunc)
+
+    return metrics_nuts
+
+
+def _sum_numeric_columns(gdf):
+    numeric_cols = gdf.select_dtypes(include='number').columns
+    string_cols = gdf.select_dtypes(include='object').columns
+
+    agg_dict = {col: 'sum' for col in numeric_cols}
+    agg_dict.update({col: 'first' for col in string_cols})
+
+    return agg_dict

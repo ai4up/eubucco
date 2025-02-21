@@ -8,7 +8,4 @@ from preproc.parsing import parse  # noqa: E402
 
 # parse(test_run=False)
 
-# microsoft
-# parse(path_output='/p/projects/eubucco/data/1-intermediary-outputs-osm-circeular',test_run=False)
-parse(path_output='/p/projects/eubucco/data/1-intermediary-outputs-microsoft-242',test_run=False)
-
+parse(path_output='/p/projects/eubucco/data/1-intermediary-outputs-v1-osm',test_run=False)

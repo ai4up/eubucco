@@ -7,6 +7,8 @@ import time
 from datetime import date
 import glob
 import ast
+from shapely.wkt import loads
+import shutil
 
 import ufo_map.Utils.helpers as ufo_helpers
 from ufo_map.Feature_engineering.urban_atlas import building_in_ua
@@ -14,6 +16,30 @@ from utils.extra_cases import average_flanders_dupls
 
 # declare global var
 CRS_UNI = 'EPSG:3035'
+
+FRANCE_OSM_PARTS = ['alsace-latest.osm',
+'aquitaine-latest.osm',
+'auvergne-latest.osm',
+'basse-normandie-latest.osm',
+'bourgogne-latest.osm',
+'bretagne-latest.osm',
+'centre-latest.osm',
+'champagne-ardenne-latest.osm',
+'corse-latest.osm',
+'franche-comte-latest.osm',
+'haute-normandie-latest.osm',
+'picardie-latest.osm',
+'lorraine-latest.osm',
+'rhone-alpes-latest.osm',
+'provence-alpes-cote-d-azur-latest.osm',
+'ile-de-france-latest.osm',
+'languedoc-roussillon-latest.osm',
+'limousin-latest.osm',
+'midi-pyrenees-latest.osm',
+'nord-pas-de-calais-latest.osm',
+'pays-de-la-loire-latest.osm',
+'poitou-charentes-latest.osm']
+
 
 # LOW
 """
@@ -32,65 +58,288 @@ def check_edge_cases(gadm_name):
     return gadm_name
 """
 
+# create new folder structure
+def create_buffer(country,
+                  path_db_set_up,
+                  path_out_buffer
+                  ):
+    
+    # TODO: deal with cases where country is incomplete
 
-def mask_gadm(gadm_file, dataset_name, country_name, path_inputs_parsing):
+    Path(os.path.join(path_out_buffer,country)).mkdir(parents=True, exist_ok=True)
+
+    # glob NUTS
+    path_nuts = glob.glob(os.path.join(path_db_set_up,country,'*.gpkg'))
+    print(path_nuts)
+
+    # load NUTS thing
+    buffer_gdf = gpd.read_file('/p/projects/eubucco/data/0-raw-data/lau/buffer_nuts.gpkg')
+
+    # each NUTS:
+    for path in path_nuts:
+
+        out_buffer = gpd.GeoDataFrame()
+        nuts = os.path.split(path)[-1].split('.')[0]
+        print(nuts)
+
+        nuts_plus_buffer = buffer_gdf[buffer_gdf.NUTS_ID == nuts]
+        nuts_plus_buffer['geometry'] = nuts_plus_buffer['geometry'].buffer(500)
+
+        # load relevant nuts one by one, join, add to gdf
+        print(nuts_plus_buffer['list_buffer_nuts'])
+        touching_nuts = ast.literal_eval(nuts_plus_buffer['list_buffer_nuts'].iloc[0])
+
+        if touching_nuts != []:
+            for touching_nut in touching_nuts:
+                
+                gdf_touching = gpd.read_file(os.path.join(path_db_set_up,country,touching_nut+'.gpkg'))
+                gdf_touching = gpd.sjoin(gdf_touching,nuts_plus_buffer)
+                out_buffer = pd.concat([out_buffer,gdf_touching])
+            
+            out_buffer.to_file(os.path.join(path_out_buffer,country,nuts+'_buffer.gpkg'))
+        else:
+            print(f'No touching nuts for {nuts}')
+
+    print('Done.')
+
+
+
+def merge_per_nuts(country,path_root_folder):
+
+    city_paths_dataset = ufo_helpers.get_all_paths(country, path_root_folder=path_root_folder)
+
+    nuts3 = set([x.split('/')[-2] for x in city_paths_dataset])
+    paths_per_nuts3 = {n:[lau for lau in city_paths_dataset if f'/{n}/' in lau]
+                    for n in nuts3}
+
+    list_missing_laus = []
+    list_missing_nuts = []
+
+    for n in nuts3:
+
+        nuts_folder_path = os.path.split(paths_per_nuts3[n][0])[0]
+
+        df_nuts3 = pd.DataFrame()
+        print(n)
+
+        for lau in paths_per_nuts3[n]:
+            try:
+                tmp = pd.read_csv(f'{lau}_geom.csv')
+                tmp = pd.merge(tmp,pd.read_csv(f'{lau}_attrib.csv',),on='id')
+                df_nuts3 = pd.concat([df_nuts3,tmp])
+            except:
+                print(f'{lau} missing')
+                list_missing_laus.append(lau)
+
+        try:
+            df_nuts3 = gpd.GeoDataFrame(df_nuts3, 
+                                geometry=df_nuts3['geometry'].apply(loads),
+                                crs=3035)
+            df_nuts3.to_file(f'{nuts_folder_path}.gpkg')
+        
+        except:
+            list_missing_nuts.append(n)
+            print(f'WARNING: NUTS {n} missing')        
+
+        if os.path.exists(nuts_folder_path): shutil.rmtree(nuts_folder_path)
+
+    print('================')
+    print('All files merged')
+    print('Missing laus:')
+    print(list_missing_laus)
+    print('Missing nuts:')
+    print(list_missing_nuts)
+
+
+def merge_per_nuts_fix_gov(country,path_root_folder):
+
+    city_paths_dataset = ufo_helpers.get_all_paths(country, path_root_folder=path_root_folder)
+
+    nuts3 = set([x.split('/')[-2] for x in city_paths_dataset])
+    paths_per_nuts3 = {n:[lau for lau in city_paths_dataset if f'/{n}/' in lau]
+                    for n in nuts3}
+
+    list_missing_laus = []
+    list_missing_nuts = []
+
+    for n in nuts3:
+
+        nuts_folder_path = os.path.split(paths_per_nuts3[n][0])[0]
+
+        df_nuts3 = pd.DataFrame()
+        print(n)
+
+        for lau in paths_per_nuts3[n]:
+
+            try:
+                paths_parts = glob.glob(lau+'*')
+
+                if country=='france' and 'gov' in path_root_folder:
+                    # take both parts
+                    parts = list(set(["_".join(path.split('_')[-2:]) for path in paths_parts]))
+                else:
+                    parts = list(set([path.split('_')[-1] for path in paths_parts]))
+                
+                for part in parts:
+                    tmp = pd.read_csv(f'{lau}_geom_'+part)
+                    tmp = pd.merge(tmp,pd.read_csv(f'{lau}_attrib_'+part),on='id')
+                    df_nuts3 = pd.concat([df_nuts3,tmp])
+
+            except:
+                # print(f'{lau} missing')
+                list_missing_laus.append(lau)
+
+        try:
+            df_nuts3 = gpd.GeoDataFrame(df_nuts3, 
+                                geometry=df_nuts3['geometry'].apply(loads),
+                                crs=3035)
+            df_nuts3.to_file(f'{nuts_folder_path}.gpkg')
+        
+        except:
+            list_missing_nuts.append(n)
+            print(f'WARNING: NUTS {n} missing')        
+
+        # if os.path.exists(nuts_folder_path): shutil.rmtree(nuts_folder_path)
+
+    print('================')
+    print('All files merged')
+    print('Missing laus:')
+    print(list_missing_laus)
+    print('Missing nuts:')
+    print(list_missing_nuts)
+
+
+def city_paths_from_lau(path_db_folder,country,LAU_NUTS_extra):
+        LAU_NUTS_extra = LAU_NUTS_extra[LAU_NUTS_extra.country == country]
+        return [os.path.join(path_db_folder, country, nuts3, city)
+                for nuts3, city in zip(
+                                       LAU_NUTS_extra.NUTS_ID_3,
+                                       LAU_NUTS_extra.LAU_ID)]
+
+def create_dirs(path_db_folder,country,path_lau_extra):
+
+        path_root = os.path.join(path_db_folder,country)
+        if os.path.isdir(path_root):
+            print('Folder structure exist already. Skipping folder creation.')
+        else:
+            print('Creating folder structure for the country')
+            LAU_NUTS_extra = pd.read_csv(path_lau_extra)
+            dir_paths = city_paths_from_lau(path_db_folder,country,LAU_NUTS_extra)
+            for lau_path in dir_paths:
+                Path(os.path.split(lau_path)[0]).mkdir(parents=True, exist_ok=True)
+            city_paths_to_txt(dir_paths,country,path_db_folder)
+
+
+def mask_lau(lau_nuts,inputs_parsing, dataset_name, country):
     """
-    Function to create a temporary gadm file that only consists of gadm bounds of the specific gov or osm dataset.
-    Case 1: one dataset per country -> no masking, we take all gadm bounds for this countryname
-    Case 2: current dataset is remaining one of several datasets in a country (f.e. austria-osm), marked with "rest" in gadm_level and gadm_name col,
-            exclude all gadm bounds of regions/cities of other datasets in this country
-    Case 3: current dataset is one of several in a country, take only gadm bound relevant for this dataset
-
+    # mask the NUTS that correspond to a dataset.
     """
-    inputs_parsing = pd.read_csv(path_inputs_parsing)
-
-    # get gadm_level and gadm_name
-    gadm_level = inputs_parsing.loc[inputs_parsing.dataset_name == dataset_name].gadm_level.values[0]
-    gadm_name = inputs_parsing.loc[inputs_parsing.dataset_name == dataset_name].gadm_name.values[0]
-
-    # check if gadm_level is 'all'; then no value is given and we mask all
-    if gadm_level == 'all':
-        gadm_file_temp = gadm_file
-    # if rest, mask all apart from the other gov datasets
-    elif gadm_level == 'rest':
-        # read in the gadm_level and gadm_name info from inputs_parsing
-        gadm_level = list(inputs_parsing[inputs_parsing.country == country_name].gadm_level)
-        gadm_name = list(inputs_parsing[inputs_parsing.country == country_name].gadm_name)
-        # exclude the rest command from the list
-        gadm_level = ([lev for lev in gadm_level if lev != 'rest'])
-        gadm_name = [nam for nam in gadm_name if nam != 'rest']
-        # assign to GADM_temp all regions and cities apart from the ones in gadm_level and gad_names
-        gadm_file_temp = gadm_file
-        for i in range(len(gadm_level)):
-            # only if gadm_level is not nan (f.e. because we left out friuli in italy,
-            # but its still in inputs-parsing.csv)
-            if not is_nan(gadm_level[i]):
-                # check for potential edge cases, f.e. Thüringen
-                #gadm_name[i] = check_edge_cases(gadm_name[i])
-                # mask
-                gadm_file_temp = gadm_file_temp.loc[gadm_file_temp[gadm_level[i]] != gadm_name[i]]
-
-    # in case gadm_level is nan - raise error
-    elif is_nan(gadm_level):
-        raise ValueError("No gadm_level provided")
-
-    # edge case to fill up empty cities in italy or spain
-    elif dataset_name in ['italy-osm', 'spain-osm']:
-        gadm_name = ast.literal_eval(gadm_name)
-        gadm_file_temp = gadm_file.loc[gadm_file[gadm_level].isin(gadm_name)]
-
-    # if value given, sjoin only with regions/cities of gov dataset
+    # hardcoded UK / northern ireland weird distribution in Geofabrik
+    if dataset_name == 'northern-ireland-osm':
+        nuts_file_temp = lau_nuts[lau_nuts.NUTS_ID_region == 'UKN']
     else:
-        #gadm_name = check_edge_cases(gadm_name)
-        gadm_file_temp = gadm_file.loc[gadm_file[gadm_level] == gadm_name]
-    return gadm_file_temp
+        # get lau_level and lau_name
+        nuts_level = inputs_parsing.loc[inputs_parsing.dataset_name == dataset_name].nuts_level.values[0]
+        nuts_name = inputs_parsing.loc[inputs_parsing.dataset_name == dataset_name].nuts_name.values[0]
+        is_has_lau_nuts3 = inputs_parsing.loc[inputs_parsing.dataset_name == dataset_name].is_has_lau_nuts3.values[0]
+
+        # check if gadm_level is 'all'; then no value is given and we mask all
+        if nuts_level == 'all':
+            nuts_file_temp = lau_nuts[lau_nuts.country==country]
+            # hardcoded UK / northern ireland weird distribution in Geofabrik
+            if dataset_name == 'uk-osm':
+                nuts_file_temp = lau_nuts[lau_nuts.NUTS_ID_region != 'UKN']
+
+        # if region level,
+        elif nuts_level in ['nuts2','nuts1']:
+            if is_has_lau_nuts3 == 'no':
+
+                if dataset_name not in ('spain-osm','trentino-alto-adige-gov'):
+                    # we mask the whole region (two regions taken from osm)
+                    nuts_file_temp = lau_nuts[lau_nuts.NUTS_ID_region == nuts_name]
+                else:
+                    nuts_file_temp = lau_nuts[lau_nuts.NUTS_ID_region.isin(ast.literal_eval(nuts_name))]
+
+            else: raise ValueError("is_has_lau_nuts3 inconsistent")
+
+        elif nuts_level == 'rest':
+
+            # remove regions
+            remove = inputs_parsing[(inputs_parsing.country == country) &
+                         (inputs_parsing.nuts_level.isin(['nuts2','nuts1']))]['nuts_name'].values
+
+
+            # handle cases with multiple regions in a nuts_name
+            processed_remove = []
+            for item in remove:
+                if '[' in item: processed_remove.extend(ast.literal_eval(item))
+                else: processed_remove.append(item)
+
+            nuts_file_temp = lau_nuts[(lau_nuts.country == country) &
+                                        ~(lau_nuts.NUTS_ID_region.isin(processed_remove))]
+
+            if is_has_lau_nuts3 == 'has_lau':
+                # additionally remove this lau
+                remove = inputs_parsing[(inputs_parsing.country == country) &
+                                (inputs_parsing.nuts_level == 'lau')]['nuts_name'].values
+
+                nuts_file_temp = nuts_file_temp[~(nuts_file_temp.LAU_ID.isin(remove))]
+
+            if is_has_lau_nuts3 == 'has_nuts3':
+                # additionally remove a nuts
+                remove = inputs_parsing[(inputs_parsing.country == country) &
+                                (inputs_parsing.nuts_level == 'nuts3')]['nuts_name'].values
+
+                nuts_file_temp = nuts_file_temp[~(nuts_file_temp.NUTS_ID.isin(remove))]
+
+        elif nuts_level == 'nuts3':
+            # mask just the nuts3
+            nuts_file_temp = lau_nuts[(lau_nuts.NUTS_ID == nuts_name)]
+
+        elif nuts_level == 'lau':
+            # mask just the nuts3
+            nuts_file_temp = lau_nuts[(lau_nuts.LAU_ID == nuts_name)]
+
+        else: raise ValueError("nuts_level value is incorrect.")
+
+    return nuts_file_temp
+
+
+def test_lau_mask(inputs_parsing,lau_nuts):
+    """
+       Ensures that all masks strictly reproduce
+       all LAUs and otherwise returns missing or duplicated LAUs
+    """
+
+    inputs_parsing = inputs_parsing.loc[0:62] #hardcoded
+
+    test_results = pd.DataFrame()
+
+    for _,row in inputs_parsing.iterrows():
+        # print(row.dataset_name)
+        lau = db_set_up.mask_lau(lau_nuts,inputs_parsing, row.dataset_name, row.country)
+        test_results = pd.concat([test_results,lau])
+
+    print(f'Similar lengths: {len(test_results) == len(lau_nuts)}')
+    print('----------------')
+    print(f'length test_results: {len(test_results)}')
+    print(f'length lau_nuts: {len(lau_nuts)}')
+    print('----------------')
+
+    duplicates = test_results[test_results.duplicated()]
+    missing_rows = lau_nuts[~lau_nuts.LAU_ID.isin(test_results.LAU_ID)]
+
+    print(f'length duplicates: {len(duplicates)}')
+    print(f'length missing rows: {len(missing_rows)}')
+
+    return duplicates,missing_rows
 
 
 def is_nan(x):
     return (x != x)
 
 
-def get_city_per_bldg(gdf_bldg, gdf_GADM):
+def get_city_per_bldg(gdf_bldg, lau):
     """
     uses the ufo-maps urban atlas function to allocate check for each bldg with which gadm
     bound it has largest intersection.
@@ -98,13 +347,13 @@ def get_city_per_bldg(gdf_bldg, gdf_GADM):
 
     # get list of geoms for calculations
     geometries = list(gdf_bldg.geometry)
-    gadm_geometries = list(gdf_GADM.geometry)
-    # get sindex of gadm geoms
-    gadm_sindex = gdf_GADM.sindex
-    # classes are the list of cities in gadm file
-    gadm_classes = list(gdf_GADM.city_name)
+    lau_geometries = list(lau.geometry)
+    # get sindex of lau geoms
+    lau_sindex = lau.sindex
+    # classes are the list of cities in lau file
+    lau_classes = list(lau.LAU_ID)
     # get list with one city per bldg
-    bldg_in_city_list = building_in_ua(geometries, gadm_sindex, gadm_geometries, gadm_classes)
+    bldg_in_city_list = building_in_ua(geometries, lau_sindex, lau_geometries, lau_classes)
     return bldg_in_city_list
 
 
@@ -132,20 +381,14 @@ def get_attribs(path_int_fol, country_name, dataset_name):
     path_attrib = os.path.join(path_int_fol, country_name, dataset_name + '_attrib.csv')
     path_x_attrib = os.path.join(path_int_fol, country_name, dataset_name + '_extra_attrib.csv')
 
+    if dataset_name == 'northern-ireland-osm':
+        path_attrib = os.path.join(path_int_fol, 'ireland', 'ireland-osm_attrib.csv') 
+        path_x_attrib = os.path.join(path_int_fol,'ireland-osm_extra_attrib.csv')
+
     # read in attrib file
     bldg_attrib = pd.read_csv(path_attrib)
     len0 = len(bldg_attrib)
     print('Num attribs in raw file: {}'.format(len0))
-
-    # HARDcoded extra cases flanders
-    if dataset_name == 'flanders-gov':
-        # 1. cut all duplicates with same rows
-        bldg_attrib = bldg_attrib.drop_duplicates()
-        len1 = len(bldg_attrib)
-        # 2. solving it with groupby func and averaging per same ids
-        bldg_attrib = average_flanders_dupls(bldg_attrib)
-        len2 = len(bldg_attrib)
-        print('Extra case flanders, dropped {} duplicates and merged {}'.format(len0 - len1, len1 - len2))
 
     # Check for x-attribs
     try:
@@ -170,144 +413,9 @@ def get_attribs(path_int_fol, country_name, dataset_name):
     return bldg_attrib, bldg_x_attrib, dict_attrib_nums
 
 
-def create_new_df_source(df_attrib, dataset_name):
-    # create new csv to store sources per building (row)
-    df_sources = pd.DataFrame()
-    df_sources['id'] = df_attrib['id']
-    df_sources['height'] = df_attrib['source_file']
-    df_sources['type_source'] = df_attrib['source_file']
-    df_sources['type'] = df_attrib['source_file']
-    df_sources['age'] = df_attrib['source_file']
-    df_sources['floors'] = df_attrib['source_file']
-    df_sources['dataset_name'] = dataset_name
-
-    print('Checking for duplicates in source files')
-    df_sources = remove_dupls(df_sources, 'df_sources', 'id')
-
-    return df_sources
-
-
-def fetch_GADM_info_country(country_name,
-                            levels=None,
-                            path_sheet='gadm_table.csv',
-                            path_root_folder='/p/projects/eubucco/data/0-raw-data/gadm'):
-    '''
-        Goes in the GADM sheet and picks up the info.
-
-        Returns:
-
-        * GADM_file - gpd.GeoDataFrame
-        * country_name - string
-        * level_city or all_levels - string or list of string
-        * local crs - string ('EPSG:XXXX')
-    '''
-    # open sheet
-    GADM_sheet = pd.read_csv(os.path.join(path_root_folder, path_sheet))
-
-    # filter by country name
-    GADM_country = GADM_sheet[GADM_sheet['country_name'] == country_name]
-
-    # get GADM city file
-    GADM_file = gpd.read_file(
-        os.path.join(
-            path_root_folder,
-            GADM_country.country_name.iloc[0],
-            'gadm36_{}_{}.shp'.format(
-                GADM_country.gadm_code.iloc[0],
-                GADM_country.level_city.iloc[0])),
-        crs=4326)
-
-    if levels == 'all':
-        return(GADM_file, GADM_country.country_name.iloc[0], eval(GADM_country.all_levels.iloc[0]), GADM_country.local_crs.iloc[0])
-    else:
-        return(GADM_file, GADM_country.country_name.iloc[0], GADM_country.level_city.iloc[0], GADM_country.local_crs.iloc[0])
-
-
-def clean_GADM_city_names(GADM_file, country_name, level_city):
-    '''
-        Handles cases in GADM when several cities in the same country have
-        the same name. First tries to create a new name "city_name (region_name)",
-        and if several cities have the same name within a region, then adds
-        an index at the end of the name to differenciate them.
-
-        Returns: cleaned gpd.GeoDataFrame
-    '''
-
-    # select useful columns
-    if country_name in ['cyprus', 'ireland']:
-        GADM_file = GADM_file[['NAME_1', 'geometry']]
-        GADM_file.insert(0, 'region_name', GADM_file.NAME_1)
-    else:
-        GADM_file = GADM_file[['NAME_1', f'NAME_{level_city}', 'geometry']]
-    GADM_file.columns = ['region_name', 'city_name', 'geometry']
-    GADM_file['country_name'] = country_name
-
-    # replace "/" in GADM_file, region names
-    if GADM_file.city_name.str.contains("/").any():
-        GADM_file['city_name'] = GADM_file.city_name.str.replace("/", "-")
-
-    # replace "/" in GADM_file, city names
-    if GADM_file.region_name.str.contains("/").any():
-        GADM_file['region_name'] = GADM_file.region_name.str.replace("/", "-")
-
-    # deal with duplicates
-    g_d = GADM_file[GADM_file.duplicated(subset=['city_name'])]
-    # add region_name to city name where we have duplicates
-    g_d['city_name'] = g_d['city_name'] + ' (' + g_d['region_name'] + ')'
-    # in cases where we have more than one duplicated; add orignal index as str behind dupl
-    if country_name in ['germany', 'spain']:
-        g_d_2 = g_d[g_d.duplicated(subset=['city_name'])]
-        g_d = g_d.drop(g_d_2.index)
-        g_d_2['city_name'] = g_d_2['city_name'] + '_' + g_d_2.index.map(str)
-        g_d = g_d.append(g_d_2)
-    GADM_file = GADM_file.drop(g_d.index).append(g_d).loc[GADM_file.city_name.apply(type) == str]
-    print('-----')
-    print('GADM duplicates after cleaning:')
-    print(GADM_file.loc[GADM_file.duplicated()])
-    print('country name: ', country_name)
-
-    return(GADM_file)
-
-
-def prepare_GADM(GADM_file, local_crs):
-    '''
-        Reproject gadm to local crs and creates several transformations of the boundary
-        encoded as WKT strings.
-
-        Returns: gpd.GeoDataFrame
-    '''
-    GADM_file['boundary_GADM_WGS84'] = GADM_file.geometry.apply(lambda x: x.wkt)
-
-    GADM_file_local = GADM_file.to_crs(local_crs)
-
-    GADM_file_local['boundary_GADM'] = GADM_file_local.geometry.apply(lambda x: x.wkt)
-    GADM_file_local['boundary_GADM_500m_buffer'] = GADM_file_local.geometry.buffer(500).apply(lambda x: x.wkt)
-    GADM_file_local['boundary_GADM_2k_buffer'] = GADM_file_local.geometry.buffer(2000).apply(lambda x: x.wkt)
-
-    GADM_file_local = GADM_file_local.drop(columns=['geometry'])
-
-    print('GADM prepared.')
-
-    return(GADM_file_local)
-
-
-def city_paths_from_gadm(path_db_folder,country,GADM_file):
-    if country in ['cyprus', 'ireland']:
-        return [os.path.join(path_db_folder, country, city, city) for city in GADM_file.city_name]
-    else:
-        return [os.path.join(path_db_folder, country, region, city, city) for region, city in zip(
-                                                                                    GADM_file.region_name,
-                                                                                    GADM_file.city_name)]
-
-
-def create_folders(list_city_paths):
-    for city_path in list_city_paths:
-        Path(os.path.split(city_path)[0]).mkdir(parents=True, exist_ok=False)
-
-
 def city_paths_to_txt(city_paths,country,path_db_folder):
     path_file = os.path.join(path_db_folder, country, f"paths_{country}.txt")
-    if os.path.isfile(path_file): 
+    if os.path.isfile(path_file):
         add_paths_to_file(city_paths,path_file,country,path_db_folder)
     else:
         write_to_file(path_file,city_paths,'w')
@@ -326,31 +434,11 @@ def write_to_file(path_file,city_paths,mode):
         for element in city_paths:
             f.write(element + "\n")
 
-
-def create_city_boundary_files(GADM_file,
-                               country_name,
-                               list_city_paths):
-    '''
-        Creates for all cities in a country based on GADM a csv with to store city-level
-        information about a city together with its geometry
-
-        Returns: None
-
-         !!TODO!!:
-        * add support for incomplete OSM countries
-    '''
-    for city_path in list_city_paths:
-        city = GADM_file[GADM_file.city_name == os.path.split(city_path)[-1]]
-        city.to_csv(city_path + '_boundary.csv', index=False)
-
-    print('City boundary files created.')
-
-
 def create_city_bldg_geom_files(gdf_bldg,
-                                gadm_file,
+                                lau,
                                 list_city_paths,
-                                only_region,
-                                part
+                                part,
+                                dataset_name
                                 ):
     '''
         Matches a processed building footprints dataset with GADM city boundaries and saves two csv with geom/id for
@@ -372,6 +460,7 @@ def create_city_bldg_geom_files(gdf_bldg,
 
     # counting initial num bldgs and dropping duplicates
     n_bldg_start = len(gdf_bldg)
+
     gdf_bldg = remove_dupls(gdf_bldg, 'bldg geoms', 'id')
     # remove invalid geoms from gdf
     n_invalid = len(gdf_bldg.loc[~gdf_bldg.is_valid])
@@ -379,57 +468,41 @@ def create_city_bldg_geom_files(gdf_bldg,
     n_bldg_start2 = len(gdf_bldg)
 
     # alocate bldgs on boundaries based on max intersecting area
-    # prepare GADM file for intersecting with gdf_bldg
-    gdf_gadm_file = gadm_file[['city_name', 'boundary_GADM']].set_geometry(
-        gadm_file['boundary_GADM'].apply(wkt.loads)).set_crs(CRS_UNI)
     # append to gdf_bldg
-    gdf_bldg['city_name'] = get_city_per_bldg(gdf_bldg, gdf_gadm_file)
-    # do second sjoin on larger buffer
-    gdf_bldg_buff = gpd.sjoin(gdf_bldg, gadm_file[['city_name', 'boundary_GADM_500m_buffer']].set_geometry(
-        gadm_file['boundary_GADM_500m_buffer'].apply(wkt.loads)).set_crs(gadm_file.crs)).drop(columns=['index_right'])
-    # be aware that at this stage gdf_bldg.city_name_left contais nan values
-    # for bldgs that do not intersect with any gadm bound
+    gdf_bldg['LAU_ID'] = get_city_per_bldg(gdf_bldg, lau)
 
     print('Num bldgs after sjoin: {}'.format(len(gdf_bldg)))
 
-    if only_region is not None:
-        list_city_paths = [path for path in list_city_paths if only_region in path]
-        list_city_names = [os.path.split(city_path)[-1] for city_path in list_city_paths]
-        discarded_cities = [city_name for city_name in set(gdf_bldg.city_name) if city_name not in list_city_names]
-        if discarded_cities != []:
-            print(f'Discarded buildings from cities: {discarded_cities}')
-
-    else:
-        list_city_names = [os.path.split(city_path)[-1] for city_path in list_city_paths]
+    list_LAU_IDs = [os.path.split(city_path)[-1] for city_path in list_city_paths]
 
     n_bldg_end = 0
 
     print('Creating building geom city files...')
     # intialise list with cities where we don't have bldgs
-    list_saved_cities = []
+    list_saved_LAUs = []
     list_saved_paths = []
-    for city_name, city_path in zip(list_city_names, list_city_paths):
+    for LAU_ID, city_path in zip(list_LAU_IDs, list_city_paths):
 
         # take only bldgs of city
-        city = gdf_bldg.loc[gdf_bldg.city_name == city_name]
+        city = gdf_bldg.loc[gdf_bldg.LAU_ID == LAU_ID]
 
         # if bldgs in city
         if len(city) != 0:
-            # take all bldgs that intersect with city buffer
-            city_plus_buffer = gdf_bldg_buff.loc[gdf_bldg_buff.city_name_right == city_name]
-            # remove all bldgs that are within city bounds
-            buffer_area = city_plus_buffer.loc[city_plus_buffer.city_name_left != city_name]
 
             n_bldg_end += len(city)
 
+            if 'france-gov' in dataset_name:
+                ufo_helpers.save_csv_wkt(city[['id', 'geometry','LAU_ID']], 
+                                         f"{city_path}_geom_{dataset_name.split('-')[-1]}_{part}.csv")
+            else:
             # save bldgs of city and bldgs in buffer
-            ufo_helpers.save_csv_wkt(city[['id', 'geometry']], f'{city_path}_geom_{part}.csv')
-            ufo_helpers.save_csv_wkt(buffer_area[['id', 'geometry']], f'{city_path}_buffer_{part}.csv')
-            list_saved_cities.append(city_name)
+                ufo_helpers.save_csv_wkt(city[['id', 'geometry','LAU_ID']], f'{city_path}_geom_{part}.csv')
+
+            list_saved_LAUs.append(LAU_ID)
             list_saved_paths.append(city_path)
 
     # remove all bldgs that did not match with any gadm bound (either nan or not in list city names)
-    gdf_bldg_out = gdf_bldg.loc[gdf_bldg.city_name.isin(list_city_names)].drop(columns='geometry')
+    gdf_bldg_out = gdf_bldg.loc[gdf_bldg.LAU_ID.isin(list_LAU_IDs)].drop(columns='geometry')
 
     print('--')
     print('Chunk num bldgs: {}'.format(n_bldg_start))
@@ -437,10 +510,10 @@ def create_city_bldg_geom_files(gdf_bldg,
     print('Chunk num after remove dupls & invalid geoms: {}'.format(n_bldg_start2))
     print('Num bldgs in gdf: {}, Num bldgs outside of gadm: {}, Num bldgs allocated to cities: {}'.format(
         len(gdf_bldg_out), len(gdf_bldg) - len(gdf_bldg_out), n_bldg_end))
-    print('Geoms created in {} cities.'.format(len(list_saved_cities)))
+    print('Geoms created in {} cities.'.format(len(list_saved_LAUs)))
     print('--')
 
-    return(gdf_bldg_out, list_saved_cities, list_saved_paths, n_bldg_start2, n_bldg_end)
+    return(gdf_bldg_out, list_saved_LAUs, list_saved_paths, n_bldg_start2, n_bldg_end)
 
 
 def create_city_bldg_attrib_files(gdf_bldgs,
@@ -448,7 +521,8 @@ def create_city_bldg_attrib_files(gdf_bldgs,
                                   file_type,
                                   list_saved_names,
                                   list_saved_paths,
-                                  part):
+                                  part,
+                                  dataset_name):
     '''
         Matches a processed building attributes dataset by ids with GADM city names and saves a csv with
         ids and attributes.
@@ -465,39 +539,16 @@ def create_city_bldg_attrib_files(gdf_bldgs,
     bldg_attrib = bldg_attrib.merge(gdf_bldgs, on='id', validate='1:1')
     raise_if_inconsistent(gdf_bldgs, bldg_attrib, file_type)
 
-    for city_name, city_path in zip(list_saved_names, list_saved_paths):
+    for LAU_ID, city_path in zip(list_saved_names, list_saved_paths):
         # save in parts
-        bldg_attrib_city = bldg_attrib[bldg_attrib.city_name == city_name].drop(columns='city_name')
-        bldg_attrib_city.to_csv(f'{city_path}_{file_type}_{part}.csv', index=False)
+        bldg_attrib_city = bldg_attrib[bldg_attrib.LAU_ID == LAU_ID].drop(columns='LAU_ID')
+        
+        if 'france-gov' in dataset_name:
+            bldg_attrib_city.to_csv(f"{city_path}_{file_type}_{dataset_name.split('-')[-1]}_{part}.csv", index=False)
+        else:
+            bldg_attrib_city.to_csv(f'{city_path}_{file_type}_{part}.csv', index=False)
 
     print('City attributes created for {} bldgs'.format(len(bldg_attrib)))
-
-
-def create_source_files(gdf_bldgs,
-                        df_sources,
-                        list_saved_names,
-                        list_saved_paths,
-                        part):
-    '''
-        Matches a processed building attributes sources dataset by ids with GADM city names and saves a csv with
-        ids and sources for geom, attribs and extra attribs.
-
-        Returns: None
-
-        !!TODO!!:
-            * add support for importing neighboring regions within a country for getting buildings within buffer.
-    '''
-    print('Creating attribute source files per city...')
-    # merge chunk with df_source on id
-    df_sources = df_sources.merge(gdf_bldgs, on='id', validate='1:1')
-    raise_if_inconsistent(gdf_bldgs, df_sources, 'attrib_source')
-
-    # save per city
-    for city_name, city_path in zip(list_saved_names, list_saved_paths):
-        df_sources_city = df_sources[df_sources.city_name == city_name].drop(columns='city_name')
-        df_sources_city.to_csv(f'{city_path}_attrib_source_{part}.csv', index=False)
-
-    print('City attribute sources created for {} bldgs'.format(len(df_sources)))
 
 
 def raise_if_inconsistent(gdf_1, gdf_2, file_type):
@@ -623,15 +674,11 @@ def db_set_up(country,
             dataset_name,
             path_db_folder,
             chunksize=int(5E5),
-            only_region=None,
-            only_geometries = None,
-            overwrite=False,
-            boundaries=True,
-            bldgs=True,
             path_stats='/p/projects/eubucco/stats/2-db-set-up',
             path_inputs_parsing='/p/projects/eubucco/git-eubucco/database/preprocessing/1-parsing/inputs-parsing.csv',
-            path_int_fol='/p/projects/eubucco/data/1-intermediary-outputs',
-            path_root_folder_GADM = '/p/projects/eubucco/data/0-raw-data/gadm'
+            path_int_fol='/p/projects/eubucco/data/1-intermediary-outputs-v0_1',
+            path_lau = '/p/projects/eubucco/data/0-raw-data/lau/lau_nuts.gpkg',
+            path_lau_extra = '/p/projects/eubucco/data/0-raw-data/lau/lau_nuts_extra.csv'
             ):
     '''
 
@@ -652,110 +699,93 @@ def db_set_up(country,
     '''
     start = time.time()
 
-    # get file gadm, import gadm, get proper crs, get country info
-    GADM_file, country_name, level_city, _ = fetch_GADM_info_country(country,
-                                                                     path_root_folder=path_root_folder_GADM)
-    GADM_file = clean_GADM_city_names(GADM_file, country_name, level_city)
-    GADM_file = prepare_GADM(GADM_file, CRS_UNI)
+    # create folders for a country if this is the first part ran
+    create_dirs(path_db_folder,country,path_lau_extra)
+    city_paths_dataset = ufo_helpers.get_all_paths(country, path_root_folder=path_db_folder)
 
-    # only take gadm bounds and cities from dataset_name
-    gadm_bounds_dataset = mask_gadm(GADM_file, dataset_name, country_name, path_inputs_parsing)
-    city_paths_dataset = city_paths_from_gadm(path_db_folder,country_name,gadm_bounds_dataset)
-
-    if not overwrite:
-        if os.path.isdir(city_paths_dataset[0]):
-            raise Exception(f'Folders for {dataset_name} already exist. Aborting...')
-        create_folders(city_paths_dataset)
-        city_paths_to_txt(city_paths_dataset,country,path_db_folder)
-
-    if boundaries:
-        create_city_boundary_files(gadm_bounds_dataset, country_name, city_paths_dataset)
-
-    if bldgs:
-        n_bldg_start_sum = 0
-        n_bldg_end_sum = 0
-        list_saved_names_sum = []
-        list_saved_paths_sum = []
-
-        # reading in gov geoms as chunks
-        geom_filename = os.path.join(path_int_fol, country_name, dataset_name + '-3035_geoms.csv')
-        chunks = pd.read_csv(geom_filename, chunksize=chunksize)
-
-        # reading in attribs and x-attribs files; checking for duplicates and creating source files
-        if only_geometries: 
-            dict_num_attribs={}
-        else: 
-            df_bldg_attrib, df_bldg_x_attrib, dict_num_attribs = get_attribs(path_int_fol, 
-                                                                            country_name, dataset_name)
-            try:
-                source_filename = os.path.join(path_int_fol, country_name, dataset_name + '_attrib_sources.csv')
-                df_sources = pd.read_csv(source_filename)
-            except BaseException:
-                df_sources = pd.DataFrame()
-
-            if df_sources.empty:
-                print('no_source file found - creating new one')
-                df_sources = create_new_df_source(df_bldg_attrib, dataset_name)
-            else:
-                df_sources['dataset_name'] = dataset_name
-                print('Checking for duplicates in source files')
-                df_sources = remove_dupls(df_sources, 'df_sources', 'id')
+    # only take lau bounds and cities from dataset_name
+    if dataset_name in FRANCE_OSM_PARTS:
+        path_lau = '/p/projects/eubucco/data/0-raw-data/lau/lau_nuts_fr_osm.gpkg'
+        path_lau_extra = '/p/projects/eubucco/data/0-raw-data/lau/lau_nuts_extra_fr_osm.csv'
+    lau_nuts = ufo_helpers.load_lau(path_lau, path_lau_extra)
+    inputs_parsing = pd.read_csv(path_inputs_parsing)
+    if 'france-gov' in dataset_name: 
+        lau = mask_lau(lau_nuts, inputs_parsing, 'france-gov', country)
+    else:
+        lau = mask_lau(lau_nuts, inputs_parsing, dataset_name, country)
 
 
-        for idx, chunk in enumerate(chunks):
-            print('-----')
-            print('chunk: ', idx)
+    n_bldg_start_sum = 0
+    n_bldg_end_sum = 0
+    list_saved_LAUs_sum = []
+    list_saved_paths_sum = []
 
-            gdf = gpd.GeoDataFrame(chunk, geometry=chunk['geometry'].apply(wkt.loads), crs=CRS_UNI)
+    # reading in gov geoms as chunks
+    if dataset_name == 'northern-ireland-osm':
+        geom_filename = os.path.join(path_int_fol, 'ireland', 'ireland-osm-3035_geoms.csv')
+    else:    
+        geom_filename = os.path.join(path_int_fol, country, dataset_name + '-3035_geoms.csv')
+    
+    chunks = pd.read_csv(geom_filename, chunksize=chunksize)
 
-            gdf_bldgs, list_saved_names, list_saved_paths, n_bldg_start, n_bldg_end = create_city_bldg_geom_files(
-                gdf, gadm_bounds_dataset, city_paths_dataset, only_region, idx)
+    # reading in attribs and x-attribs files; checking for duplicates
+    df_bldg_attrib, df_bldg_x_attrib, dict_num_attribs = get_attribs(path_int_fol, country, dataset_name)
 
-            if not only_geometries:
+    for idx, chunk in enumerate(chunks):
+        print('-----')
+        print('chunk: ', idx)
+
+        gdf = gpd.GeoDataFrame(chunk, geometry=chunk['geometry'].apply(wkt.loads), crs=CRS_UNI)
+
+        gdf_bldgs, list_saved_LAUs, list_saved_paths, n_bldg_start, n_bldg_end = create_city_bldg_geom_files(
+            gdf, lau, city_paths_dataset, idx, dataset_name)
+
+        create_city_bldg_attrib_files(gdf_bldgs,
+                                        df_bldg_attrib,
+                                        'attrib',
+                                        list_saved_LAUs,
+                                        list_saved_paths,
+                                        idx,
+                                        dataset_name)
+        if not df_bldg_x_attrib.empty:
                 create_city_bldg_attrib_files(gdf_bldgs,
-                                            df_bldg_attrib,
-                                            'attrib',
-                                            list_saved_names,
+                                            df_bldg_x_attrib,
+                                            'extra_attrib',
+                                            list_saved_LAUs,
                                             list_saved_paths,
-                                            idx)
-                if not df_bldg_x_attrib.empty:
-                    create_city_bldg_attrib_files(gdf_bldgs,
-                                                df_bldg_x_attrib,
-                                                'extra_attrib',
-                                                list_saved_names,
-                                                list_saved_paths,
-                                                idx)
-            
-                create_source_files(gdf_bldgs, df_sources, list_saved_names, list_saved_paths, idx)
+                                            idx,
+                                            dataset_name)
 
-            n_bldg_start_sum += n_bldg_start
-            n_bldg_end_sum += n_bldg_end
+        n_bldg_start_sum += n_bldg_start
+        n_bldg_end_sum += n_bldg_end
 
-            # collect all city names & paths where we have bldgs
-            list_saved_names_sum.extend(list_saved_names)
-            list_saved_paths_sum.extend(list_saved_paths)
+        # collect all city names & paths where we have bldgs
+        list_saved_LAUs_sum.extend(list_saved_LAUs)
+        list_saved_paths_sum.extend(list_saved_paths)
 
-        # calculate end time
-        end = time.time() - start
+    # calculate end time
+    end = time.time() - start
 
-        # calculate stats
-        df_stats = get_stats(country_name,
-                            dataset_name,
-                            n_bldg_start_sum,
-                            n_bldg_end_sum,
-                            end,
-                            list_saved_names_sum,
-                            dict_num_attribs)
+    # calculate stats
+    df_stats = get_stats(country,
+                        dataset_name,
+                        n_bldg_start_sum,
+                        n_bldg_end_sum,
+                        end,
+                        list_saved_LAUs_sum,
+                        dict_num_attribs)
 
-        # save stats file
-        Path(path_stats).mkdir(parents=True, exist_ok=True)
-        df_stats.to_csv(os.path.join(path_stats, dataset_name + '_stat.csv'), index=False)
+    # save stats file
+    Path(path_stats).mkdir(parents=True, exist_ok=True)
+    df_stats.to_csv(os.path.join(path_stats, dataset_name + '_stat.csv'), index=False)
 
-        print(df_stats.iloc[0])
-        print('----------------')
-        print('saved all geom files in gadm folders & saved stats files')
-        print('################')
+    print(df_stats.iloc[0])
+    print('----------------')
+    print('saved all geom files in gadm folders & saved stats files')
+    print('################')
 
-        # merge chunks for processed cities where we saved bldgs
+    # merge chunks for processed cities where we saved bldgs
+    # no merge for France-gov as chunks are processed by indep. workers for potentially same cities
+    if 'france-gov' not in dataset_name: 
         print('merging all paths')
         merge(list_saved_paths_sum, None, path_db_folder)

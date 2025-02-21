@@ -1,9 +1,23 @@
+import re
+from pathlib import Path
+from typing import List
 import pandas as pd
 import geopandas as gpd
 import sys
 from zipfile import ZipFile
 sys.path.append('../..')
 from utils.concate import validity_merge_db
+
+
+def all_files(data_dir: str, pattern: str = None) -> List[Path]:
+    paths = Path(data_dir).rglob('*')
+    files = [p for p in paths if p.is_file()]
+
+    if pattern:
+        pattern = re.compile(pattern)
+        files = [f for f in files if pattern.match(f.name)]
+
+    return files
 
 
 def read_db(path):
