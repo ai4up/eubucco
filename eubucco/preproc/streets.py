@@ -1,6 +1,7 @@
 import os
 import time
 
+import geopandas as gpd
 import osmnx as ox
 import momepy
 import geopandas as gpd

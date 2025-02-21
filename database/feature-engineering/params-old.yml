@@ -1,9 +1,0 @@
-- country: france
-  data_dir: /p/projects/eubucco/data/2-database-city-level-v0_1
-  file_path: /p/projects/eubucco/data/3-ml-inputs-v0_1-alpha/df-france-inc-age.pkl
-- country: netherlands
-  data_dir: /p/projects/eubucco/data/2-database-city-level-v0_1
-  file_path: /p/projects/eubucco/data/3-ml-inputs-v0_1-alpha/df-netherlands-inc-age.pkl
-- country: spain
-  data_dir: /p/projects/eubucco/data/2-database-city-level-v0_1
-  file_path: /p/projects/eubucco/data/3-ml-inputs-v0_1-alpha/df-spain-inc-age.pkl

@@ -414,9 +414,6 @@ def get_attribs(path_int_fol, country_name, dataset_name):
 
 
 def city_paths_to_txt(city_paths,country,path_db_folder):
-    # city_names = [el.rsplit('/')[-1] for el in city_paths]
-    # city_paths_full = [os.path.join(path, city) for path, city in zip(city_paths, city_names)]
-
     path_file = os.path.join(path_db_folder, country, f"paths_{country}.txt")
     if os.path.isfile(path_file):
         add_paths_to_file(city_paths,path_file,country,path_db_folder)
