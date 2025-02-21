@@ -57,7 +57,7 @@ def _remove_duplicates(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     df['attr_nan_count'] = df[['height', 'type', 'age']].isna().sum(axis=1)
     df = df.sort_values(by='attr_nan_count', ascending=True)
 
-    df = df.drop_duplicates(subset=['id_source'], keep='first')
+    df = df.drop_duplicates(subset=['id'], keep='first')
     df = df.drop_duplicates(subset=['geometry'], keep='first')
 
     df = df.drop(columns=['attr_nan_count'])
