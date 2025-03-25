@@ -1,0 +1,15 @@
+region: 'brandenburg'
+jobs: 
+  - 'size'
+  #- 'wfs'
+  #- 'parquet'
+url: 'https://isk.geobasis-bb.de/ows/alkis_vereinf_wfs'
+count: 100_000
+params: 
+  SERVICE: 'WFS',
+  REQUEST: 'GetFeature',
+  TYPENAMES: 'ave:GebaeudeBauwerk',
+  SRSNAME: 'EPSG:4326',
+  VERSION: '2.0.0',
+path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany'
+  
