@@ -14,7 +14,6 @@
   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
   
 
-
 - region: 'sachsen'
   jobs: 
     - 'size'
@@ -89,7 +88,7 @@
     start: 0
     stop: 3320444
     url_postfix: '&limit=4000&f=json'
-  path_data: /Users/felix/code/eubucco_data/germany
+  path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
 
 
 - region: 'saarland'
