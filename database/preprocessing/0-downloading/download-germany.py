@@ -9,6 +9,19 @@ from io import BytesIO
 import pandas as pd
 import geopandas as gpd
 import requests
+import urllib.parse
+
+
+def get_size(url, params):
+    params = params.copy()
+    params['resultType'] = 'hits'
+    response = requests.get(url, params=params)
+    
+    if response.status_code == 200:
+        size = re.findall(r'numberMatched="[0-9]+"', str(response.content))
+        size = int(size[0].split('=')[-1][1:-1])
+        return size
+    return 'unknown'
 
 
 def process_wfs(region_name,
@@ -17,9 +30,8 @@ def process_wfs(region_name,
                 params,
                 count,
                 start=0,
-                path_data=None,
-                ):
-    params = params.copy()
+                path_data=None,):
+    
     i = start
     print(type(size), type(count))
     for i in range(start, size+count, count):        
@@ -42,25 +54,41 @@ def process_wfs(region_name,
         gdf.to_parquet(os.path.join(path_data, "raw",f"buildings_{region_name}_{i}_raw.pq"))
 
 
-def get_size(url, params):
-    params = params.copy()
-    params['resultType'] = 'hits'
-    response = requests.get(url, params=params)
+def process_gdf(region_name,
+                url_prefix,
+                params,
+                count,
+                path_data):
     
-    if response.status_code == 200:
-        size = re.findall(r'numberMatched="[0-9]+"', str(response.content))
-        size = int(size[0].split('=')[-1][1:-1])
-        return size
-    return 'unknown'
+    for i in range(params['start'], params['stop'], count):
+        url = url_prefix+str(i)+params['url_postfix']
+        print(url)
+        gdf = gpd.read_file(url)
+        print(f'{i}: {len(gdf)} Buildings')
+        gdf.to_parquet(os.path.join(path_data,'raw', f"buildings_{region_name}_{i}_raw.pq"))
 
 
-def process_parquet(region, path_data=None):
+def process_links(region_name,
+                url,
+                path_data):
+    
+    links = gpd.read_file(url)
+    for i,link in enumerate(links.zip.values):
+        link = urllib.parse.quote(link, safe=':/')
+        gdf = gpd.read_file(link, layer='gebaeude')
+        print(f"{i}: {len(gdf)} Buildings from {link.split('/')[-1][:-9]} (special case info)")
+        gdf.to_parquet(os.path.join(path_data,'raw', f"buildings_{region_name}_{i}_raw.pq"))
+ 
+
+def safe_parquet(region, path_data):
+
     files = glob(os.path.join(path_data, 'raw',f'buildings_{region}*'))
     frames = []
-    for f in files:
-        gdf = gpd.read_parquet(f)
+    for file in files:
+        gdf = gpd.read_parquet(file)
         if gdf.shape[0]:
             frames.append(gdf.to_crs(epsg=3035))
+    
     gdf = pd.concat(frames, ignore_index=True)
 
     if 'gml_id' in gdf.columns:
@@ -68,6 +96,9 @@ def process_parquet(region, path_data=None):
     
     if 'oid' in gdf.columns:
         gdf = gdf[~gdf['oid'].duplicated()]
+    
+    if 'id' in gdf.columns:
+        gdf = gdf[~gdf['id'].duplicated()]
 
     print("buildings processed: ", len(gdf))
     print("building columns: ", gdf.columns)
@@ -106,8 +137,21 @@ def main():
                     start=0, # left at default
                     path_data = request['path_data'])
 
+    if "gdf" in request['jobs']:
+        process_gdf(request['region'],
+                    request['url'],
+                    request['params'],
+                    request['count'],
+                    request['path_data'])
+    
+    if "links" in request['jobs']:
+        process_links(request['region'],
+                    request['url'],
+                    request['path_data'])
+
     if 'parquet' in request['jobs']:
-        process_parquet(request['region'],request['path_data'])
+        safe_parquet(request['region'],
+                        request['path_data'])
 
 
 if __name__ == "__main__":
