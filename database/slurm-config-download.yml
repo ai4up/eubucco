@@ -2,7 +2,7 @@ jobs:
    - name: downloading
      script: /p/projects/eubucco/git-eubucco/database/preprocessing/download-germany.py
      param_files:
-        -/p/projects/eubucco/data/0-raw-data-v1/gov/germany/params-download.yml
+        -/p/projects/eubucco/git-eubucco/database/preprocessing/params-download-germany.yml
      log_dir: /p/projects/eubucco/logs/v1_0-db/download-buildings
      resources:
        cpus: 1
@@ -11,7 +11,7 @@ jobs:
      
 
 properties:
-  conda_env: "/home/felixwa/.conda/envs/eubucco_download"
+  conda_env: "/home/felixwa/.conda/envs/eubucco-download"
   account: eubucco
   log_level: INFO
   exp_backoff_factor: 1
