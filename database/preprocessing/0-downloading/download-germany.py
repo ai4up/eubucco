@@ -116,7 +116,7 @@ def init(path_data):
 def get_input():
     request = json.load(sys.stdin)
     print(request)
-    return request[0]
+    return request
 
 
 def main():
