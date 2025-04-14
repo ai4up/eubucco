@@ -1,7 +1,3 @@
-
-- region: 'brandenburg'
-  jobs:
-    - 'size'
 - region: 'brandenburg'
   jobs:
     - 'size'
