@@ -116,7 +116,7 @@ def init(path_data):
 def get_input():
     request = json.load(sys.stdin)
     print(request)
-    return request
+    return request[0]
 
 
 def main():
@@ -129,12 +129,17 @@ def main():
         print(f"Number of files: {size}")
 
     if ('size' in request['jobs']) & ('wfs' in request['jobs']):
+        if 'start' in request.keys():
+            start = request['start']
+        else: 
+            start = 0
+        
         process_wfs(request['region'],
                     size,
                     request['url'],
                     request['params'],
                     request['count'],
-                    start=0, # left at default
+                    start=start, 
                     path_data = request['path_data'])
 
     if "gdf" in request['jobs']:
