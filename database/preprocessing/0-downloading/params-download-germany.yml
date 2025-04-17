@@ -107,8 +107,8 @@
 
 - region: 'nordrhein_westfalen'
   jobs:
-    - 'gdf'
-    #- 'parquet'
+    #- 'gdf'
+    - 'parquet'
   url: 'https://ogc-api.nrw.de/lika/v1/collections/gebaeude_bauwerk/items?offset='
   count: 5000
   params:
