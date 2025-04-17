@@ -14,88 +14,87 @@
 #   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
 
 
-- region: 'sachsen'
-  jobs:
-    - 'size'
-    - 'wfs'
-    - 'parquet'
-  url: 'https://geodienste.sachsen.de/aaa/public_alkis/vereinf/wfs'
-  count: 100_000
-  params:
-    SERVICE: 'WFS'
-    REQUEST: 'GetFeature'
-    TYPENAMES: 'ave:GebaeudeBauwerk'
-    SRSNAME: 'EPSG:25833'
-    VERSION: '2.0.0'
-  path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+# - region: 'sachsen'
+#   jobs:
+#     - 'size'
+#     - 'wfs'
+#     - 'parquet'
+#   url: 'https://geodienste.sachsen.de/aaa/public_alkis/vereinf/wfs'
+#   count: 100_000
+#   params:
+#     SERVICE: 'WFS'
+#     REQUEST: 'GetFeature'
+#     TYPENAMES: 'ave:GebaeudeBauwerk'
+#     SRSNAME: 'EPSG:25833'
+#     VERSION: '2.0.0'
+#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
 
 
-- region: 'baden_wuerttenberg'
-  jobs:
-    - 'size'
-    - 'wfs'
-    - 'parquet'
-  url: 'https://owsproxy.lgl-bw.de/owsproxy/wfs/WFS_INSP_BW_Gebaeude_ALKIS'
-  count: 100_000
-  start: 1900000
-  params:
-    SERVICE: 'WFS'
-    REQUEST: 'GetFeature'
-    TYPENAMES: 'bu-core2d:Building'
-    SRSNAME: 'EPSG:25833'
-    VERSION: '2.0.0'
-  path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+# - region: 'baden_wuerttenberg'
+#   jobs:
+#     - 'size'
+#     - 'wfs'
+#     - 'parquet'
+#   url: 'https://owsproxy.lgl-bw.de/owsproxy/wfs/WFS_INSP_BW_Gebaeude_ALKIS'
+#   count: 100_000
+#   start: 1900000
+#   params:
+#     SERVICE: 'WFS'
+#     REQUEST: 'GetFeature'
+#     TYPENAMES: 'bu-core2d:Building'
+#     SRSNAME: 'EPSG:25833'
+#     VERSION: '2.0.0'
+#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
   
 
 
-- region: 'mecklenburg_vorpommern'
-  jobs:
-    - 'size'
-    - 'wfs'
-    - 'parquet'
-  url: 'https://www.geodaten-mv.de/dienste/alkis_wfs_einfach'
-  count: 100_000
-  params:
-    SERVICE: 'WFS'
-    REQUEST: 'GetFeature'
-    TYPENAMES: 'ave:GebaeudeBauwerk'
-    SRSNAME: 'EPSG:5650'
-    VERSION: '2.0.0'
-  path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+# - region: 'mecklenburg_vorpommern'
+#   jobs:
+#     - 'size'
+#     - 'wfs'
+#     - 'parquet'
+#   url: 'https://www.geodaten-mv.de/dienste/alkis_wfs_einfach'
+#   count: 30_000 # adjusted to not exceed limit
+#   params:
+#     SERVICE: 'WFS'
+#     REQUEST: 'GetFeature'
+#     TYPENAMES: 'ave:GebaeudeBauwerk'
+#     SRSNAME: 'EPSG:5650'
+#     VERSION: '2.0.0'
+#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
 
 
-- region: 'hessen'
-  jobs:
-    - 'size'
-    - 'wfs'
-    - 'parquet'
-  url: 'https://www.gds.hessen.de/wfs2/aaa-suite/cgi-bin/alkis/vereinf/wfs'
-  count: 100_000
-  params:
-    SERVICE: 'WFS'
-    REQUEST: 'GetFeature'
-    TYPENAMES: 'ave:GebaeudeBauwerk'
-    SRSNAME: 'EPSG:25832'
-    VERSION: '2.0.0'
-  path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+# - region: 'hessen'
+#   jobs:
+#     - 'size'
+#     - 'wfs'
+#     - 'parquet'
+#   url: 'https://www.gds.hessen.de/wfs2/aaa-suite/cgi-bin/alkis/vereinf/wfs'
+#   count: 100_000
+#   params:
+#     SERVICE: 'WFS'
+#     REQUEST: 'GetFeature'
+#     TYPENAMES: 'ave:GebaeudeBauwerk'
+#     SRSNAME: 'EPSG:25832'
+#     VERSION: '2.0.0'
+#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
 
 
-- region: 'rheinland_pfalz'
-  jobs:
-    - 'gdf'
-    - 'parquet'
-  url: 'https://www.geoportal.rlp.de/spatial-objects/519/collections/ave:GebaeudeBauwerk/items?offset='
-  count: 4000
-  params:
-    start: 0
-    stop: 3320444
-    url_postfix: '&limit=4000&f=json'
-  path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
-
+# - region: 'rheinland_pfalz'
+#   jobs:
+#     - 'gdf'
+#     - 'parquet'
+#   url: 'https://www.geoportal.rlp.de/spatial-objects/519/collections/ave:GebaeudeBauwerk/items?offset='
+#   count: 4000
+#   params:
+#     start: 0
+#     stop: 3320444
+#     url_postfix: '&limit=4000&f=json'
+#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
 
 - region: 'saarland'
   jobs:
-    - 'gdf'
+    #- 'gdf'
     - 'parquet'
   url: 'https://geoportal.saarland.de/spatial-objects/406/collections/bu-core2d:Building/items?offset='
   count: 500
@@ -106,30 +105,30 @@
   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
 
 
-- region: 'nordrhein_westfalen'
-  jobs:
-    - 'gdf'
-    - 'parquet'
-  url: 'https://ogc-api.nrw.de/lika/v1/collections/gebaeude_bauwerk/items?offset='
-  count: 5000
-  params:
-    start: 0
-    stop: 12646244
-    url_postfix: '&limit=5000&f=json'
-  path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+# - region: 'nordrhein_westfalen'
+#   jobs:
+#     - 'gdf'
+#     - 'parquet'
+#   url: 'https://ogc-api.nrw.de/lika/v1/collections/gebaeude_bauwerk/items?offset='
+#   count: 5000
+#   params:
+#     start: 0
+#     stop: 12646244
+#     url_postfix: '&limit=5000&f=json'
+#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
 
 
-- region: 'niedersachsen'
-  jobs:
-    - 'links'
-    - 'parquet'
-  url: 'https://arcgis-geojson.s3.eu-de.cloud-object-storage.appdomain.cloud/alkis-vektor/lgln-opengeodata-alkis-vektor.geojson'
-  count: null
-  params:
-    start: null
-    stop: null
-    url_postfix: null
-  path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+# - region: 'niedersachsen'
+#   jobs:
+#     - 'links'
+#     - 'parquet'
+#   url: 'https://arcgis-geojson.s3.eu-de.cloud-object-storage.appdomain.cloud/alkis-vektor/lgln-opengeodata-alkis-vektor.geojson'
+#   count: null
+#   params:
+#     start: null
+#     stop: null
+#     url_postfix: null
+#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
 
 
 # - region: 'thueringen' # Thueringe edge cases is yet to be fully integrated
