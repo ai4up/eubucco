@@ -16,8 +16,8 @@
 
 - region: 'sachsen'
   jobs:
-    - 'size'
-    - 'wfs'
+    # - 'size'
+    # - 'wfs'
     - 'parquet'
   url: 'https://geodienste.sachsen.de/aaa/public_alkis/vereinf/wfs'
   count: 10000
@@ -29,7 +29,6 @@
     VERSION: '2.0.0'
   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
   
-
 
 # - region: 'baden_wuerttenberg'
 #   jobs:
@@ -48,27 +47,26 @@
 #   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
   
 
-
-# - region: 'mecklenburg_vorpommern'
-#   jobs:
-#     - 'size'
-#     - 'wfs'
-#     - 'parquet'
-#   url: 'https://www.geodaten-mv.de/dienste/alkis_wfs_einfach'
-#   count: 30_000 # adjusted to not exceed limit
-#   params:
-#     SERVICE: 'WFS'
-#     REQUEST: 'GetFeature'
-#     TYPENAMES: 'ave:GebaeudeBauwerk'
-#     SRSNAME: 'EPSG:5650'
-#     VERSION: '2.0.0'
-#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+- region: 'mecklenburg_vorpommern'
+  jobs:
+    # - 'size'
+    # - 'wfs'
+    - 'parquet'
+  url: 'https://www.geodaten-mv.de/dienste/alkis_wfs_einfach'
+  count: 30_000 # adjusted to not exceed limit
+  params:
+    SERVICE: 'WFS'
+    REQUEST: 'GetFeature'
+    TYPENAMES: 'ave:GebaeudeBauwerk'
+    SRSNAME: 'EPSG:5650'
+    VERSION: '2.0.0'
+  path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
 
 
 - region: 'hessen'
   jobs:
-    - 'size'
-    - 'wfs'
+    # - 'size'
+    # - 'wfs'
     - 'parquet'
   url: 'https://www.gds.hessen.de/wfs2/aaa-suite/cgi-bin/alkis/vereinf/wfs'
   count: 100_000

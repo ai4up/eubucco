@@ -8,6 +8,7 @@ from io import BytesIO
 
 import pandas as pd
 import geopandas as gpd
+from shapely import wkb
 import requests
 import urllib.parse
 
@@ -85,7 +86,16 @@ def safe_parquet(region, path_data):
     files = glob(os.path.join(path_data, 'raw',f'buildings_{region}*'))
     frames = []
     for file in files:
-        gdf = gpd.read_parquet(file)
+        try: 
+            gdf = gpd.read_parquet(file)
+        
+        except ValueError:
+            print(f"Missing geo metadata error in {file} - using pandas fallback")
+            df = pd.read_parquet(file)
+            df["geometry"] = df["geometry"].apply(wkb.loads)
+            gdf = gpd.GeoDataFrame(df, geometry="geometry")
+            gdf.set_crs("EPSG:3035", inplace=True)
+
         if gdf.shape[0]:
             frames.append(gdf.to_crs(epsg=3035))
     
