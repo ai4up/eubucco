@@ -85,16 +85,25 @@ def safe_parquet(region, path_data):
 
     files = glob(os.path.join(path_data, 'raw',f'buildings_{region}*'))
     frames = []
+    meta_data_errors = []
+    missing_geom_errors = []
+    
     for file in files:
         try: 
             gdf = gpd.read_parquet(file)
-        
         except ValueError:
             print(f"Missing geo metadata error in {file} - using pandas fallback")
+            meta_data_errors.append(file)
             df = pd.read_parquet(file)
-            df["geometry"] = df["geometry"].apply(wkb.loads)
-            gdf = gpd.GeoDataFrame(df, geometry="geometry")
-            gdf.set_crs("EPSG:3035", inplace=True)
+
+            try: 
+                df["geometry"] = df["geometry"].apply(wkb.loads)
+                gdf = gpd.GeoDataFrame(df, geometry="geometry")
+                gdf.set_crs("EPSG:3035", inplace=True)
+            except KeyError:
+                print(f"Missing geometry column in {file} - skipping")
+                missing_geom_errors.append(file)
+                gdf = gpd.GeoDataFrame() # empty gdf will not be appended to frame
 
         if gdf.shape[0]:
             frames.append(gdf.to_crs(epsg=3035))
@@ -110,9 +119,22 @@ def safe_parquet(region, path_data):
     if 'id' in gdf.columns:
         gdf = gdf[~gdf['id'].duplicated()]
 
+    print("-"*12)
+    print("Run summary:")
     print("buildings processed: ", len(gdf))
     print("building columns: ", gdf.columns)
     print("building crs: ", gdf.crs)
+    print(f"Found {len(meta_data_errors)} metadata errors (ValueError)")
+    print(f"Found {len(missing_geom_errors)} missing geom errors (KeyError)")
+    
+    if len(meta_data_errors) > 0:    
+        print("*"*8)
+        print("Metadata errors in following files:")
+        print("\n".join(meta_data_errors))
+        print("*"*8)
+        print("Missing geom errors in following files:")
+        print("\n".join(missing_geom_errors))
+
 
     gdf.to_parquet(os.path.join(path_data, f'buildings_{region}.pq'))
 
