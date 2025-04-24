@@ -14,20 +14,20 @@
 #   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
 
 
-- region: 'sachsen'
-  jobs:
-    # - 'size'
-    # - 'wfs'
-    - 'parquet'
-  url: 'https://geodienste.sachsen.de/aaa/public_alkis/vereinf/wfs'
-  count: 10000
-  params:
-    SERVICE: 'WFS'
-    REQUEST: 'GetFeature'
-    TYPENAMES: 'ave:GebaeudeBauwerk'
-    SRSNAME: 'EPSG:25833'
-    VERSION: '2.0.0'
-  path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+# - region: 'sachsen'
+#   jobs:
+#     # - 'size'
+#     # - 'wfs'
+#     - 'parquet'
+#   url: 'https://geodienste.sachsen.de/aaa/public_alkis/vereinf/wfs'
+#   count: 10000
+#   params:
+#     SERVICE: 'WFS'
+#     REQUEST: 'GetFeature'
+#     TYPENAMES: 'ave:GebaeudeBauwerk'
+#     SRSNAME: 'EPSG:25833'
+#     VERSION: '2.0.0'
+#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
   
 
 # - region: 'baden_wuerttenberg'
@@ -47,36 +47,36 @@
 #   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
   
 
-- region: 'mecklenburg_vorpommern'
-  jobs:
-    # - 'size'
-    # - 'wfs'
-    - 'parquet'
-  url: 'https://www.geodaten-mv.de/dienste/alkis_wfs_einfach'
-  count: 30_000 # adjusted to not exceed limit
-  params:
-    SERVICE: 'WFS'
-    REQUEST: 'GetFeature'
-    TYPENAMES: 'ave:GebaeudeBauwerk'
-    SRSNAME: 'EPSG:5650'
-    VERSION: '2.0.0'
-  path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+# - region: 'mecklenburg_vorpommern'
+#   jobs:
+#     # - 'size'
+#     # - 'wfs'
+#     - 'parquet'
+#   url: 'https://www.geodaten-mv.de/dienste/alkis_wfs_einfach'
+#   count: 30_000 # adjusted to not exceed limit
+#   params:
+#     SERVICE: 'WFS'
+#     REQUEST: 'GetFeature'
+#     TYPENAMES: 'ave:GebaeudeBauwerk'
+#     SRSNAME: 'EPSG:5650'
+#     VERSION: '2.0.0'
+#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
 
 
-- region: 'hessen'
-  jobs:
-    # - 'size'
-    # - 'wfs'
-    - 'parquet'
-  url: 'https://www.gds.hessen.de/wfs2/aaa-suite/cgi-bin/alkis/vereinf/wfs'
-  count: 100_000
-  params:
-    SERVICE: 'WFS'
-    REQUEST: 'GetFeature'
-    TYPENAMES: 'ave:GebaeudeBauwerk'
-    SRSNAME: 'EPSG:25832'
-    VERSION: '2.0.0'
-  path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+# - region: 'hessen'
+#   jobs:
+#     # - 'size'
+#     # - 'wfs'
+#     - 'parquet'
+#   url: 'https://www.gds.hessen.de/wfs2/aaa-suite/cgi-bin/alkis/vereinf/wfs'
+#   count: 100_000
+#   params:
+#     SERVICE: 'WFS'
+#     REQUEST: 'GetFeature'
+#     TYPENAMES: 'ave:GebaeudeBauwerk'
+#     SRSNAME: 'EPSG:25832'
+#     VERSION: '2.0.0'
+#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
 
 
 
@@ -131,15 +131,28 @@
 #   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
 
 
-# - region: 'thueringen' # Thueringe edge cases is yet to be fully integrated
-#   jobs:
-#     - 'zip'
-#     - 'zip_parquet'
-#   url: 'https://geoportal.geoportal-th.de/ALKIS/Shape/ALKIS_KB5'
-#   count: null
-#   params:
-#     start: 1
-#     stop: 2
-#     url_postfix: _shp.zip
-#     crs: 25833
-#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+- region: 'thueringen'
+  jobs:
+    - 'size'
+    - 'wfs'
+    - 'parquet'
+  url: 'https://www.geoproxy.geoportal-th.de/geoproxy/services/adv_alkis_wfs'
+  count: 100_000
+  params:
+    SERVICE: 'WFS'
+    REQUEST: 'GetFeature'
+    TYPENAMES: 'ave:GebaeudeBauwerk'
+    SRSNAME: 'EPSG:5650'
+    VERSION: '2.0.0'
+  path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+
+
+- region: 'sachsen_anhalt'
+  jobs:
+    - 'zip'
+    - 'parquet'
+  url: 'https://www.geodatenportal.sachsen-anhalt.de/gfds_webshare/download/LVermGeo/Geodatenportal/externedaten/GBIS_Gebaeude.zip'
+  params:
+    zip_case: Null # added as edge case to handle zip files
+  path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+  
