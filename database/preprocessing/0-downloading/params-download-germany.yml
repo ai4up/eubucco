@@ -153,25 +153,40 @@
 #     - 'parquet'
 #   url: 'https://www.geodatenportal.sachsen-anhalt.de/gfds_webshare/download/LVermGeo/Geodatenportal/externedaten/GBIS_Gebaeude.zip'
 #   params:
-#     zip_case: Null # added as edge case to handle zip files
+#     file_type: 'xml' # added as edge case to handle zip files
 #   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
   
 
-- region: schleswig_holstein
-  jobs: 
-    - 'xml'
-    - 'parquet'
-  url: 'https://service.gdi-sh.de/SH_OpenGBD/feeds/Atom_SH_ALKIS_vereinf_OpenGBD/Atom_SH_ALKIS_vereinf_OpenGBD.xml'
-  params:
-    namespaces:
-      atom: 'http://www.w3.org/2005/Atom'
-      georss: 'http://www.georss.org/georss'
-      inspire_dls: 'http://inspire.ec.europa.eu/schemas/inspire_dls/1.0'
-      lang: 'ger'
-    spatial_identifier_code: 'inspire_dls:spatial_dataset_identifier_code'
-    bld_url_pre_fix: 'https://dienste.gdi-sh.de/WFS_SH_ALKIS_vereinf_OpenGBD?Request=GetFeature&Service=WFS&Version=2.0.0&gemeindeschluessel='
-    bld_url_post_fix: '&StoredQuery_ID=GetGebByGemeinde'
-  path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+# - region: schleswig_holstein
+#   jobs: 
+#     - 'xml'
+#     - 'parquet'
+#   url: 'https://service.gdi-sh.de/SH_OpenGBD/feeds/Atom_SH_ALKIS_vereinf_OpenGBD/Atom_SH_ALKIS_vereinf_OpenGBD.xml'
+#   params:
+#     namespaces:
+#       atom: 'http://www.w3.org/2005/Atom'
+#       georss: 'http://www.georss.org/georss'
+#       inspire_dls: 'http://inspire.ec.europa.eu/schemas/inspire_dls/1.0'
+#       lang: 'ger'
+#     spatial_identifier_code: 'inspire_dls:spatial_dataset_identifier_code'
+#     bld_url_pre_fix: 'https://dienste.gdi-sh.de/WFS_SH_ALKIS_vereinf_OpenGBD?Request=GetFeature&Service=WFS&Version=2.0.0&gemeindeschluessel='
+#     bld_url_post_fix: '&StoredQuery_ID=GetGebByGemeinde'
+#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
   
 
+- region: bavaria
+  jobs:
+    - 'zip'
+    - 'parquet'
+  url: 
+    - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/096_Unterfranken_Hausumringe.zip'
+    - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/094_Oberfranken_Hausumringe.zip'
+    - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/095_Mittelfranken_Hausumringe.zip'
+    - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/093_Oberpfalz_Hausumringe.zip'
+    - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/097_Schwaben_Hausumringe.zip'
+    - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/091_Oberbayern_Hausumringe.zip'
+    - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/092_Niederbayern_Hausumringe.zip'
+  params:
+    file_type: 'shp' # added as edge case to handle zip files
+  path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
 

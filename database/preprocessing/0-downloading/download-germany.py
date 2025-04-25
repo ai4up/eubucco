@@ -84,22 +84,33 @@ def process_links(region_name,
         gdf.to_parquet(os.path.join(path_data,'raw', f"buildings_{region_name}_{i}_raw.pq"))
 
 
+def _list(x):
+    if isinstance(x, str): return [x]
+    else: return x
+
+
 def process_zip(region_name,
-                url,
+                urls,
                 path_data):
     
     print("creating zip dir")
     path_zip_dir = os.path.join(path_data, 'raw',f'zip_{region_name}')
     pathlib.Path(path_zip_dir).mkdir(exist_ok=True)
     
+    urls = _list(urls)
     print("downloading zip file")
-    response = requests.get(url)
-    
-    print("extracting zip")
-    z = zipfile.ZipFile(BytesIO(response.content))
-    
-    print("saving zip")
-    z.extractall(path_zip_dir)
+    for i, url in enumerate(urls):
+        filename = url.rsplit("/",1)[1].rsplit(".",1)[0]
+        
+        print(f'Downloading {i}/{len(urls)}: {filename}')
+        response = requests.get(url)
+     
+        print("extracting zip")
+        z = zipfile.ZipFile(BytesIO(response.content))
+        for zipinfo in _list(z.infolist()):
+            # add filename as pre-fix to avoid overwriting from dirs with same file names
+            zipinfo.filename = filename+'_'+zipinfo.filename
+            z.extract(zipinfo, path=path_zip_dir)
 
 
 def process_xml(region_name,
@@ -137,9 +148,13 @@ def _read_geofile(file):
         return gpd.read_file(file)
 
 
-def _handle_missing_metadata(file,meta_data_errors, geom_errors):
+def _handle_missing_metadata(file,data_errors, geom_errors):
+    """ 
+    handles errors of missing medata data (data error) or
+    missing geometry column (geom error) 
+    """
     print(f"Missing geo metadata error in {file} - using pandas fallback")
-    meta_data_errors.append(file)
+    data_errors.append(file)
     df = pd.read_parquet(file)
     
     try: 
@@ -152,7 +167,7 @@ def _handle_missing_metadata(file,meta_data_errors, geom_errors):
         geom_errors.append(file)
         gdf = gpd.GeoDataFrame() # empty gdf will not be appended to frame
 
-    return meta_data_errors, geom_errors
+    return data_errors, geom_errors
 
 
 def _remove_id_duplicates(gdf):
@@ -169,14 +184,15 @@ def _remove_id_duplicates(gdf):
 
 
 def safe_parquet(region, path_data, params):
-    if "zip_case" in params.keys():
-        path_files = os.path.join(path_data, 'raw',f'zip_{region}/*')
+    if "file_type" in params.keys():
+        # for zip cases - file types can be different per state and must be specified in params
+        path_files = os.path.join(path_data, 'raw',f"zip_{region}/*.{params['file_type']}")
     else:
         path_files = os.path.join(path_data, 'raw',f'buildings_{region}*')
     
     files = glob(path_files)
     frames = []
-    meta_data_errors = []
+    data_errors = []
     geom_errors = []
     
     for file in files:
@@ -184,9 +200,9 @@ def safe_parquet(region, path_data, params):
             gdf = _read_geofile(file)
         
         except ValueError:
-           meta_data_errors, geom_errors = _handle_missing_metadata(file,
-                                                                    meta_data_errors,
-                                                                    geom_errors)
+           data_errors, geom_errors = _handle_missing_metadata(file,
+                                                                data_errors,
+                                                                geom_errors)
 
         if gdf.shape[0]:
             print(f"appending geoms of file:{file}")
@@ -200,13 +216,13 @@ def safe_parquet(region, path_data, params):
     print("buildings processed: ", len(gdf))
     print("building columns: ", gdf.columns)
     print("building crs: ", gdf.crs)
-    print(f"Found {len(meta_data_errors)} metadata errors (ValueError)")
+    print(f"Found {len(data_errors)} metadata errors (ValueError)")
     print(f"Found {len(geom_errors)} missing geom errors (KeyError)")
     
-    if len(meta_data_errors) > 0:    
+    if len(data_errors) > 0:    
         print("*"*8)
         print("Metadata errors in following files:")
-        print("\n".join(meta_data_errors))
+        print("\n".join(data_errors))
         print("*"*8)
         print("Missing geom errors in following files:")
         print("\n".join(geom_errors))
