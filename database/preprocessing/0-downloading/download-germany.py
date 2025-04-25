@@ -7,6 +7,7 @@ from glob import glob
 from io import BytesIO
 import zipfile
 import pathlib
+import xml.etree.ElementTree as ET
 
 import pandas as pd
 import geopandas as gpd
@@ -99,6 +100,34 @@ def process_zip(region_name,
     
     print("saving zip")
     z.extractall(path_zip_dir)
+
+
+def process_xml(region_name,
+                url,
+                path_data,
+                params):
+    
+    print("downloading xml file")
+    response = requests.get(url)
+
+    # Load the XML file
+    tree = ET.parse(BytesIO(response.content))
+    root = tree.getroot()
+
+    # Find all elements with the tag 'entry'
+    entries = root.findall('atom:entry', params['namespaces'])
+    codes = []
+
+    # Extract and print the 'inspire_dls:spatial_dataset_identifier_code' attribute for each entry
+    for entry in entries:
+        # Find the 'inspire_dls:spatial_dataset_identifier_code' element within the entry
+        spatial_code = entry.find(params['spatial_identifier_code'], params['namespaces'])
+        codes.append(spatial_code.text)    
+    
+    for code in codes:
+        url_bld_code = params['bld_url_pre_fix']+code+params['bld_url_post_fix']
+        gdf = gpd.read_file(url_bld_code, driver='GML')
+        gdf.to_parquet(os.path.join(path_data, 'raw', f'buildings_{region_name}_{code}_raw.pq'))
 
 
 def _read_geofile(file):
@@ -237,6 +266,12 @@ def main():
         process_zip(request['region'],
                     request['url'],
                     request['path_data'])
+    
+    if "xml" in request['jobs']:
+        process_xml(request['region'],
+                    request['url'],
+                    request['path_data'],
+                    request['params'])
 
     if 'parquet' in request['jobs']:
         safe_parquet(request['region'],
