@@ -87,12 +87,17 @@ def process_zip(region_name,
                 url,
                 path_data):
     
+    print("creating zip dir")
+    path_zip_dir = os.path.join(path_data, 'raw',f'zip_{region_name}')
+    pathlib.Path(path_zip_dir).mkdir(exist_ok=True)
+    
     print("downloading zip file")
     response = requests.get(url)
+    
     print("extracting zip")
     z = zipfile.ZipFile(BytesIO(response.content))
+    
     print("saving zip")
-    path_zip_dir = os.mkdir(os.path.join(path_data, 'raw','zip_{region_name}'))
     z.extractall(path_zip_dir)
 
 
@@ -100,7 +105,6 @@ def _read_geofile(file):
     if pathlib.Path(file).suffix == ".pq":
         return gpd.read_parquet(file)
     else:
-        print("reading file: gpd.read_file")
         return gpd.read_file(file)
 
 
@@ -141,14 +145,12 @@ def safe_parquet(region, path_data, params):
     else:
         path_files = os.path.join(path_data, 'raw',f'buildings_{region}*')
     
-    print(path_files)
     files = glob(path_files)
-    print(files)
     frames = []
     meta_data_errors = []
     geom_errors = []
     
-    for file in files[0:2]:
+    for file in files:
         try: 
             gdf = _read_geofile(file)
         
@@ -158,6 +160,7 @@ def safe_parquet(region, path_data, params):
                                                                     geom_errors)
 
         if gdf.shape[0]:
+            print(f"appending geoms of file:{file}")
             frames.append(gdf.to_crs(epsg=3035))
     
     gdf = pd.concat(frames, ignore_index=True)
