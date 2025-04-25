@@ -189,11 +189,11 @@ def _remove_id_duplicates(gdf):
 def safe_parquet(region, path_data, params):
     if "file_type" in params.keys():
         # for zip cases - file types can be different per state and must be specified in params
-        path_files = os.path.join(path_data, 'raw',f"zip_{region}/*.{params['file_type']}")
+        path_files = os.path.join(path_data, 'raw',f"zip_{region}/**/*.{params['file_type']}")
     else:
         path_files = os.path.join(path_data, 'raw',f'buildings_{region}*')
     
-    files = glob(path_files)
+    files = glob(path_files,recursive=True)
     frames = []
     data_errors = []
     geom_errors = []
