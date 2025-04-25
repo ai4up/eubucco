@@ -58,6 +58,7 @@ def process_wfs(region_name,
         gdf.to_parquet(os.path.join(path_data, "raw",f"buildings_{region_name}_{i}_raw.pq"))
 
 
+
 def process_gdf(region_name,
                 url_prefix,
                 params,
@@ -141,9 +142,11 @@ def process_xml(region_name,
         gdf.to_parquet(os.path.join(path_data, 'raw', f'buildings_{region_name}_{code}_raw.pq'))
 
 
-def _read_geofile(file):
+def _read_geofile(file, region):
     if pathlib.Path(file).suffix == ".pq":
         return gpd.read_parquet(file)
+    elif region == "hamburg":
+        return gpd.read_file(file, layer='building').set_crs(epsg=25832)
     else:
         return gpd.read_file(file)
 
@@ -197,7 +200,7 @@ def safe_parquet(region, path_data, params):
     
     for file in files:
         try: 
-            gdf = _read_geofile(file)
+            gdf = _read_geofile(file, region)
         
         except ValueError:
            data_errors, geom_errors = _handle_missing_metadata(file,

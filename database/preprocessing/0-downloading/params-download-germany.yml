@@ -174,19 +174,59 @@
 #   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
   
 
-- region: bavaria
+# - region: bavaria
+#   jobs:
+#     - 'zip'
+#     - 'parquet'
+#   url: 
+#     - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/096_Unterfranken_Hausumringe.zip'
+#     - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/094_Oberfranken_Hausumringe.zip'
+#     - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/095_Mittelfranken_Hausumringe.zip'
+#     - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/093_Oberpfalz_Hausumringe.zip'
+#     - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/097_Schwaben_Hausumringe.zip'
+#     - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/091_Oberbayern_Hausumringe.zip'
+#     - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/092_Niederbayern_Hausumringe.zip'
+#   params:
+#     file_type: 'shp' # added as edge case to handle zip files
+#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+
+
+# - region: 'berlin'
+#   jobs:
+#     - 'size'
+#     - 'wfs'
+#     #- 'parquet'
+#   url: 'https://fbinter.stadt-berlin.de/fb/feed/senstadt/a_lod2/0'
+#   count: 1000
+#   params:
+#     SERVICE: "WFS"
+#     REQUEST: "GetFeature"
+#     TYPENAMES: "bu2d_alkis:Building"
+#     SRSNAME: "EPSG:25832"
+#     VERSION: '2.0.0'
+#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+
+
+- region: 'hamburg'
   jobs:
     - 'zip'
     - 'parquet'
-  url: 
-    - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/096_Unterfranken_Hausumringe.zip'
-    - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/094_Oberfranken_Hausumringe.zip'
-    - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/095_Mittelfranken_Hausumringe.zip'
-    - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/093_Oberpfalz_Hausumringe.zip'
-    - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/097_Schwaben_Hausumringe.zip'
-    - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/091_Oberbayern_Hausumringe.zip'
-    - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/092_Niederbayern_Hausumringe.zip'
+  url: 'https://daten-hamburg.de/inspire/hh_inspire_gebaeude_2d_alkis/INSPIRE_HH_Gebaeude_2D_ALKIS_2020-07-15.zip'
   params:
-    file_type: 'shp' # added as edge case to handle zip files
+    file_type: 'gml' # added as edge case to handle zip files
   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
 
+
+# - region: 'bremen'
+#   jobs:
+#     - 'zip'
+#     - 'parquet'
+#   url: 'https://gdi2.geo.bremen.de/inspire/download/LoD/data/LoD2_Bremen_2024_04_citygml.zip'
+#   params:
+#     file_type: 'shp' # added as edge case to handle zip files
+#   #path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+#   path_data: '/Users/felix/Documents/phd/1_projects/5_eubucco_v1/data'
+
+
+  
+  
