@@ -84,6 +84,31 @@ def process_links(region_name,
         gdf.to_parquet(os.path.join(path_data,'raw', f"buildings_{region_name}_{i}_raw.pq"))
 
 
+def _parse_atom_xml(atom_xml,
+                     params):
+    """
+    Parses the Atom XML and returns every <link> 
+    whose type is a zipped LoD2 package.
+    """
+    root = ET.fromstring(atom_xml)
+    for link in root.findall('.//atom:entry/atom:link', params):
+        href = link.get('href', '')
+        mime = link.get('type', '')
+        # application/x-gmz or .zip extension both indicate our zips
+        if mime == 'application/x-gmz' or href.lower().endswith('.zip'):
+            yield href
+
+
+def get_zip_links(params):
+    response = requests.get(params['feed_url'])
+    response.raise_for_status()
+    
+    urls = []
+    for url in _parse_atom_xml(response.text, params['namespaces']):
+        urls.append(url)
+    return urls
+
+
 def _list(x):
     if isinstance(x, str): return [x]
     else: return x
@@ -141,11 +166,11 @@ def process_xml(region_name,
         gdf.to_parquet(os.path.join(path_data, 'raw', f'buildings_{region_name}_{code}_raw.pq'))
 
 
-def _read_geofile(file, region):
+def _read_geofile(file, params):
     if pathlib.Path(file).suffix == ".pq":
         return gpd.read_parquet(file)
-    elif region == "hamburg":
-        return gpd.read_file(file, layer='building').set_crs(epsg=25832)
+    if pathlib.Path(file).suffix == ".xml" or pathlib.Path(file).suffix == ".gml":
+        return gpd.read_file(file, driver='GML', layer='building').set_crs(params['crs'])
     else:
         return gpd.read_file(file)
 
@@ -185,6 +210,14 @@ def _remove_id_duplicates(gdf):
     return gdf
 
 
+def _clean_list_cols(gdf):
+    # turning columns with lists into strings to avoid issues with parquet
+    for col in gdf.columns:
+        if col in gdf.columns[gdf.dtypes=='object']:
+            gdf[col] = gdf[col].apply(lambda x: ', '.join(map(str, x)) if isinstance(x, list) else x)
+    return gdf
+
+
 def safe_parquet(region, path_data, params):
     if "file_type" in params.keys():
         # for zip cases - file types can be different per state and must be specified in params
@@ -199,14 +232,14 @@ def safe_parquet(region, path_data, params):
     
     for file in files:
         try: 
-            gdf = _read_geofile(file, region)
-        
+            gdf = _read_geofile(file, params)
         except ValueError:
            data_errors, geom_errors = _handle_missing_metadata(file,
                                                                 data_errors,
                                                                 geom_errors)
 
         if gdf.shape[0]:
+            gdf = _clean_list_cols(gdf)
             print(f"appending geoms of file:{file}")
             frames.append(gdf.to_crs(epsg=3035))
     
@@ -279,6 +312,9 @@ def main():
         process_links(request['region'],
                     request['url'],
                     request['path_data'])
+    
+    if "get_zip_links" in request['jobs']:
+        request['url'] = _get_atom_links(request['params'])
 
     if "zip" in request['jobs']:
         process_zip(request['region'],
