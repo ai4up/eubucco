@@ -67,9 +67,8 @@ def process_gdf(region_name,
     
     for i in range(params['start'], params['stop'], count):
         url = url_prefix+str(i)+params['url_postfix']
-        print(url)
         gdf = gpd.read_file(url)
-        print(f'{i}: {len(gdf)} Buildings')
+        print(f"{i}: {len(gdf)} Buildings from {url.rsplit('/',1)[1]}")
         gdf.to_parquet(os.path.join(path_data,'raw', f"buildings_{region_name}_{i}_raw.pq"))
 
 
