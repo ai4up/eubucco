@@ -128,7 +128,7 @@ def process_zip(region_name,
     if urls is None:
         urls = _get_zip_links(params) 
 
-    urls = _list(url)
+    urls = _list(urls)
     print("downloading zip file")
     for i, url in enumerate(urls):
         filename = url.rsplit("/",1)[1].rsplit(".",1)[0]
@@ -172,11 +172,14 @@ def process_xml(region_name,
         gdf.to_parquet(os.path.join(path_data, 'raw', f'buildings_{region_name}_{code}_raw.pq'))
 
 
-def _read_geofile(file, params):
+def _read_geofile(file, region, params):
     if pathlib.Path(file).suffix == ".pq":
         return gpd.read_parquet(file)
+    if region=='hamburg':
+        # hamburg requires specific layer name
+        return gpd.read_file(file, layer='building').set_crs(params['crs'])
     if pathlib.Path(file).suffix == ".xml" or pathlib.Path(file).suffix == ".gml":
-        return gpd.read_file(file, driver='GML', layer='building').set_crs(params['crs'])
+        return gpd.read_file(file, driver='GML').set_crs(params['crs'])
     else:
         return gpd.read_file(file)
 
@@ -238,7 +241,7 @@ def safe_parquet(region, params, path_data):
     
     for file in files:
         try: 
-            gdf = _read_geofile(file, params)
+            gdf = _read_geofile(file, region, params)
         except ValueError:
            data_errors, geom_errors = _handle_missing_metadata(file,
                                                                 data_errors,
