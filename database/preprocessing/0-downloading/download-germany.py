@@ -1,4 +1,3 @@
-
 import os 
 import sys
 import json
@@ -16,10 +15,9 @@ import requests
 import urllib.parse
 
 
-def get_size(url, params):
-    params = params.copy()
-    params['resultType'] = 'hits'
-    response = requests.get(url, params=params)
+def _get_size(url, params_tmp):
+    params_tmp['resultType'] = 'hits'
+    response = requests.get(url, params=params_tmp)
     
     if response.status_code == 200:
         size = re.findall(r'numberMatched="[0-9]+"', str(response.content))
@@ -36,6 +34,9 @@ def process_wfs(region_name,
                 start=0,
                 path_data=None,):
     
+    size = _get_size(url, params.copy())
+    print(f"Number of files: {size}")
+
     i = start
     print(type(size), type(count))
     for i in range(start, size+count, count):        
@@ -58,23 +59,22 @@ def process_wfs(region_name,
         gdf.to_parquet(os.path.join(path_data, "raw",f"buildings_{region_name}_{i}_raw.pq"))
 
 
-
-def process_gdf(region_name,
+def process_json(region_name,
                 url_prefix,
                 params,
                 count,
                 path_data):
     
     for i in range(params['start'], params['stop'], count):
-        url = url_prefix+str(i)+params['url_postfix']
+        url = url_prefix+str(i)+params['url_postfix'] # construct json url
         gdf = gpd.read_file(url)
         print(f"{i}: {len(gdf)} Buildings from {url.rsplit('/',1)[1]}")
         gdf.to_parquet(os.path.join(path_data,'raw', f"buildings_{region_name}_{i}_raw.pq"))
 
 
-def process_links(region_name,
-                url,
-                path_data):
+def process_json_w_gpkg(region_name,
+                        url,
+                        path_data):
     
     links = gpd.read_file(url)
     for i,link in enumerate(links.zip.values):
@@ -99,7 +99,9 @@ def _parse_atom_xml(atom_xml,
             yield href
 
 
-def get_zip_links(params):
+def _get_zip_links(params):
+    # for edge case in Berlin, where urls to zip files first needed 
+    # to be extracted from an atom xml
     response = requests.get(params['feed_url'])
     response.raise_for_status()
     
@@ -116,13 +118,17 @@ def _list(x):
 
 def process_zip(region_name,
                 urls,
+                params,
                 path_data):
     
     print("creating zip dir")
     path_zip_dir = os.path.join(path_data, 'raw',f'zip_{region_name}')
     pathlib.Path(path_zip_dir).mkdir(exist_ok=True)
     
-    urls = _list(urls)
+    if urls is None:
+        urls = _get_zip_links(params) 
+
+    urls = _list(url)
     print("downloading zip file")
     for i, url in enumerate(urls):
         filename = url.rsplit("/",1)[1].rsplit(".",1)[0]
@@ -140,8 +146,8 @@ def process_zip(region_name,
 
 def process_xml(region_name,
                 url,
-                path_data,
-                params):
+                params,
+                path_data):
     
     print("downloading xml file")
     response = requests.get(url)
@@ -218,7 +224,7 @@ def _clean_list_cols(gdf):
     return gdf
 
 
-def safe_parquet(region, path_data, params):
+def safe_parquet(region, params, path_data):
     if "file_type" in params.keys():
         # for zip cases - file types can be different per state and must be specified in params
         path_files = os.path.join(path_data, 'raw',f"zip_{region}/**/*.{params['file_type']}")
@@ -262,7 +268,6 @@ def safe_parquet(region, path_data, params):
         print("Missing geom errors in following files:")
         print("\n".join(geom_errors))
 
-
     gdf.to_parquet(os.path.join(path_data, f'buildings_{region}.pq'))
 
 
@@ -283,54 +288,45 @@ def main():
     request = get_input()
     init(request['path_data'])
 
-    if 'size' in request['jobs']:
-        size = get_size(request['url'], request['params'])
-        print(f"Number of files: {size}")
-
-    if ('size' in request['jobs']) & ('wfs' in request['jobs']):
-        if 'start' in request.keys():
-            start = request['start']
-        else: 
-            start = 0
+    if 'wfs' in request['jobs']:
+        if 'start' in request.keys(): start = request['start']
+        else: start = 0
         
         process_wfs(request['region'],
-                    size,
                     request['url'],
                     request['params'],
                     request['count'],
                     start=start, 
                     path_data = request['path_data'])
 
-    if "gdf" in request['jobs']:
-        process_gdf(request['region'],
+    if "json" in request['jobs']:
+        process_json(request['region'],
                     request['url'],
                     request['params'],
                     request['count'],
                     request['path_data'])
     
-    if "links" in request['jobs']:
-        process_links(request['region'],
+    if "json_w_gpkg" in request['jobs']:
+        process_json_w_gpkg(request['region'],
                     request['url'],
                     request['path_data'])
-    
-    if "get_zip_links" in request['jobs']:
-        request['url'] = _get_atom_links(request['params'])
 
     if "zip" in request['jobs']:
         process_zip(request['region'],
                     request['url'],
+                    request['params'],
                     request['path_data'])
     
     if "xml" in request['jobs']:
         process_xml(request['region'],
                     request['url'],
-                    request['path_data'],
-                    request['params'])
+                    request['params'],
+                    request['path_data'])
 
     if 'parquet' in request['jobs']:
         safe_parquet(request['region'],
-                    request['path_data'],
-                    request['params'])
+                    request['params'],
+                    request['path_data'])
 
 
 if __name__ == "__main__":
