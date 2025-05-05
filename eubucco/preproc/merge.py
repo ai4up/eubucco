@@ -37,20 +37,30 @@ def merge_gov_osm_msft(region_id: str, gov_dir: str, osm_dir: str, msft_dir: str
     osm['dataset'] = 'osm'
     msft['dataset'] = 'msft'
 
-    gov_osm = merge_building_datasets(gov, osm, fillna=True)
-    gov_osm_msft = merge_building_datasets(gov_osm, msft, fillna=False)
+    gov_osm = _merge_building_datasets(gov, osm, fillna=True)
+    gov_osm_msft = _merge_building_datasets(gov_osm, msft, fillna=False)
     gov_osm_msft = _generate_unique_id(gov_osm_msft, db_version)
 
     gov_osm_msft.to_parquet(out_path)
 
 
-def merge_building_datasets(gdf1: gpd.GeoDataFrame, gdf2: gpd.GeoDataFrame, fillna: bool) -> gpd.GeoDataFrame:
+def _merge_building_datasets(gdf1: gpd.GeoDataFrame, gdf2: gpd.GeoDataFrame, fillna: bool) -> gpd.GeoDataFrame:
     if gdf1.empty:
         return gdf2
 
     if gdf2.empty:
         return gdf1
 
+    matching, non_matching, _ = _match_building_datasets_based_on_overlap(gdf1, gdf2)
+
+    if fillna:
+        # use gdf2 to fill missing attributes in gdf1
+        gdf1 = _fill_missing_attributes(gdf1, matching)
+
+    return pd.concat([gdf1, non_matching], ignore_index=True)
+
+
+def _match_building_datasets_based_on_overlap(gdf1: gpd.GeoDataFrame, gdf2: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     # determine intersecting buildings
     int_idx2, int_idx1 = gdf1.sindex.query(gdf2.geometry, predicate='intersects')
 
@@ -62,35 +72,43 @@ def merge_building_datasets(gdf1: gpd.GeoDataFrame, gdf2: gpd.GeoDataFrame, fill
     ioa = _intersection_to_area_ratio(geoms1, geoms2)
     gdf2_int['ioa'] = ioa.values
 
-    # add new non-intersecting buildings
+    # select matching buildings based on large intersection
+    intersecting = gdf2_int[gdf2_int['ioa'] > 0.8]
+    intersecting.index = gdf1_int.index[ioa > 0.8]
+
+    # select non-matching buildings (with no intersection)
     non_intersecting = gdf2.drop(gdf2_int.index)
 
-    # add new slightly intersecting buildings
+    # select non-matching buildings (with slight intersection)
     gdf2_largest_int = gdf2_int.sort_values('ioa', ascending=False).drop_duplicates(subset=['id'], keep='first')
     intersecting_below_thresh = gdf2_largest_int[gdf2_largest_int['ioa'] < 0.2]
 
-    # use gdf2 to fill missing attributes in gdf1
-    if fillna:
-        gdf2_overlapping = gdf2_int[gdf2_int['ioa'] > 0.8]
-        gdf2_overlapping.index = gdf1_int.index[ioa > 0.8]
+    matching = intersecting
+    non_matching = pd.concat([non_intersecting, intersecting_below_thresh])
+    unsure = gdf2.drop(matching.index).drop(non_matching.index)
 
-        matched_type = _most_frequent_category(gdf2_overlapping['type'])
-        matched_height = gdf2_overlapping.groupby(level=0)['height'].mean()
-        matched_age = gdf2_overlapping.groupby(level=0)['age'].mean()
+    return matching, non_matching, unsure
 
-        type_missings = gdf1['type'].isna()
-        height_missings = gdf1['height'].isna()
-        age_missings = gdf1['age'].isna()
 
-        gdf1['type'] = gdf1['type'].fillna(matched_type)
-        gdf1['height'] = gdf1['height'].fillna(matched_height)
-        gdf1['age'] = gdf1['age'].fillna(matched_age)
+def _fill_missing_attributes(gdf: gpd.GeoDataFrame, matching: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    # aggregate attributes for 1:n matches
+    matched_type = _most_frequent_category(matching['type'])
+    matched_height = matching.groupby(level=0)['height'].mean()
+    matched_age = matching.groupby(level=0)['age'].mean()
 
-        gdf1['filled_type'] = type_missings & gdf1['type'].notna()
-        gdf1['filled_height'] = height_missings & gdf1['height'].notna()
-        gdf1['filled_age'] = age_missings & gdf1['age'].notna()
+    type_missings = gdf['type'].isna()
+    height_missings = gdf['height'].isna()
+    age_missings = gdf['age'].isna()
 
-    return pd.concat([gdf1, non_intersecting, intersecting_below_thresh], ignore_index=True)
+    gdf['type'] = gdf['type'].fillna(matched_type)
+    gdf['height'] = gdf['height'].fillna(matched_height)
+    gdf['age'] = gdf['age'].fillna(matched_age)
+
+    gdf['filled_type'] = type_missings & gdf['type'].notna()
+    gdf['filled_height'] = height_missings & gdf['height'].notna()
+    gdf['filled_age'] = age_missings & gdf['age'].notna()
+
+    return gdf
 
 
 def _read_geodata(path: str) -> gpd.GeoDataFrame:
