@@ -100,7 +100,7 @@
 #   url: 'https://geoportal.saarland.de/spatial-objects/406/collections/bu-core2d:Building/items?offset='
 #   count: 500
 #   params:
-#     start: 0
+#     start: 580500
 #     stop: 622841
 #     url_postfix: '&limit=500&f=json'
 #   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
@@ -192,20 +192,20 @@
 #   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
 
 
-- region: 'berlin'
-  jobs: 
-    - 'zip'
-    - 'parquet'
-  url: null # edge case for Berlin where zip links first have to be extracted from feed url
-  params:
-    feed_url: 'https://fbinter.stadt-berlin.de/fb/feed/senstadt/a_lod2/0'
-    namespaces:
-      atom: 'http://www.w3.org/2005/Atom'
-      inspire_dls: 'http://inspire.ec.europa.eu/schemas/inspire_dls/1.0'
-      georss: 'http://www.georss.org/georss'
-    file_type: 'xml'
-    crs: 'EPSG:25833'
-  path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+# - region: 'berlin'
+#   jobs: 
+#     - 'zip'
+#     - 'parquet'
+#   url: null # edge case for Berlin where zip links first have to be extracted from feed url
+#   params:
+#     feed_url: 'https://fbinter.stadt-berlin.de/fb/feed/senstadt/a_lod2/0'
+#     namespaces:
+#       atom: 'http://www.w3.org/2005/Atom'
+#       inspire_dls: 'http://inspire.ec.europa.eu/schemas/inspire_dls/1.0'
+#       georss: 'http://www.georss.org/georss'
+#     file_type: 'xml'
+#     crs: 'EPSG:25833'
+#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
 
 
 # - region: 'hamburg'
@@ -221,7 +221,7 @@
 
 - region: 'bremen'
   jobs:
-    - 'zip'
+    #- 'zip'
     - 'parquet'
   url: 'https://gdi2.geo.bremen.de/inspire/download/LoD/data/LoD2_Bremen_2024_04_citygml.zip'
   params:
