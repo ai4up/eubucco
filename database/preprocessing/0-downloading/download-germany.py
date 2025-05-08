@@ -172,14 +172,30 @@ def process_xml(region_name,
         gdf.to_parquet(os.path.join(path_data, 'raw', f'buildings_{region_name}_{code}_raw.pq'))
 
 
+def _read_gml_files(file, region, params):
+    # hamburg requires specific layer name
+    if region=='hamburg':
+        return gpd.read_file(file, layer='building').set_crs(params['crs'])
+
+    else:
+        # tries to read gml or xml with fiona first to avoid piogrio error for wkb type 15
+        try:
+            return gpd.read_file(file, engine='fiona').set_crs(params['crs']) 
+        except:
+            # if fiona fails, try pyogrio
+            try:
+                return gpd.read_file(file, engine='pyogrio').set_crs(params['crs'])
+            except:
+                # if both fail, print link to failed file
+                print(f'GML ERROR. Could not read: {file}')
+                return gpd.GeoDataFrame()
+
+
 def _read_geofile(file, region, params):
     if pathlib.Path(file).suffix == ".pq":
         return gpd.read_parquet(file)
-    if region=='hamburg':
-        # hamburg requires specific layer name
-        return gpd.read_file(file, layer='building').set_crs(params['crs'])
-    if pathlib.Path(file).suffix == ".xml" or pathlib.Path(file).suffix == ".gml":
-        return gpd.read_file(file, driver='GML').set_crs(params['crs'])
+    elif pathlib.Path(file).suffix == ".xml" or pathlib.Path(file).suffix == ".gml":
+        return _read_gml_files(file, region, params)
     else:
         return gpd.read_file(file)
 
@@ -227,6 +243,42 @@ def _clean_list_cols(gdf):
     return gdf
 
 
+def _check_geometry_types(gdf):    
+    invalid_geometries = gdf[~gdf.geometry.geom_type.isin(['Polygon', 'MultiPolygon'])]
+    invalid_types = list(set(invalid_geometries.geometry.geom_type))
+
+    if gdf.geometry.has_z.any():
+        invalid_types.append('z_geometry')
+
+    if not invalid_geometries.empty:
+        print("Found geometries that are not 'Polygon' or 'MultiPolygon':")
+        print(invalid_types)
+        return invalid_types
+    else:
+        print("Check successful: All geometries are either 'Polygon' or 'MultiPolygon'.")
+        return None
+
+
+def _fix_invalid_geometries(gdf, invalid_types):
+    if "MultiLineString" in invalid_types:
+        n_invalid_geoms = len(gdf.loc[gdf.geometry.geom_type == 'MultiLineString'])
+        gdf.loc[gdf.geometry.geom_type == "MultiLineString",'geometry'] = gdf.loc[gdf.geometry.geom_type == "MultiLineString",'geometry'].polygonize()
+        print(f"Fixed {n_invalid_geoms} MulitLineString geometries.")
+    if "z_geometry" in invalid_types:
+        n_invalid_geoms = len(gdf.loc[gdf.geometry.has_z])
+        gdf.loc[gdf.geometry.has_z,'geometry'] = gdf.loc[gdf.geometry.has_z,'geometry'].force_2d()
+        print(f"Fixed {n_invalid_geoms} Z geometries.")
+    return gdf
+
+
+def _clean_gdf(gdf):
+    gdf = _remove_id_duplicates(gdf)
+    invalid_types = _check_geometry_types(gdf)
+    if invalid_types:
+        gdf = _fix_invalid_geometries(gdf, invalid_types)
+    return gdf
+
+
 def safe_parquet(region, params, path_data):
     if "file_type" in params.keys():
         # for zip cases - file types can be different per state and must be specified in params
@@ -252,8 +304,9 @@ def safe_parquet(region, params, path_data):
             print(f"appending geoms of file:{file}")
             frames.append(gdf.to_crs(epsg=3035))
     
-    gdf = pd.concat(frames, ignore_index=True)
-    gdf = _remove_id_duplicates(gdf)
+    gdf = pd.concat(frames, ignore_index=True) 
+
+    gdf = _clean_gdf(gdf)
 
     print("-"*12)
     print("Run summary:")
