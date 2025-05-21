@@ -1,4 +1,5 @@
 # - region: 'brandenburg'
+#   country: 'germany'
 #   jobs:
 #     - 'size'
 #     - 'wfs'
@@ -11,10 +12,11 @@
 #     TYPENAMES: 'ave:GebaeudeBauwerk'
 #     SRSNAME: 'EPSG:4326'
 #     VERSION: '2.0.0'
-#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
 # - region: 'sachsen'
+#   country: 'germany'
 #   jobs:
 #     - 'size'
 #     - 'wfs'
@@ -27,10 +29,11 @@
 #     TYPENAMES: 'ave:GebaeudeBauwerk'
 #     SRSNAME: 'EPSG:25833'
 #     VERSION: '2.0.0'
-#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
   
 
 # - region: 'baden_wuerttenberg'
+#   country: 'germany'
 #   jobs:
 #     # - 'size'
 #     # - 'wfs'
@@ -44,10 +47,11 @@
 #     TYPENAMES: 'bu-core2d:Building'
 #     SRSNAME: 'EPSG:25833'
 #     VERSION: '2.0.0'
-#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
   
 
 # - region: 'mecklenburg_vorpommern'
+#   country: 'germany'
 #   jobs:
 #     # - 'size'
 #     # - 'wfs'
@@ -60,10 +64,11 @@
 #     TYPENAMES: 'ave:GebaeudeBauwerk'
 #     SRSNAME: 'EPSG:5650'
 #     VERSION: '2.0.0'
-#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
 # - region: 'hessen'
+#   country: 'germany'
 #   jobs:
 #     # - 'size'
 #     # - 'wfs'
@@ -76,11 +81,12 @@
 #     TYPENAMES: 'ave:GebaeudeBauwerk'
 #     SRSNAME: 'EPSG:25832'
 #     VERSION: '2.0.0'
-#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
 
 # - region: 'rheinland_pfalz'
+#   country: 'germany'
 #   jobs:
 #   # - 'json'
 #     - 'parquet'
@@ -90,10 +96,11 @@
 #     start: 0
 #     stop: 3320444
 #     url_postfix: '&limit=4000&f=json'
-#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
 # - region: 'saarland'
+#   country: 'germany'
 #   jobs:
 #     - 'json'
 #     - 'parquet'
@@ -103,10 +110,11 @@
 #     start: 580500
 #     stop: 622841
 #     url_postfix: '&limit=500&f=json'
-#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
 # - region: 'nordrhein_westfalen'
+#   country: 'germany'
 #   jobs:
 #     #- 'json'
 #     - 'parquet'
@@ -116,10 +124,11 @@
 #     start: 0
 #     stop: 12646244
 #     url_postfix: '&limit=5000&f=json'
-#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
 # - region: 'niedersachsen'
+#   country: 'germany'
 #   jobs:
 #   #  - 'json_w_gpkg'
 #     - 'parquet'
@@ -129,10 +138,11 @@
 #     start: null
 #     stop: null
 #     url_postfix: null
-#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
 # - region: 'thueringen'
+#   country: 'germany'
 #   jobs:
 #     - 'size'
 #     - 'wfs'
@@ -145,20 +155,22 @@
 #     TYPENAMES: 'ave:GebaeudeBauwerk'
 #     SRSNAME: 'EPSG:5650'
 #     VERSION: '2.0.0'
-#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
 # - region: 'sachsen_anhalt'
+#   country: 'germany'
 #   jobs:
 #     #- 'zip'
 #     - 'parquet'
 #   url: 'https://www.geodatenportal.sachsen-anhalt.de/gfds_webshare/download/LVermGeo/Geodatenportal/externedaten/GBIS_Gebaeude.zip'
 #   params:
 #     file_type: 'xml' # added as edge case to handle zip files
-#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
   
 
 # - region: schleswig_holstein
+#   country: 'germany'
 #   jobs: 
 #     - 'xml'
 #     - 'parquet'
@@ -172,10 +184,11 @@
 #     spatial_identifier_code: 'inspire_dls:spatial_dataset_identifier_code'
 #     bld_url_pre_fix: 'https://dienste.gdi-sh.de/WFS_SH_ALKIS_vereinf_OpenGBD?Request=GetFeature&Service=WFS&Version=2.0.0&gemeindeschluessel='
 #     bld_url_post_fix: '&StoredQuery_ID=GetGebByGemeinde'
-#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
   
 
 # - region: bavaria
+#   country: 'germany'
 #   jobs:
 #     - 'zip'
 #     - 'parquet'
@@ -189,26 +202,28 @@
 #     - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/092_Niederbayern_Hausumringe.zip'
 #   params:
 #     file_type: 'shp' # added as edge case to handle zip files
-#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
-- region: 'berlin'
-  jobs: 
-    - 'zip'
-    - 'parquet'
-  url: null # edge case for Berlin where zip links first have to be extracted from feed url
-  params:
-    feed_url: 'https://fbinter.stadt-berlin.de/fb/feed/senstadt/a_lod2/0'
-    namespaces:
-      atom: 'http://www.w3.org/2005/Atom'
-      inspire_dls: 'http://inspire.ec.europa.eu/schemas/inspire_dls/1.0'
-      georss: 'http://www.georss.org/georss'
-    file_type: 'xml'
-    crs: 'EPSG:25833'
-  path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+# - region: 'berlin'
+#   country: 'germany'
+#   jobs: 
+#     - 'zip'
+#     - 'parquet'
+#   url: null # edge case for Berlin where zip links first have to be extracted from feed url
+#   params:
+#     feed_url: 'https://fbinter.stadt-berlin.de/fb/feed/senstadt/a_lod2/0'
+#     namespaces:
+#       atom: 'http://www.w3.org/2005/Atom'
+#       inspire_dls: 'http://inspire.ec.europa.eu/schemas/inspire_dls/1.0'
+#       georss: 'http://www.georss.org/georss'
+#     file_type: 'xml'
+#     crs: 'EPSG:25833'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
 # - region: 'hamburg'
+#   country: 'germany'
 #   jobs:
 #     - 'zip'
 #     - 'parquet'
@@ -216,41 +231,43 @@
 #   params:
 #     file_type: 'gml' # added as edge case to handle zip files
 #     crs: 'EPSG:25832'
-#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
-# - region: 'bremen'
-#   jobs:
-#     #- 'zip'
-#     - 'parquet'
-#   url: 'https://gdi2.geo.bremen.de/inspire/download/LoD/data/LoD2_Bremen_2024_04_citygml.zip'
-#   params:
-#     file_type: 'gml' # added as edge case to handle zip files
-#     crs: 'EPSG:25832'
-#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+- region: 'bremen'
+  country: 'germany'
+  jobs:
+    - 'zip'
+    - 'parquet'
+  url: 'https://gdi2.geo.bremen.de/inspire/download/LoD/data/LoD2_Bremen_2024_04_citygml.zip'
+  params:
+    file_type: 'gml' # added as edge case to handle zip files
+    crs: 'EPSG:25832'
+  path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
-# - region: poland
+# - region: 'poland'
+#   country: 'poland'
 #   jobs:
 #     - 'zip'
 #     - 'parquet'
 #   url: 
 #     - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=34ad9f34a0b7dc8205a933bb058e91c1&name=podkarpackie_bu.zip'
 #     - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=78896afe993bcb34365fe7b8a7f9966f&name=pomorskie_bu.zip'
-#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=be4bfa1478a6eeedd67faffea96eafda&name=opolskie_bu.zip'
-#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=c7881c0de4e3d86548ba0e97c50b490a&name=lodzkie_bu.zip'
-#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=79dcc64d4c0c4e8873365f04c55a4940&name=lubuskie_bu.zip'
-#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=ac47d220ce942cc3668f703fe4bd7a60&name=mazowieckie_bu.zip'
-#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=9e87962dd94adddb2838f6321778f04a&name=kujawskopomorskie_bu.zip'
-#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=8818a617772a6c9dad222dd52acecc29&name=slaskie_bu.zip'
-#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=4b636d1174ceff606fb1c9c95c145915&name=dolnoslaskie_bu.zip'
-#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=99c8bdcfc3173a3a7c2d18bf675f4315&name=malopolskie_bu.zip'
-#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=cb81449840b96ff21fba1a42e094c074&name=lubelskie_bu.zip'
-#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=9bb1518bbf0d8e22ec338c80dcc83f61&name=zachodniopomorskie_bu.zip'
-#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=0217fcdf1da066af11a62067530786a9&name=warminskomazurskie_bu.zip'
-#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=67eb749e1ae54cb7aa9a8aa1d90d8dd7&name=wielkopolskie_bu.zip'
-#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=fc9fe6a16296acf6a4072a08f5be1342&name=podlaskie_bu.zip'
-#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=e968c6db383a80a34b702866ede92cb1&name=swietorzyskie_bu.zip'
+#     - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=be4bfa1478a6eeedd67faffea96eafda&name=opolskie_bu.zip'
+#     - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=c7881c0de4e3d86548ba0e97c50b490a&name=lodzkie_bu.zip'
+#     - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=79dcc64d4c0c4e8873365f04c55a4940&name=lubuskie_bu.zip'
+#     - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=ac47d220ce942cc3668f703fe4bd7a60&name=mazowieckie_bu.zip'
+#     - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=9e87962dd94adddb2838f6321778f04a&name=kujawskopomorskie_bu.zip'
+#     - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=8818a617772a6c9dad222dd52acecc29&name=slaskie_bu.zip'
+#     - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=4b636d1174ceff606fb1c9c95c145915&name=dolnoslaskie_bu.zip'
+#     - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=99c8bdcfc3173a3a7c2d18bf675f4315&name=malopolskie_bu.zip'
+#     - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=cb81449840b96ff21fba1a42e094c074&name=lubelskie_bu.zip'
+#     - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=9bb1518bbf0d8e22ec338c80dcc83f61&name=zachodniopomorskie_bu.zip'
+#     - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=0217fcdf1da066af11a62067530786a9&name=warminskomazurskie_bu.zip'
+#     - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=67eb749e1ae54cb7aa9a8aa1d90d8dd7&name=wielkopolskie_bu.zip'
+#     - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=fc9fe6a16296acf6a4072a08f5be1342&name=podlaskie_bu.zip'
+#     - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=e968c6db383a80a34b702866ede92cb1&name=swietorzyskie_bu.zip'
 #   params:
 #     file_type: 'gml' # added as edge case to handle zip files
-#   path_data: '/Users/felix/Documents/phd/1_projects/5_eubucco_v1/data'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'

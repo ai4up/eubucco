@@ -1,23 +1,23 @@
 jobs:
-   - name: downloading
-     script: /p/projects/eubucco/git-eubucco/database/preprocessing/download-germany.py
-     param_files:
-        -/p/projects/eubucco/git-eubucco/database/preprocessing/params-download-germany.yml
-     log_dir: /p/projects/eubucco/logs/v1_0-db/download-buildings
-     resources:
-       cpus: 5
-       time: "1:00:00"
-       #partition: io
-     
+  - name: 'downloading'
+    script: '/p/projects/eubucco/git-eubucco/database/preprocessing/0-downloading/download-v1.py'
+    param_files:
+      - '/p/projects/eubucco/git-eubucco/database/preprocessing/0-downloading/params-download-v1.yml'
+    log_dir: '/p/projects/eubucco/logs/v1_0-db/download-buildings'
+    resources:
+      cpus: 2
+      time: '2:00:00'
+      partition: 'io'
+
 
 properties:
-  conda_env: "/home/felixwa/.conda/envs/eubucco-download"
-  account: eubucco
-  log_level: INFO
+  conda_env: '/home/felixwa/.conda/envs/eubucco-download'
+  account: 'eubucco'
+  log_level: 'INFO'
   exp_backoff_factor: 1
   max_retries: 0
   poll_interval: 30
   slack:
-    channel: "#test-slurm-bot"
+    channel: '#test-slurm-bot'
     token: <to-be-added>
 
