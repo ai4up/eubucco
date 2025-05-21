@@ -5,9 +5,9 @@ jobs:
         -/p/projects/eubucco/git-eubucco/database/preprocessing/params-download-germany.yml
      log_dir: /p/projects/eubucco/logs/v1_0-db/download-buildings
      resources:
-       cpus: 1
-       time: "2:00:00"
-       partition: io
+       cpus: 5
+       time: "1:00:00"
+       #partition: io
      
 
 properties:
