@@ -235,7 +235,7 @@ def _remove_id_duplicates(gdf):
     return gdf
 
 
-def _clean_list_cols(gdf):
+def _clean_individual(gdf):
     # turning columns with lists into strings to avoid issues with parquet
     for col in gdf.columns:
         if col in gdf.columns[gdf.dtypes=='object']:
@@ -271,7 +271,7 @@ def _fix_invalid_geometries(gdf, invalid_types):
     return gdf
 
 
-def _clean_gdf(gdf):
+def _clean_full(gdf):
     gdf = _remove_id_duplicates(gdf)
     invalid_types = _check_geometry_types(gdf)
     if invalid_types:
@@ -300,13 +300,13 @@ def safe_parquet(region, params, path_data):
                                                                 geom_errors)
 
         if gdf.shape[0]:
-            gdf = _clean_list_cols(gdf)
+            gdf = _clean_individual(gdf)
             print(f"appending geoms of file:{file}")
             frames.append(gdf.to_crs(epsg=3035))
     
     gdf = pd.concat(frames, ignore_index=True) 
 
-    gdf = _clean_gdf(gdf)
+    gdf = _clean_full(gdf)
 
     print("-"*12)
     print("Run summary:")
