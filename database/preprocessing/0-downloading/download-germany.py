@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import re
+import time
 from glob import glob
 from io import BytesIO
 import zipfile
@@ -180,15 +181,17 @@ def _read_gml_files(file, region, params):
     else:
         # tries to read gml or xml with fiona first to avoid piogrio error for wkb type 15
         try:
-            return gpd.read_file(file, engine='fiona').set_crs(params['crs']) 
+            return gpd.read_file(file, engine='fiona')
         except:
-            # if fiona fails, try pyogrio
             try:
-                return gpd.read_file(file, engine='pyogrio').set_crs(params['crs'])
+                return gpd.read_file(file, engine='pyogrio')
             except:
-                # if both fail, print link to failed file
-                print(f'GML ERROR. Could not read: {file}')
-                return gpd.GeoDataFrame()
+                try:
+                    time.sleep(0.5) # waiting 0.5 seconds ensures creation of gds meta file which in some cases is needed by fiona to process gml files
+                    return gpd.read_file(file, engine='fiona')
+                except:
+                    print(f'GML ERROR. Could not read: {file}')
+                    return gpd.GeoDataFrame()
 
 
 def _read_geofile(file, region, params):
