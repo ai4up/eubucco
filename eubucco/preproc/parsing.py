@@ -823,7 +823,7 @@ def clean_attributes(df,
     Returns: tuple(pd.DataFrame,pd.DataFrame)
     '''
 
-    if extension in ['shp', 'dxf', 'pbf','csv.gz']:
+    if extension in ['shp', 'dxf', 'pbf','csv.gz', 'pq']:
         # get variables/columns existing in the inputs
         list_var_source = [var_map[i] for i in var_map.keys() if var_map[i] is not None]
         list_var = [i for i in var_map.keys() if var_map[i] is not None]
@@ -902,7 +902,7 @@ def parse(path_to_param_file='/p/projects/eubucco/git-eubucco/database/preproces
     Wrapper function to parse an arbitraty number of files for a given open government
     building data source / OpenStreetMap: fetches a specific set of attributes and footprints in WKT.
 
-    Currently supports the following formats: .gml, .xml, .shp, .dxf, .pbf
+    Currently supports the following formats: .gml, .xml, .shp, .dxf, .pbf, .pq
 
     The function creates a unique dataframe for the source that is split into two files
     for attributes and geometries that can be matched by id, and possibly a third file for
@@ -967,7 +967,7 @@ def parse(path_to_param_file='/p/projects/eubucco/git-eubucco/database/preproces
         print('{}/{}'.format(n + 1, len(file_paths)))
         print(file_path)
 
-        if p['extension'] in ['shp', 'dxf', 'pbf']:
+        if p['extension'] in ['shp', 'dxf', 'pbf', 'pq']:
             gdf, count_multipoly, dict_val = parse_tabular(file_path,
                                                            p['dataset_name'],
                                                            p['var_map']
