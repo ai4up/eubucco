@@ -192,20 +192,20 @@
 #   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
 
 
-# - region: 'berlin'
-#   jobs: 
-#     - 'zip'
-#     - 'parquet'
-#   url: null # edge case for Berlin where zip links first have to be extracted from feed url
-#   params:
-#     feed_url: 'https://fbinter.stadt-berlin.de/fb/feed/senstadt/a_lod2/0'
-#     namespaces:
-#       atom: 'http://www.w3.org/2005/Atom'
-#       inspire_dls: 'http://inspire.ec.europa.eu/schemas/inspire_dls/1.0'
-#       georss: 'http://www.georss.org/georss'
-#     file_type: 'xml'
-#     crs: 'EPSG:25833'
-#   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
+- region: 'berlin'
+  jobs: 
+    - 'zip'
+    - 'parquet'
+  url: null # edge case for Berlin where zip links first have to be extracted from feed url
+  params:
+    feed_url: 'https://fbinter.stadt-berlin.de/fb/feed/senstadt/a_lod2/0'
+    namespaces:
+      atom: 'http://www.w3.org/2005/Atom'
+      inspire_dls: 'http://inspire.ec.europa.eu/schemas/inspire_dls/1.0'
+      georss: 'http://www.georss.org/georss'
+    file_type: 'xml'
+    crs: 'EPSG:25833'
+  path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
 
 
 # - region: 'hamburg'
@@ -230,27 +230,27 @@
 #   path_data: '/p/projects/eubucco/data/0-raw-data-v1/gov/germany/'
 
 
-- region: poland
-  jobs:
-    - 'zip'
-    - 'parquet'
-  url: 
-    - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=34ad9f34a0b7dc8205a933bb058e91c1&name=podkarpackie_bu.zip'
-    - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=78896afe993bcb34365fe7b8a7f9966f&name=pomorskie_bu.zip'
-    # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=be4bfa1478a6eeedd67faffea96eafda&name=opolskie_bu.zip'
-    # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=c7881c0de4e3d86548ba0e97c50b490a&name=lodzkie_bu.zip'
-    # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=79dcc64d4c0c4e8873365f04c55a4940&name=lubuskie_bu.zip'
-    # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=ac47d220ce942cc3668f703fe4bd7a60&name=mazowieckie_bu.zip'
-    # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=9e87962dd94adddb2838f6321778f04a&name=kujawskopomorskie_bu.zip'
-    # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=8818a617772a6c9dad222dd52acecc29&name=slaskie_bu.zip'
-    # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=4b636d1174ceff606fb1c9c95c145915&name=dolnoslaskie_bu.zip'
-    # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=99c8bdcfc3173a3a7c2d18bf675f4315&name=malopolskie_bu.zip'
-    # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=cb81449840b96ff21fba1a42e094c074&name=lubelskie_bu.zip'
-    # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=9bb1518bbf0d8e22ec338c80dcc83f61&name=zachodniopomorskie_bu.zip'
-    # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=0217fcdf1da066af11a62067530786a9&name=warminskomazurskie_bu.zip'
-    # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=67eb749e1ae54cb7aa9a8aa1d90d8dd7&name=wielkopolskie_bu.zip'
-    # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=fc9fe6a16296acf6a4072a08f5be1342&name=podlaskie_bu.zip'
-    # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=e968c6db383a80a34b702866ede92cb1&name=swietorzyskie_bu.zip'
-  params:
-    file_type: 'gml' # added as edge case to handle zip files
-  path_data: '/Users/felix/Documents/phd/1_projects/5_eubucco_v1/data'
+# - region: poland
+#   jobs:
+#     - 'zip'
+#     - 'parquet'
+#   url: 
+#     - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=34ad9f34a0b7dc8205a933bb058e91c1&name=podkarpackie_bu.zip'
+#     - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=78896afe993bcb34365fe7b8a7f9966f&name=pomorskie_bu.zip'
+#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=be4bfa1478a6eeedd67faffea96eafda&name=opolskie_bu.zip'
+#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=c7881c0de4e3d86548ba0e97c50b490a&name=lodzkie_bu.zip'
+#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=79dcc64d4c0c4e8873365f04c55a4940&name=lubuskie_bu.zip'
+#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=ac47d220ce942cc3668f703fe4bd7a60&name=mazowieckie_bu.zip'
+#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=9e87962dd94adddb2838f6321778f04a&name=kujawskopomorskie_bu.zip'
+#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=8818a617772a6c9dad222dd52acecc29&name=slaskie_bu.zip'
+#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=4b636d1174ceff606fb1c9c95c145915&name=dolnoslaskie_bu.zip'
+#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=99c8bdcfc3173a3a7c2d18bf675f4315&name=malopolskie_bu.zip'
+#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=cb81449840b96ff21fba1a42e094c074&name=lubelskie_bu.zip'
+#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=9bb1518bbf0d8e22ec338c80dcc83f61&name=zachodniopomorskie_bu.zip'
+#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=0217fcdf1da066af11a62067530786a9&name=warminskomazurskie_bu.zip'
+#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=67eb749e1ae54cb7aa9a8aa1d90d8dd7&name=wielkopolskie_bu.zip'
+#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=fc9fe6a16296acf6a4072a08f5be1342&name=podlaskie_bu.zip'
+#     # - 'http://mapy.geoportal.gov.pl/wss/service/ATOM/httpauth/download/?fileId=e968c6db383a80a34b702866ede92cb1&name=swietorzyskie_bu.zip'
+#   params:
+#     file_type: 'gml' # added as edge case to handle zip files
+#   path_data: '/Users/felix/Documents/phd/1_projects/5_eubucco_v1/data'
