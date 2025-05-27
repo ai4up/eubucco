@@ -25,7 +25,7 @@ def get_overview(gdf):
 
     # check for duplicates
     duplicate_count = {}
-    for idx in ['gml_id','oid','id']:
+    for idx in ['gml_id','oid','id','objid']:
         if idx in gdf.columns:
             duplicate_count[idx] = len(gdf[gdf.duplicated(subset=[idx], keep=False)])
     

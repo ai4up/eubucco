@@ -226,15 +226,10 @@ def _handle_missing_metadata(file,data_errors, geom_errors):
 
 
 def _remove_id_duplicates(gdf):
-    if 'gml_id' in gdf.columns:
-        gdf = gdf[~gdf['gml_id'].duplicated()]
-    
-    if 'oid' in gdf.columns:
-        gdf = gdf[~gdf['oid'].duplicated()]
-    
-    if 'id' in gdf.columns:
-        gdf = gdf[~gdf['id'].duplicated()]
-
+    for id_x in ['gml_id', 'oid', 'id', 'objid']:
+        if id_x in gdf.columns:
+            # remove duplicates based on id_x column
+            gdf = gdf[~gdf[id_x].duplicated()]
     return gdf
 
 
