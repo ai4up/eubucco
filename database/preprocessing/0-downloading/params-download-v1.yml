@@ -185,24 +185,17 @@
 #     bld_url_pre_fix: 'https://dienste.gdi-sh.de/WFS_SH_ALKIS_vereinf_OpenGBD?Request=GetFeature&Service=WFS&Version=2.0.0&gemeindeschluessel='
 #     bld_url_post_fix: '&StoredQuery_ID=GetGebByGemeinde'
 #   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
-  
 
-# - region: bavaria
-#   country: 'germany'
-#   jobs:
-#     - 'zip'
-#     - 'parquet'
-#   url: 
-#     - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/096_Unterfranken_Hausumringe.zip'
-#     - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/094_Oberfranken_Hausumringe.zip'
-#     - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/095_Mittelfranken_Hausumringe.zip'
-#     - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/093_Oberpfalz_Hausumringe.zip'
-#     - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/097_Schwaben_Hausumringe.zip'
-#     - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/091_Oberbayern_Hausumringe.zip'
-#     - 'https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/092_Niederbayern_Hausumringe.zip'
-#   params:
-#     file_type: 'shp' # added as edge case to handle zip files
-#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
+
+- region: bavaria
+  country: 'germany'
+  jobs:
+    - 'download_meta4'
+    - 'meta4'
+    - 'parquet'
+  params: Null
+  url: 'https://geodaten.bayern.de/odd/a/lod2/citygml/meta/metalink/09.meta4'
+  path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
 # - region: 'berlin'
@@ -234,16 +227,16 @@
 #   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
-- region: 'bremen'
-  country: 'germany'
-  jobs:
-    #- 'zip'
-    - 'parquet'
-  url: 'https://gdi2.geo.bremen.de/inspire/download/LoD/data/LoD2_Bremen_2024_04_citygml.zip'
-  params:
-    file_type: 'gml' # added as edge case to handle zip files
-    crs: 'EPSG:25832'
-  path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
+# - region: 'bremen'
+#   country: 'germany'
+#   jobs:
+#     #- 'zip'
+#     - 'parquet'
+#   url: 'https://gdi2.geo.bremen.de/inspire/download/LoD/data/LoD2_Bremen_2024_04_citygml.zip'
+#   params:
+#     file_type: 'gml' # added as edge case to handle zip files
+#     crs: 'EPSG:25832'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
 # - region: 'poland'

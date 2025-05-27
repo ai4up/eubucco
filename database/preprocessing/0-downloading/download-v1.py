@@ -60,6 +60,52 @@ def process_wfs(region,
         gdf.to_parquet(os.path.join(path_data, "raw",f"buildings_{region}_{i}_raw.pq"))
 
 
+def download_meta4(region, url, path_data):
+    """
+    Downloads a meta4 file and returns a list of tuples with file names and URLs.
+    """
+    response = requests.get(url)
+    if response.status_code != 200:
+        print(f"Failed to download meta4 file from {url}")
+        raise ValueError(f"Failed to download meta4 file from {url}")
+
+    meta4_file_path = os.path.join(path_data, 'raw', f'meta4_{region}.xml')
+    with open(meta4_file_path, 'wb') as f:
+        f.write(response.content)
+    print(f"Meta4 file downloaded to {meta4_file_path}")
+
+
+def _parse_meta4(file_path):
+    ns = {'m': 'urn:ietf:params:xml:ns:metalink'}
+    tree = ET.parse(file_path)
+    root = tree.getroot()
+    files = []
+    for file_elem in root.findall('m:file', ns):
+        name = file_elem.get('name')
+        urls = [ue.text for ue in file_elem.findall('m:url', ns)]
+        files.append((name, urls))
+    return files  
+
+
+def process_meta4(region, path_data):
+    files = _parse_meta4(os.path.join(path_data, 'raw', f'meta4_{region}.xml'))
+    i=0
+    for name, urls in files:
+        try: gdf = gpd.read_file(urls[0], engine='fiona')
+        except Exception as e:
+            print(f"Error downloading {name}: {e}. Testing second URL if available.")
+            if len(urls) > 1:
+                try: gdf = gpd.read_file(urls[0], engine='fiona')
+                except Exception as e:
+                    print(f"Error downloading {name} from second URL: {e}")
+        
+        if gdf is not None:
+            i+=1
+            gdf.to_parquet(os.path.join(path_data,'raw', f"buildings_{region}_{name.rsplit('.')[0]}_raw.pq"))
+    
+    print(f"Processed and saved {i} of {len(files)} files from meta4 for {region}.")    
+    
+
 def process_json(region,
                 url_prefix,
                 params,
@@ -278,9 +324,10 @@ def _clean_concatenated_gdf(gdf):
 
 
 def safe_parquet(region, params, path_data):
-    if "file_type" in params.keys():
-        # for zip cases - file types can be different per state and must be specified in params
-        path_files = os.path.join(path_data, 'raw',f"zip_{region}/**/*.{params['file_type']}")
+    if params is not None:
+        if "file_type" in params.keys():
+            # for zip cases - file types can be different per state and must be specified in params
+            path_files = os.path.join(path_data, 'raw',f"zip_{region}/**/*.{params['file_type']}")
     else:
         path_files = os.path.join(path_data, 'raw',f'buildings_{region}*')
     
@@ -382,6 +429,15 @@ def main():
                     request['url'],
                     request['params'],
                     path_data)
+    
+    if "download_meta4" in request['jobs']:
+        download_meta4(request['region'],
+                       request['url'],
+                       path_data)
+        
+    if "meta4" in request['jobs']:
+        process_meta4(request['region'],
+                      path_data)
 
     if 'parquet' in request['jobs']:
         safe_parquet(request['region'],
