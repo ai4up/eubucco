@@ -99,29 +99,24 @@ def _download_read_gml(name, url,path_data, region):
     
     layers = fiona.listlayers(file_path)
     print(f"Found layers: {layers} in {file_path}")
-    return gpd.read_file(file_path, layer=layers[0],engine='fiona')
 
 
 def process_meta4(region, path_data):
-    # processing meta4 files (bavaria) requires certain workarounds to account for differences
-    # in how a local machine and the cluster handle gml files.
-    # In particular, we download a .gml file save it and directly read it with gpd.read_file()
-    # while specifying the relevant layer names.
     files = _parse_meta4(os.path.join(path_data, 'raw',f'zip_{region}', 'meta4.xml'))
     i=0
     for name, urls in files:
         try: 
-            gdf = _download_read_gml(name, urls[0], path_data, region)
+            _download_read_gml(name, urls[0], path_data, region)
         except Exception as e:
             print(f"Error downloading {name}: {e}. Testing second URL if available.")
             if len(urls) > 1:
-                try: gdf = _download_read_gml(name, urls[1], path_data, region)
+                try: _download_read_gml(name, urls[1], path_data, region)
                 except Exception as e:
                     print(f"Error downloading {name} from second URL: {e}")
         
-        if gdf is not None:
-            i+=1
-            gdf.to_parquet(os.path.join(path_data,'raw', f"buildings_{region}_{name.rsplit('.')[0]}_raw.pq"))
+        # if gdf is not None:
+        #     i+=1
+        #     gdf.to_parquet(os.path.join(path_data,'raw', f"buildings_{region}_{name.rsplit('.')[0]}_raw.pq"))
         if i>100:
             print("Stopping after 100 files for testing.")
             break
@@ -244,9 +239,11 @@ def process_xml(region,
 
 def _read_gml_files(file, region, params):
     # hamburg requires specific layer name
-    if region=='hamburg':
-        return gpd.read_file(file, layer='building').set_crs(params['crs'])
-
+    if "layer" in params.keys():
+        gdf = gpd.read_file(file, layer=params['layer'])
+        if "crs" in params.keys():
+            gdf = gdf.set_crs(params['crs'])
+        return gdf
     else:
         # tries to read gml or xml with fiona first to avoid piogrio error for wkb type 15
         try:
