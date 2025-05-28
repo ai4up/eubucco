@@ -9,7 +9,7 @@ import zipfile
 import pathlib
 import xml.etree.ElementTree as ET
 
-import fiona
+import numpy as np
 import pandas as pd
 import geopandas as gpd
 from shapely import wkb
@@ -328,11 +328,21 @@ def _fix_invalid_geometries(gdf, invalid_types):
     return gdf
 
 
+def remove_ndarray_columns(gdf):
+    array_cols = [col for col in gdf.columns if gdf[col].apply(lambda x: isinstance(x, np.ndarray)).any()]
+    if array_cols:
+        for col in array_cols:
+            print(f"Removing ndarray values in {col}")
+            gdf[col] = gdf[col].astype(str)  # Convert ndarray columns to string
+    return gdf
+
+
 def _clean_concatenated_gdf(gdf):
     gdf = _remove_id_duplicates(gdf)
     invalid_types = _check_geometry_types(gdf)
     if invalid_types:
         gdf = _fix_invalid_geometries(gdf, invalid_types)
+    gdf = remove_ndarray_columns(gdf)
     return gdf
 
 
