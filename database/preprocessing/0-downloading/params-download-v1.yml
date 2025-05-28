@@ -240,7 +240,6 @@
   params:
     file_type: 'gml' # added as edge case to handle zip files
     layer: 'Building'
-    crs: 'EPSG:25832'
   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 

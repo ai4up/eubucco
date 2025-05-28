@@ -91,35 +91,27 @@ def _parse_meta4(file_path):
     return files  
 
 
-def _download_read_gml(name, url,path_data, region):
+def _download_gml(name, url,path_data, region):
     resp = requests.get(url)
     file_path = os.path.join(path_data,'raw',f'zip_{region}', f"{name.rsplit('.')[0]}.gml")
     with open(file_path, "wb") as f:
-        f.write(resp.content)
-    
-    layers = fiona.listlayers(file_path)
-    print(f"Found layers: {layers} in {file_path}")
-
+        f.write(resp.content) 
+  
 
 def process_meta4(region, path_data):
     files = _parse_meta4(os.path.join(path_data, 'raw',f'zip_{region}', 'meta4.xml'))
     i=0
     for name, urls in files:
         try: 
-            _download_read_gml(name, urls[0], path_data, region)
+            _download_gml(name, urls[0], path_data, region)
+            i += 1
         except Exception as e:
             print(f"Error downloading {name}: {e}. Testing second URL if available.")
             if len(urls) > 1:
-                try: _download_read_gml(name, urls[1], path_data, region)
+                try: _download_gml(name, urls[1], path_data, region)
                 except Exception as e:
                     print(f"Error downloading {name} from second URL: {e}")
-        
-        # if gdf is not None:
-        #     i+=1
-        #     gdf.to_parquet(os.path.join(path_data,'raw', f"buildings_{region}_{name.rsplit('.')[0]}_raw.pq"))
-        if i>100:
-            print("Stopping after 100 files for testing.")
-            break
+                    i -= 1  # do not count this file as processed
     
     print(f"Processed and saved {i} of {len(files)} files from meta4 for {region}.")    
     
@@ -238,26 +230,23 @@ def process_xml(region,
 
 
 def _read_gml_files(file, region, params):
-    # hamburg requires specific layer name
-    if "layer" in params.keys():
-        gdf = gpd.read_file(file, layer=params['layer'])
-        if "crs" in params.keys():
-            gdf = gdf.set_crs(params['crs'])
-        return gdf
-    else:
-        # tries to read gml or xml with fiona first to avoid piogrio error for wkb type 15
+    # some cases require layer to be specified as some gml files might be corrupted and fiona cannot find the right layer
+    if "layer" in params.keys(): layer = params['layer']
+    else: layer = None
+    
+    # tries to read gml or xml with defaul engine = pyogrio, if it fails it tries to read with fiona
+    try:
+        return gpd.read_file(file, layer=layer)
+    except:
         try:
-            return gpd.read_file(file, engine='fiona')
+            return gpd.read_file(file,layer=layer, engine='fiona')
         except:
             try:
-                return gpd.read_file(file, engine='pyogrio')
+                time.sleep(0.5) # waiting 0.5 seconds ensures creation of gfs meta file which in some cases is needed by fiona to process gml files
+                return gpd.read_file(file, layer=layer, engine='fiona')
             except:
-                try:
-                    time.sleep(0.5) # waiting 0.5 seconds ensures creation of gds meta file which in some cases is needed by fiona to process gml files
-                    return gpd.read_file(file, engine='fiona')
-                except:
-                    print(f'GML ERROR. Could not read: {file}')
-                    return gpd.GeoDataFrame()
+                print(f'GML ERROR. Could not read: {file}')
+                return gpd.GeoDataFrame()
 
 
 def _read_geofile(file, region, params):
