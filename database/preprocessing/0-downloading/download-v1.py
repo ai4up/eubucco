@@ -9,6 +9,7 @@ import zipfile
 import pathlib
 import xml.etree.ElementTree as ET
 
+import fiona
 import pandas as pd
 import geopandas as gpd
 from shapely import wkb
@@ -64,15 +65,18 @@ def download_meta4(region, url, path_data):
     """
     Downloads a meta4 file and returns a list of tuples with file names and URLs.
     """
+    print("creating zip dir (for meta4)")
+    path_zip_dir = os.path.join(path_data, 'raw',f'zip_{region}')
+    pathlib.Path(path_zip_dir).mkdir(exist_ok=True)
+    
     response = requests.get(url)
     if response.status_code != 200:
         print(f"Failed to download meta4 file from {url}")
         raise ValueError(f"Failed to download meta4 file from {url}")
 
-    meta4_file_path = os.path.join(path_data, 'raw', f'meta4_{region}.xml')
-    with open(meta4_file_path, 'wb') as f:
+    with open(os.path.join(path_zip_dir,'meta4.xml'), 'wb') as f:
         f.write(response.content)
-    print(f"Meta4 file downloaded to {meta4_file_path}")
+    print(f"Meta4 file downloaded to {os.path.join(path_zip_dir,'meta4.xml')}")
 
 
 def _parse_meta4(file_path):
@@ -87,21 +91,39 @@ def _parse_meta4(file_path):
     return files  
 
 
+def _download_read_gml(name, url,path_data, region):
+    resp = requests.get(url)
+    file_path = os.path.join(path_data,'raw',f'zip_{region}', f"{name.rsplit('.')[0]}.gml")
+    with open(file_path, "wb") as f:
+        f.write(resp.content)
+    
+    layers = fiona.listlayers(file_path)
+    return gpd.read_file(file_path, layer=layers[0],engine='fiona')
+
+
 def process_meta4(region, path_data):
-    files = _parse_meta4(os.path.join(path_data, 'raw', f'meta4_{region}.xml'))
+    # processing meta4 files (bavaria) requires certain workarounds to account for differences
+    # in how a local machine and the cluster handle gml files.
+    # In particular, we download a .gml file save it and directly read it with gpd.read_file()
+    # while specifying the relevant layer names.
+    files = _parse_meta4(os.path.join(path_data, 'raw',f'zip_{region}', 'meta4.xml'))
     i=0
     for name, urls in files:
-        try: gdf = gpd.read_file(urls[0], engine='fiona')
+        try: 
+            gdf = _download_read_gml(name, urls[0], path_data, region)
         except Exception as e:
             print(f"Error downloading {name}: {e}. Testing second URL if available.")
             if len(urls) > 1:
-                try: gdf = gpd.read_file(urls[0], engine='fiona')
+                try: gdf = _download_read_gml(name, urls[1], path_data, region)
                 except Exception as e:
                     print(f"Error downloading {name} from second URL: {e}")
         
         if gdf is not None:
             i+=1
             gdf.to_parquet(os.path.join(path_data,'raw', f"buildings_{region}_{name.rsplit('.')[0]}_raw.pq"))
+        if i>100:
+            print("Stopping after 100 files for testing.")
+            break
     
     print(f"Processed and saved {i} of {len(files)} files from meta4 for {region}.")    
     
