@@ -129,16 +129,20 @@ def process_json(region,
         gdf.to_parquet(os.path.join(path_data,'raw', f"buildings_{region}_{i}_raw.pq"))
 
 
-def process_json_w_gpkg(region,
+def process_json_w_gml(region,
                         url,
                         path_data):
     
+    print("creating zip dir (for json with gml links)")
+    path_zip_dir = os.path.join(path_data, 'raw',f'zip_{region}')
+    pathlib.Path(path_zip_dir).mkdir(exist_ok=True)
+
     links = gpd.read_file(url)
-    for i,link in enumerate(links.zip.values):
-        link = urllib.parse.quote(link, safe=':/')
-        gdf = gpd.read_file(link, layer='gebaeude')
-        print(f"{i}: {len(gdf)} Buildings from {link.split('/')[-1][:-9]} (special case info)")
-        gdf.to_parquet(os.path.join(path_data,'raw', f"buildings_{region}_{i}_raw.pq"))
+    for i,link in enumerate(links.xml.values):
+        url = urllib.parse.quote(link, safe=':/')
+        print('Processing:',url)
+        name = url.rsplit('/',1)[1]
+        _download_gml(name, url,path_data, region)
 
 
 def _parse_atom_xml(atom_xml,
@@ -333,10 +337,9 @@ def _clean_concatenated_gdf(gdf):
 
 
 def safe_parquet(region, params, path_data):
-    if params is not None:
-        if "file_type" in params.keys():
-            # for zip cases - file types can be different per state and must be specified in params
-            path_files = os.path.join(path_data, 'raw',f"zip_{region}/**/*.{params['file_type']}")
+    if "file_type" in params.keys():
+        # for zip cases - file types can be different per state and must be specified in params
+        path_files = os.path.join(path_data, 'raw',f"zip_{region}/**/*.{params['file_type']}")
     else:
         path_files = os.path.join(path_data, 'raw',f'buildings_{region}*')
     
@@ -422,8 +425,8 @@ def main():
                     request['count'],
                     path_data)
     
-    if "json_w_gpkg" in request['jobs']:
-        process_json_w_gpkg(request['region'],
+    if "json_w_gml" in request['jobs']:
+        process_json_w_gml(request['region'],
                     request['url'],
                     path_data)
 
