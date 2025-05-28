@@ -187,17 +187,18 @@
 #   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
-- region: 'bavaria'
-  country: 'germany'
-  jobs:
-    - 'download_meta4'
-    - 'meta4'
-    - 'parquet'
-  params: 
-    file_type: 'gml' # added as edge case to handle meta4 files
-    layer: 'Building'
-  url: 'https://geodaten.bayern.de/odd/a/lod2/citygml/meta/metalink/09.meta4'
-  path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
+# - region: 'bavaria'
+#   country: 'germany'
+#   jobs:
+#     - 'download_meta4'
+#     - 'meta4'
+#     - 'parquet'
+#   params: 
+#     file_type: 'gml' # added as edge case to handle meta4 files
+#     layer: 'Building'
+#   url: 'https://geodaten.bayern.de/odd/a/lod2/citygml/meta/metalink/09.meta4'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
+
 
 
 # - region: 'berlin'
@@ -230,16 +231,17 @@
 #   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
-# - region: 'bremen'
-#   country: 'germany'
-#   jobs:
-#     #- 'zip'
-#     - 'parquet'
-#   url: 'https://gdi2.geo.bremen.de/inspire/download/LoD/data/LoD2_Bremen_2024_04_citygml.zip'
-#   params:
-#     file_type: 'gml' # added as edge case to handle zip files
-#     crs: 'EPSG:25832'
-#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
+- region: 'bremen'
+  country: 'germany'
+  jobs:
+    #- 'zip'
+    - 'parquet'
+  url: 'https://gdi2.geo.bremen.de/inspire/download/LoD/data/LoD2_Bremen_2024_04_citygml.zip'
+  params:
+    file_type: 'gml' # added as edge case to handle zip files
+    layer: 'Building'
+    crs: 'EPSG:25832'
+  path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
 # - region: 'poland'
