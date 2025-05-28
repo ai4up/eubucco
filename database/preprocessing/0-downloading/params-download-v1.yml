@@ -99,18 +99,18 @@
 #   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
-- region: 'saarland'
-  country: 'germany'
-  jobs:
-    #- 'json'
-    - 'parquet'
-  url: 'https://geoportal.saarland.de/spatial-objects/406/collections/bu-core2d:Building/items?offset='
-  count: 500
-  params:
-    start: 580500
-    stop: 622841
-    url_postfix: '&limit=500&f=json'
-  path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
+# - region: 'saarland'
+#   country: 'germany'
+#   jobs:
+#     #- 'json'
+#     - 'parquet'
+#   url: 'https://geoportal.saarland.de/spatial-objects/406/collections/bu-core2d:Building/items?offset='
+#   count: 500
+#   params:
+#     start: 580500
+#     stop: 622841
+#     url_postfix: '&limit=500&f=json'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
 # - region: 'nordrhein_westfalen'
@@ -127,16 +127,16 @@
 #   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
-# - region: 'niedersachsen'
-#   country: 'germany'
-#   jobs:
-#     - 'json_w_gml'
-#     - 'parquet'
-#   url: 'https://arcgis-geojson.s3.eu-de.cloud-object-storage.appdomain.cloud/lod2/lgln-opengeodata-lod2.geojson'
-#   params: 
-#     file_type: 'gml'
-#     layer: 'Building'
-#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
+- region: 'niedersachsen'
+  country: 'germany'
+  jobs:
+    - 'json_w_gml'
+    - 'parquet'
+  url: 'https://arcgis-geojson.s3.eu-de.cloud-object-storage.appdomain.cloud/lod2/lgln-opengeodata-lod2.geojson'
+  params: 
+    file_type: 'gml'
+    layer: 'Building'
+  path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
 # - region: 'thueringen'
@@ -185,17 +185,17 @@
 #   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
-# - region: 'bavaria'
-#   country: 'germany'
-#   jobs:
-#     - 'download_meta4'
-#     - 'meta4'
-#     - 'parquet'
-#   params: 
-#     file_type: 'gml' # added as edge case to handle meta4 files
-#     layer: 'Building'
-#   url: 'https://geodaten.bayern.de/odd/a/lod2/citygml/meta/metalink/09.meta4'
-#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
+- region: 'bavaria'
+  country: 'germany'
+  jobs:
+    - 'download_meta4'
+    - 'meta4'
+    - 'parquet'
+  params: 
+    file_type: 'gml' # added as edge case to handle meta4 files
+    layer: 'Building'
+  url: 'https://geodaten.bayern.de/odd/a/lod2/citygml/meta/metalink/09.meta4'
+  path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
 
