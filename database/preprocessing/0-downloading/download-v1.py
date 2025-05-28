@@ -98,6 +98,7 @@ def _download_read_gml(name, url,path_data, region):
         f.write(resp.content)
     
     layers = fiona.listlayers(file_path)
+    print(f"Found layers: {layers} in {file_path}")
     return gpd.read_file(file_path, layer=layers[0],engine='fiona')
 
 
