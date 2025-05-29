@@ -331,17 +331,17 @@ def _clean_individual_gdf(gdf,params):
 def _check_geometry_types(gdf):    
     invalid_geometries = gdf[~gdf.geometry.geom_type.isin(['Polygon', 'MultiPolygon'])]
     invalid_types = list(set(invalid_geometries.geometry.geom_type))
-
+    
     if gdf.geometry.has_z.any():
         invalid_types.append('z_geometry')
 
-    if not invalid_geometries.empty:
+    if (not invalid_geometries.empty) or (len(invalid_types) > 0):
         print("Found geometries that are not 'Polygon' or 'MultiPolygon':")
         print(invalid_types)
         return invalid_types
     else:
         print("Check successful: All geometries are either 'Polygon' or 'MultiPolygon'.")
-        return None
+        return None        
 
 
 def _fix_invalid_geometries(gdf, invalid_types):
