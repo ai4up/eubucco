@@ -292,7 +292,15 @@ def _remove_id_duplicates(gdf):
     return gdf
 
 
-def _clean_individual_gdf(gdf):
+def _check_crs(gdf,params):
+    if (gdf.crs is None) & ('crs' in params.keys()):
+        print(f"Warning! CRS not available; Setting crs to {params['crs']}")    
+        gdf.set_crs(params['crs'], inplace=True)
+    return gdf
+
+
+def _clean_individual_gdf(gdf,params):
+    gdf = _check_crs(gdf,params)
     # turning columns with lists into strings to avoid issues with parquet
     for col in gdf.columns:
         if col in gdf.columns[gdf.dtypes=='object']:
@@ -358,23 +366,23 @@ def safe_parquet(region, params, path_data):
     data_errors = []
     geom_errors = []
     
+    i=0
+    missed_files = []
     for file in files:
         try: 
             gdf = _read_geofile(file, region, params)
-            print('Warning! CRS not available; Setting crs')
-            if (gdf.crs is None) & ('crs' in params.keys()):
-                print(f"Setting CRS to {params['crs']} for file: {file}")
-                gdf.set_crs(params['crs'], inplace=True)
-            
         except ValueError:
            data_errors, geom_errors = _handle_missing_metadata(file,
                                                                 data_errors,
-                                                                geom_errors)
-
+                                                                geom_errors) #TODO move into reading parquet file
+        
         if gdf.shape[0]:
-            gdf = _clean_individual_gdf(gdf)
             print(f"appending geoms of file:{file}")
+            gdf = _clean_individual_gdf(gdf,params)
             frames.append(gdf.to_crs(epsg=3035))
+            i += 1
+        else:
+            missed_files.append(file)
     
     gdf = pd.concat(frames, ignore_index=True) 
 
@@ -385,15 +393,18 @@ def safe_parquet(region, params, path_data):
     print("buildings processed: ", len(gdf))
     print("building columns: ", gdf.columns)
     print("building crs: ", gdf.crs)
-    print(f"Found {len(data_errors)} metadata errors (ValueError)")
-    print(f"Found {len(geom_errors)} missing geom errors (KeyError)")
+    print(f"concatenaed buildings from {i} our of {len(files)} files")
+    if len(missed_files) > 0:
+        print(f"Missed files: {len(missed_files)}")
+        print("\n".join(missed_files))
+    print("-"*12)
     
     if len(data_errors) > 0:    
         print("*"*8)
-        print("Metadata errors in following files:")
+        print(f"Found {len(data_errors)} Metadata errors in following files:")
         print("\n".join(data_errors))
         print("*"*8)
-        print("Missing geom errors in following files:")
+        print(f"Found {len(geom_errors)} Missing geom errors in following files:")
         print("\n".join(geom_errors))
 
     gdf.to_parquet(os.path.join(path_data, f'buildings_{region}.pq'))
