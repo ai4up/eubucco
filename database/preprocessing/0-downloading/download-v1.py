@@ -356,13 +356,13 @@ def _fix_invalid_geometries(gdf, invalid_types):
     return gdf
 
 
-def remove_ndarray_columns(gdf):
-    array_cols = [col for col in gdf.columns if gdf[col].apply(lambda x: isinstance(x, np.ndarray)).any()]
-    if array_cols:
-        for col in array_cols:
-            print(f"Removing ndarray values in {col}")
-            gdf[col] = gdf[col].astype(str)  # Convert ndarray columns to string
-    return gdf
+# def remove_ndarray_columns(gdf):
+#     array_cols = [col for col in gdf.columns if gdf[col].apply(lambda x: isinstance(x, np.ndarray)).any()]
+#     if array_cols:
+#         for col in array_cols:
+#             print(f"Removing ndarray values in {col}")
+#             gdf[col] = gdf[col].astype(str)  # Convert ndarray columns to string
+#     return gdf
 
 
 def _clean_concatenated_gdf(gdf):
@@ -370,7 +370,9 @@ def _clean_concatenated_gdf(gdf):
     invalid_types = _check_geometry_types(gdf)
     if invalid_types:
         gdf = _fix_invalid_geometries(gdf, invalid_types)
-    gdf = remove_ndarray_columns(gdf)
+    #gdf = remove_ndarray_columns(gdf)
+    # convert dtypes to prepare gdf for saving as paruet
+    gdf = gdf.replace({None: np.nan}).convert_dtypes(dtype_backend="numpy_nullable")
     return gdf
 
 
@@ -403,6 +405,8 @@ def safe_parquet(region, params, path_data):
             i += 1
         else:
             missed_files.append(file)
+        
+        if i ==50:break # for testing purposes, remove in production
     
     gdf = pd.concat(frames, ignore_index=True) 
 
