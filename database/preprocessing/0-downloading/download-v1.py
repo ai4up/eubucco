@@ -361,8 +361,9 @@ def safe_parquet(region, params, path_data):
     for file in files:
         try: 
             gdf = _read_geofile(file, region, params)
-            if gdf.crs is None:
-                print('Warning! CRS not available; Setting crs')
+            print('Warning! CRS not available; Setting crs')
+            if (gdf.crs is None) & ('crs' in params.keys()):
+                print(f"Setting CRS to {params['crs']} for file: {file}")
                 gdf.set_crs(params['crs'], inplace=True)
             
         except ValueError:
