@@ -13,24 +13,21 @@
 #     SRSNAME: 'EPSG:4326'
 #     VERSION: '2.0.0'
 #   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
-
-
-# - region: 'sachsen'
-#   country: 'germany'
-#   jobs:
-#     - 'size'
-#     - 'wfs'
-#     - 'parquet'
-#   url: 'https://geodienste.sachsen.de/aaa/public_alkis/vereinf/wfs'
-#   count: 10000
-#   params:
-#     SERVICE: 'WFS'
-#     REQUEST: 'GetFeature'
-#     TYPENAMES: 'ave:GebaeudeBauwerk'
-#     SRSNAME: 'EPSG:25833'
-#     VERSION: '2.0.0'
-#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
   
+  
+- region: 'sachsen'
+  country: 'germany'
+  jobs: 
+    - 'zip'
+    - 'parquet'
+  url: null # edge case for Sachsen where zip links first have to be extracted from yml file
+  params:
+    feed_file_path: 'raw/zip_sachsen/sachsen_lod2_urls.yml'
+    file_type: 'shp'
+    filter: 
+      Geometr_3D: 'Ground'
+  path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
+
 
 # - region: 'baden_wuerttenberg'
 #   country: 'germany'
@@ -186,18 +183,18 @@
 #   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
-- region: 'bavaria'
-  country: 'germany'
-  jobs:
-    # - 'download_meta4'
-    # - 'meta4'
-    - 'parquet'
-  params: 
-    file_type: 'gml' # added as edge case to handle meta4 files
-    layer: 'Building'
-    crs: 'EPSG:25832'
-  url: 'https://geodaten.bayern.de/odd/a/lod2/citygml/meta/metalink/09.meta4'
-  path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
+# - region: 'bavaria'
+#   country: 'germany'
+#   jobs:
+#     # - 'download_meta4'
+#     # - 'meta4'
+#     - 'parquet'
+#   params: 
+#     file_type: 'gml' # added as edge case to handle meta4 files
+#     layer: 'Building'
+#     crs: 'EPSG:25832'
+#   url: 'https://geodaten.bayern.de/odd/a/lod2/citygml/meta/metalink/09.meta4'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
 

@@ -1,6 +1,7 @@
 import os 
 import sys
 import json
+import yaml
 import re
 import time
 from glob import glob
@@ -160,12 +161,19 @@ def _parse_atom_xml(atom_xml,
             yield href
 
 
-def _get_zip_links(params):
+def _get_zip_links(params, path_data):
     # for edge case in Berlin, where urls to zip files first needed 
     # to be extracted from an atom xml
-    response = requests.get(params['feed_url'])
-    response.raise_for_status()
-    
+    if 'feed_url' in params.keys():
+        response = requests.get(params['feed_url'])
+        response.raise_for_status()
+    elif 'feed_file_path' in params.keys():
+        with open(os.path.join(path_data,params['feed_file_path']), 'r') as f:
+            response = yaml.safe_load(f)
+        return response['urls']
+    else:
+        raise ValueError("No feed URL or file path provided in params.")
+        
     urls = []
     for url in _parse_atom_xml(response.text, params['namespaces']):
         urls.append(url)
@@ -187,7 +195,7 @@ def process_zip(region,
     pathlib.Path(path_zip_dir).mkdir(exist_ok=True)
     
     if urls is None:
-        urls = _get_zip_links(params) 
+        urls = _get_zip_links(params, path_data) 
 
     urls = _list(urls)
     print("downloading zip file")
@@ -259,7 +267,10 @@ def _read_geofile(file, region, params):
     elif pathlib.Path(file).suffix == ".xml" or pathlib.Path(file).suffix == ".gml":
         return _read_gml_files(file, region, params)
     else:
-        return gpd.read_file(file)
+        try: 
+            return gpd.read_file(file,engine='pyogrio')
+        except:
+            return gpd.read_file(file,engine='fiona')
 
 
 def _handle_missing_metadata(file,data_errors, geom_errors):
@@ -299,7 +310,16 @@ def _check_crs(gdf,params):
     return gdf
 
 
+def _select_relevant_rows(gdf, params):
+    if 'filter' in params.keys():
+        for column, value in params['filter'].items():
+            gdf = gdf[gdf[column]==value]
+        gdf.reset_index(drop=True, inplace=True)
+    return gdf
+
+
 def _clean_individual_gdf(gdf,params):
+    gdf = _select_relevant_rows(gdf, params)
     gdf = _check_crs(gdf,params)
     # turning columns with lists into strings to avoid issues with parquet
     for col in gdf.columns:
@@ -395,7 +415,7 @@ def safe_parquet(region, params, path_data):
     print("building crs: ", gdf.crs)
     print(f"concatenaed buildings from {i} our of {len(files)} files")
     if len(missed_files) > 0:
-        print(f"Missed files: {len(missed_files)}")
+        print(f"Files which are empty or could not be opened: {len(missed_files)}")
         print("\n".join(missed_files))
     print("-"*12)
     
