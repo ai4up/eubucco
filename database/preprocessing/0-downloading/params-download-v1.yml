@@ -124,17 +124,17 @@
 #   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
-# - region: 'niedersachsen'
-#   country: 'germany'
-#   jobs:
-#     #- 'json_w_gml'
-#     - 'parquet'
-#   url: 'https://arcgis-geojson.s3.eu-de.cloud-object-storage.appdomain.cloud/lod2/lgln-opengeodata-lod2.geojson'
-#   params: 
-#     file_type: 'gml'
-#     layer: 'Building'
-#     crs: 'EPSG:25832'
-#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
+- region: 'niedersachsen'
+  country: 'germany'
+  jobs:
+    #- 'json_w_gml'
+    - 'parquet'
+  url: 'https://arcgis-geojson.s3.eu-de.cloud-object-storage.appdomain.cloud/lod2/lgln-opengeodata-lod2.geojson'
+  params: 
+    file_type: 'gml'
+    layer: 'Building'
+    crs: 'EPSG:25832'
+  path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
 # - region: 'thueringen'
