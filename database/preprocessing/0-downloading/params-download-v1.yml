@@ -187,18 +187,18 @@
 #   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
-# - region: 'bavaria'
-#   country: 'germany'
-#   jobs:
-#     # - 'download_meta4'
-#     # - 'meta4'
-#     - 'parquet'
-#   params: 
-#     file_type: 'gml' # added as edge case to handle meta4 files
-#     layer: 'Building'
-#     crs: 'EPSG:25832'
-#   url: 'https://geodaten.bayern.de/odd/a/lod2/citygml/meta/metalink/09.meta4'
-#   path_dir: '/Users/felix/Documents/phd/1_projects/5_eubucco_v1/data'
+- region: 'bavaria'
+  country: 'germany'
+  jobs:
+    # - 'download_meta4'
+    # - 'meta4'
+    #- 'parquet'
+  params: 
+    file_type: 'gml' # added as edge case to handle meta4 files
+    layer: 'Building'
+    crs: 'EPSG:25832'
+  url: 'https://geodaten.bayern.de/odd/a/lod2/citygml/meta/metalink/09.meta4'
+  path_dir: '/Users/felix/Documents/phd/1_projects/5_eubucco_v1/data'
 
 
 # - region: 'berlin'
