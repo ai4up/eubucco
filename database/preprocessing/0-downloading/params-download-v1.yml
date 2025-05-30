@@ -158,7 +158,7 @@
   country: 'germany'
   jobs:
     - 'zip'
-    - 'parquet'
+    #- 'parquet'
   url: 
     - 'https://www.geodatenportal.sachsen-anhalt.de/gfds_webshare/download/LVermGeo/Geodatenportal/Online-Bereitstellung-LVermGeo/3D/LoD2-1.zip'
     - 'https://www.geodatenportal.sachsen-anhalt.de/gfds_webshare/download/LVermGeo/Geodatenportal/Online-Bereitstellung-LVermGeo/3D/LoD2-2.zip'
@@ -166,6 +166,7 @@
     - 'https://www.geodatenportal.sachsen-anhalt.de/gfds_webshare/download/LVermGeo/Geodatenportal/Online-Bereitstellung-LVermGeo/3D/LoD2-4.zip'
   params:
     file_type: 'gml' # added as edge case to handle zip files
+    crs: 'EPSG:25832'
   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
   
