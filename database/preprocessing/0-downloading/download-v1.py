@@ -440,8 +440,6 @@ def safe_parquet(region, params, path_data):
             i += 1
         else:
             missed_files.append(file)
-        
-        if i ==100:break # for testing purposes, remove in production
     
     gdf = pd.concat(frames, ignore_index=True) 
 
@@ -454,7 +452,7 @@ def safe_parquet(region, params, path_data):
     print("building crs: ", gdf.crs)
     print(f"concatenaed buildings from {i} our of {len(files)} files")
     if len(missed_files) > 0:
-        print(f"Files which are empty or could not be opened: {len(missed_files)}")
+        print(f"Files which are empty (or could not be opened): {len(missed_files)}")
         print("\n".join(missed_files))
     print("-"*12)
     
