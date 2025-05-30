@@ -441,7 +441,7 @@ def safe_parquet(region, params, path_data):
         else:
             missed_files.append(file)
         
-        if i ==10:break # for testing purposes, remove in production
+        if i ==100:break # for testing purposes, remove in production
     
     gdf = pd.concat(frames, ignore_index=True) 
 

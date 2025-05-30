@@ -124,17 +124,17 @@
 #   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
-- region: 'niedersachsen'
-  country: 'germany'
-  jobs:
-    #- 'json_w_gml'
-    - 'parquet'
-  url: 'https://arcgis-geojson.s3.eu-de.cloud-object-storage.appdomain.cloud/lod2/lgln-opengeodata-lod2.geojson'
-  params: 
-    file_type: 'gml'
-    layer: 'Building'
-    crs: 'EPSG:25832'
-  path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
+# - region: 'niedersachsen'
+#   country: 'germany'
+#   jobs:
+#     #- 'json_w_gml'
+#     - 'parquet'
+#   url: 'https://arcgis-geojson.s3.eu-de.cloud-object-storage.appdomain.cloud/lod2/lgln-opengeodata-lod2.geojson'
+#   params: 
+#     file_type: 'gml'
+#     layer: 'Building'
+#     crs: 'EPSG:25832'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
 # - region: 'thueringen'
@@ -163,8 +163,23 @@
 #   params:
 #     file_type: 'xml' # added as edge case to handle zip files
 #   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
-  
 
+
+# - region: 'sachsen_anhalt'
+#   country: 'germany'
+#   jobs:
+#   #  - 'zip'
+#     - 'parquet'
+#   url: 
+#     - 'https://www.geodatenportal.sachsen-anhalt.de/gfds_webshare/download/LVermGeo/Geodatenportal/Online-Bereitstellung-LVermGeo/3D/LoD2-1.zip'
+#     # - 'https://www.geodatenportal.sachsen-anhalt.de/gfds_webshare/download/LVermGeo/Geodatenportal/Online-Bereitstellung-LVermGeo/3D/LoD2-2.zip'
+#     # - 'https://www.geodatenportal.sachsen-anhalt.de/gfds_webshare/download/LVermGeo/Geodatenportal/Online-Bereitstellung-LVermGeo/3D/LoD2-3.zip'
+#     # - 'https://www.geodatenportal.sachsen-anhalt.de/gfds_webshare/download/LVermGeo/Geodatenportal/Online-Bereitstellung-LVermGeo/3D/LoD2-4.zip'
+#   params:
+#     file_type: 'gml' # added as edge case to handle zip files
+#   path_dir: '/Users/felix/Documents/phd/1_projects/5_eubucco_v1/data'
+
+  
 # - region: schleswig_holstein
 #   country: 'germany'
 #   jobs: 
@@ -195,7 +210,6 @@
     crs: 'EPSG:25832'
   url: 'https://geodaten.bayern.de/odd/a/lod2/citygml/meta/metalink/09.meta4'
   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
-
 
 
 # - region: 'berlin'
