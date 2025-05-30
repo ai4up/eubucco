@@ -365,14 +365,49 @@ def _fix_invalid_geometries(gdf, invalid_types):
 #     return gdf
 
 
+def _harmonize_none_entries(gdf):
+    null_strings = [None,'None', 'NONE','nan', 'NaN','null', 'NULL','n/a', 'N/A',''                 ]
+    gdf = gdf.replace(null_strings, np.nan)  # Replace None with NaN
+    return gdf
+
+
+def _prepare_dtypes_for_paruquet(gdf):
+    """
+    Saving in paruet requires compatible dtypes.
+    It can happen that parquet does not infer the right dtypes, leaving certain
+    columns as object dtype, which causes pyarrow.lib.ArrowTypeError.
+    This functions infers dtype first, then converts leftover object dtypes to StringDtype
+    
+    Note that this is not perfect, as it causes different NaN representations: dtype float64 will
+    have np.nan, while dtype string[python] will have pd.NA. For any further processing, this should
+    not be an issue, though, as both represent missing values.
+    """
+
+    gdf = gdf.convert_dtypes(
+            infer_objects=True,
+            convert_string=True,
+            convert_integer=False,
+            convert_boolean=False,
+            convert_floating=False,
+            dtype_backend="numpy_nullable")
+    
+    # Cast non inferrable dtype objects to pandas StringDtype
+    obj_cols = gdf.select_dtypes(include=["object"]).columns
+    
+    for col in obj_cols:
+        gdf[col] = gdf[col].astype("string")
+    return gdf
+
+
 def _clean_concatenated_gdf(gdf):
     gdf = _remove_id_duplicates(gdf)
+    
     invalid_types = _check_geometry_types(gdf)
     if invalid_types:
         gdf = _fix_invalid_geometries(gdf, invalid_types)
-    #gdf = remove_ndarray_columns(gdf)
-    # convert dtypes to prepare gdf for saving as paruet
-    gdf = gdf.replace({None: np.nan}).convert_dtypes(dtype_backend="numpy_nullable")
+
+    gdf = _harmonize_none_entries(gdf)
+    gdf = _prepare_dtypes_for_paruquet(gdf)
     return gdf
 
 
@@ -406,7 +441,7 @@ def safe_parquet(region, params, path_data):
         else:
             missed_files.append(file)
         
-        if i ==50:break # for testing purposes, remove in production
+        if i ==10:break # for testing purposes, remove in production
     
     gdf = pd.concat(frames, ignore_index=True) 
 
