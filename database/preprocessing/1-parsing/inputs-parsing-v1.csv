@@ -8,7 +8,7 @@ germany,buildings_hamburg,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,
 germany,buildings_hessen,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,None,funktion,None,anzahlgs,None,None,None,2d,None,,,,"contains multipolygon, own type description"
 germany,buildings_mecklenburg_vorpommern,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,None,funktion,None,anzahlgs,None,None,None,2d,None,,,,"contains multipolygon, own type description"
 germany,buildings_niedersachsen,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,measuredHeight,function,None,None,None,None,None,2d,"['roofType']",,,,"contains None and multipolygon"
-germany,buildings_nordrhein_westfalen,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,,None,None,None,None,None,None,None,2d,None,,,,
+germany,buildings_nordrhein_westfalen,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,id,None,funktion,None,anzahlgs,None,None,None,2d,None,,,,contains multipolygons
 germany,buildings_rheinland_pfalz,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,None,funktion,None,anzahlgs,None,None,None,2d,None,,,,has own type desciprtion
 germany,buildings_saarland,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,None,None,None,None,None,None,None,2d,None,,,,"has “horizontalGeometryEstimatedAccuracy” but no height column, geometry contains point geom"
 germany,buildings_sachsen,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,ID,H_Objekt,Funktion,None,Stockwerke,None,germany code,None,2d,"['Dachtyp','Zustand']",,,,"has geomtry collection and multipolygon"
