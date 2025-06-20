@@ -15,18 +15,18 @@
 #   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
   
 
-- region: 'sachsen'
-  country: 'germany'
-  jobs: 
-    - 'zip'
-    - 'parquet'
-  url: null # edge case for Sachsen where zip links first have to be extracted from yml file
-  params:
-    feed_file_path: 'raw/zip_sachsen/sachsen_lod2_urls.yml'
-    file_type: 'shp'
-    filter: 
-      Geometr_3D: 'Ground'
-  path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
+# - region: 'sachsen'
+#   country: 'germany'
+#   jobs: 
+#     - 'zip'
+#     - 'parquet'
+#   url: null # edge case for Sachsen where zip links first have to be extracted from yml file
+#   params:
+#     feed_file_path: 'raw/zip_sachsen/sachsen_lod2_urls.yml'
+#     file_type: 'shp'
+#     filter: 
+#       Geometr_3D: 'Ground'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
 # - region: 'baden_wuerttenberg'
@@ -96,45 +96,45 @@
 #   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
-- region: 'saarland'
-  country: 'germany'
-  jobs:
-    #- 'json'
-    - 'parquet'
-  url: 'https://geoportal.saarland.de/spatial-objects/406/collections/bu-core2d:Building/items?offset='
-  count: 500
-  params:
-    start: 580500
-    stop: 622841
-    url_postfix: '&limit=500&f=json'
-  path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
-
-
-# - region: 'nordrhein_westfalen'
+# - region: 'saarland'
 #   country: 'germany'
 #   jobs:
 #     #- 'json'
 #     - 'parquet'
-#   url: 'https://ogc-api.nrw.de/lika/v1/collections/gebaeude_bauwerk/items?offset='
-#   count: 5000
+#   url: 'https://geoportal.saarland.de/spatial-objects/406/collections/bu-core2d:Building/items?offset='
+#   count: 500
 #   params:
-#     start: 0
-#     stop: 12646244
-#     url_postfix: '&limit=5000&f=json'
+#     start: 580500
+#     stop: 622841
+#     url_postfix: '&limit=500&f=json'
 #   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
-- region: 'niedersachsen'
+- region: 'nordrhein_westfalen'
   country: 'germany'
   jobs:
-    #- 'json_w_gml'
+    #- 'json'
     - 'parquet'
-  url: 'https://arcgis-geojson.s3.eu-de.cloud-object-storage.appdomain.cloud/lod2/lgln-opengeodata-lod2.geojson'
-  params: 
-    file_type: 'gml'
-    layer: 'Building'
-    crs: 'EPSG:25832'
+  url: 'https://ogc-api.nrw.de/lika/v1/collections/gebaeude_bauwerk/items?offset='
+  count: 5000
+  params:
+    start: 0
+    stop: 12646244
+    url_postfix: '&limit=5000&f=json'
   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
+
+
+# - region: 'niedersachsen'
+#   country: 'germany'
+#   jobs:
+#     #- 'json_w_gml'
+#     - 'parquet'
+#   url: 'https://arcgis-geojson.s3.eu-de.cloud-object-storage.appdomain.cloud/lod2/lgln-opengeodata-lod2.geojson'
+#   params: 
+#     file_type: 'gml'
+#     layer: 'Building'
+#     crs: 'EPSG:25832'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
 # - region: 'thueringen'
@@ -154,20 +154,20 @@
 #   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
-- region: 'sachsen_anhalt'
-  country: 'germany'
-  jobs:
-    - 'zip'
-    #- 'parquet'
-  url: 
-    - 'https://www.geodatenportal.sachsen-anhalt.de/gfds_webshare/download/LVermGeo/Geodatenportal/Online-Bereitstellung-LVermGeo/3D/LoD2-1.zip'
-    - 'https://www.geodatenportal.sachsen-anhalt.de/gfds_webshare/download/LVermGeo/Geodatenportal/Online-Bereitstellung-LVermGeo/3D/LoD2-2.zip'
-    - 'https://www.geodatenportal.sachsen-anhalt.de/gfds_webshare/download/LVermGeo/Geodatenportal/Online-Bereitstellung-LVermGeo/3D/LoD2-3.zip'
-    - 'https://www.geodatenportal.sachsen-anhalt.de/gfds_webshare/download/LVermGeo/Geodatenportal/Online-Bereitstellung-LVermGeo/3D/LoD2-4.zip'
-  params:
-    file_type: 'gml' # added as edge case to handle zip files
-    crs: 'EPSG:25832'
-  path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
+# - region: 'sachsen_anhalt'
+#   country: 'germany'
+#   jobs:
+#     - 'zip'
+#     #- 'parquet'
+#   url: 
+#     - 'https://www.geodatenportal.sachsen-anhalt.de/gfds_webshare/download/LVermGeo/Geodatenportal/Online-Bereitstellung-LVermGeo/3D/LoD2-1.zip'
+#     - 'https://www.geodatenportal.sachsen-anhalt.de/gfds_webshare/download/LVermGeo/Geodatenportal/Online-Bereitstellung-LVermGeo/3D/LoD2-2.zip'
+#     - 'https://www.geodatenportal.sachsen-anhalt.de/gfds_webshare/download/LVermGeo/Geodatenportal/Online-Bereitstellung-LVermGeo/3D/LoD2-3.zip'
+#     - 'https://www.geodatenportal.sachsen-anhalt.de/gfds_webshare/download/LVermGeo/Geodatenportal/Online-Bereitstellung-LVermGeo/3D/LoD2-4.zip'
+#   params:
+#     file_type: 'gml' # added as edge case to handle zip files
+#     crs: 'EPSG:25832'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
   
 # - region: schleswig_holstein
@@ -188,18 +188,18 @@
 #   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
-- region: 'bavaria'
-  country: 'germany'
-  jobs:
-    - 'download_meta4'
-    - 'meta4'
-    - 'parquet'
-  params: 
-    file_type: 'gml' # added as edge case to handle meta4 files
-    layer: 'Building'
-    crs: 'EPSG:25832'
-  url: 'https://geodaten.bayern.de/odd/a/lod2/citygml/meta/metalink/09.meta4'
-  path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
+# - region: 'bavaria'
+#   country: 'germany'
+#   jobs:
+#     - 'download_meta4'
+#     - 'meta4'
+#     - 'parquet'
+#   params: 
+#     file_type: 'gml' # added as edge case to handle meta4 files
+#     layer: 'Building'
+#     crs: 'EPSG:25832'
+#   url: 'https://geodaten.bayern.de/odd/a/lod2/citygml/meta/metalink/09.meta4'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
 # - region: 'berlin'
@@ -232,16 +232,16 @@
 #   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
-- region: 'bremen'
-  country: 'germany'
-  jobs:
-    - 'zip'
-    - 'parquet'
-  url: 'https://gdi2.geo.bremen.de/inspire/download/LoD/data/LoD2_Bremen_2024_04_citygml.zip'
-  params:
-    file_type: 'gml' 
-    layer: 'Building'
-  path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
+# - region: 'bremen'
+#   country: 'germany'
+#   jobs:
+#     - 'zip'
+#     - 'parquet'
+#   url: 'https://gdi2.geo.bremen.de/inspire/download/LoD/data/LoD2_Bremen_2024_04_citygml.zip'
+#   params:
+#     file_type: 'gml' 
+#     layer: 'Building'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
 # - region: 'poland'
