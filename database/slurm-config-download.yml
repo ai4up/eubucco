@@ -9,6 +9,14 @@ jobs:
       time: '2:00:00'
       partition: 'io'
 
+  - name: 'validation'
+    script: '/p/projects/eubucco/git-eubucco/database/preprocessing/0-downloading/validate-download-v1.py'
+    param_files:
+      - '/p/projects/eubucco/git-eubucco/database/preprocessing/0-downloading/params-download-v1.yml'
+    log_dir: '/p/projects/eubucco/logs/v1_0-db/download-buildings'
+    resources:
+      cpus: 6
+      time: '1:00:00'
 
 properties:
   conda_env: '/home/felixwa/.conda/envs/eubucco-download'
