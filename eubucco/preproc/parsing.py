@@ -131,14 +131,21 @@ def get_params(i, path_or_dict):
          sys.exit('get_params: type of path_or_dict not supported.')
     
     print(p)
-    p['type_map'] = ast.literal_eval(p['type_map'])  # converts either a dict or None
-    p['extra_attrib'] = ast.literal_eval(p['extra_attrib'])  # converts either a list, a dict or None
+    
+    raw_type_map = p['type_map']
+    p['type_map'] = ast.literal_eval(str(raw_type_map)) if pd.notna(raw_type_map) else None # converts either a dict or None
+    
+    raw_extra_attrib = p['extra_attrib']
+    p['extra_attrib'] = ast.literal_eval(str(raw_extra_attrib)) if pd.notna(raw_extra_attrib) else None  # converts either a list, a dict or None
     
     col_list = ['id', 'height', 'type_source', 'age', 'floors', 'footprint']
-    var_map = p[col_list]
-    for i in range(len(var_map)):
-        if var_map[i] == 'None':
-            var_map[i] = ast.literal_eval(var_map[i])
+    var_map = p[col_list].copy()
+    for key in var_map.index:
+        val = var_map[key]
+        if isinstance(val, str) and val.strip() == 'None':
+            var_map[key] = None
+        elif pd.isna(val):
+            var_map[key] = None
     p['var_map'] = var_map.to_dict()
     return(p.drop(labels=col_list))
 
