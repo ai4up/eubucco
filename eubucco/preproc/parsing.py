@@ -131,7 +131,7 @@ def get_params(i, path_or_dict):
          sys.exit('get_params: type of path_or_dict not supported.')
     
     print(p)
-    
+
     raw_type_map = p['type_map']
     p['type_map'] = ast.literal_eval(str(raw_type_map)) if pd.notna(raw_type_map) else None # converts either a dict or None
     
@@ -543,6 +543,8 @@ def parse_tabular(file_path,
     # edge case brno (only inserted due to the PIK clutser having issues with local crs leading to inf geoms)
     elif dataset_name == 'brno-gov':
         gdf = import_csv_w_wkt_to_gdf(file_path, crs=CRS_UNI)
+    elif file_path.endswith('.pq') or file_path.endswith('.parquet'):
+        gdf = gpd.read_parquet(file_path)
     else:
         gdf = gpd.read_file(file_path)
 
@@ -830,7 +832,7 @@ def clean_attributes(df,
     Returns: tuple(pd.DataFrame,pd.DataFrame)
     '''
 
-    if extension in ['shp', 'dxf', 'pbf','csv.gz', 'pq']:
+    if extension in ['shp', 'dxf', 'pbf','csv.gz', 'pq', 'parquet']:
         # get variables/columns existing in the inputs
         list_var_source = [var_map[i] for i in var_map.keys() if var_map[i] is not None]
         list_var = [i for i in var_map.keys() if var_map[i] is not None]
@@ -974,7 +976,7 @@ def parse(path_to_param_file='/p/projects/eubucco/git-eubucco/database/preproces
         print('{}/{}'.format(n + 1, len(file_paths)))
         print(file_path)
 
-        if p['extension'] in ['shp', 'dxf', 'pbf', 'pq']:
+        if p['extension'] in ['shp', 'dxf', 'pbf', 'pq', 'parquet']:
             gdf, count_multipoly, dict_val = parse_tabular(file_path,
                                                            p['dataset_name'],
                                                            p['var_map']
