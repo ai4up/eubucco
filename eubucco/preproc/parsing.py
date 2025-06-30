@@ -172,6 +172,9 @@ def get_stats(df_result_attrib,
     stats['dataset_name'] = dataset_name
     stats['n_bldgs'] = len(df_result_attrib)
 
+    print("stats:")
+    print(df_result_attrib)
+
     for col in ['height', 'type_source', 'age', 'floors']:
         len_col_vals = len([item for item in np.array(df_result_attrib[col]) if item != ''])
         stats['n_{}'.format(col)] = len_col_vals
@@ -243,7 +246,7 @@ def get_file_paths(dataset_name, path_input_folder, extra, extension):
 def get_extra_attribs(gdf, extra_attrib, extension, var_map, extra, file_path,id):
     '''Returns a pd.DataFrame with non-standard attributes potentially chosen.'''
     # create id if missing
-    if extension in ['shp', 'dxf', 'pbf','csv.gz']:
+    if extension in ['shp', 'dxf', 'pbf','csv.gz', 'pq', 'parquet']:
         # if shp format and have id, take id column
         if var_map['id'] is not None:
             gdf['id'] = gdf[var_map['id']]
@@ -1022,11 +1025,12 @@ def parse(path_to_param_file='/p/projects/eubucco/git-eubucco/database/preproces
                                                        df_result_attrib.id)
 
         # append part to main results/metrics
-        df_results_geom = df_results_geom.append(df_result_geom)
-        df_results_attrib = df_results_attrib.append(df_result_attrib)
+        df_results_geom = pd.concat([df_results_geom, df_result_geom], ignore_index=True)
+        df_results_attrib = pd.concat([df_results_attrib, df_result_attrib], ignore_index=True)
+
         if p['extra_attrib'] is not None or (p['extra_attrib'] is None and p['extra']
                                              == 'compute_height' and p['extension'] == 'gml'):
-            df_results_extra_attrib = df_results_extra_attrib.append(df_result_extra_attrib)
+            df_results_extra_attrib = pd.concat([df_results_extra_attrib, df_result_extra_attrib], ignore_index=True)
 
         # validation update: append to dict_val_result
         dict_val_result['invalid_geom_id'] += dict_val['invalid_geom_id']
