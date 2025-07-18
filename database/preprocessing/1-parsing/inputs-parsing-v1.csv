@@ -1,21 +1,17 @@
-country,dataset_name,extension,path_input_folder,local_crs,id,height,type_source,age,floors,footprint,type_map,bldg_elem,extra,extra_attrib,nuts_level,nuts_name,is_has_lau_nuts3,Notes
-germany,buildings_baden_wuerttenberg,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,heightAboveGround,None,None,numberOfFloorsAboveGround,None,None,None,2d,"['conditionOfConstruction']",,,,contains Multipoint geometries ?!
-germany,buildings_bavaria,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,measuredHeight,function,None,storeysAboveGround,None,None,None,2d,None,,,,"contains Multipolygon, has only one colum called “ags”?"
-germany,buildings_brandenburg,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,None,funktion,None,anzahlgs,None,None,None,2d,None,,,,"contains multipolygonshas its own type description"
-germany,buildings_berlin,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,measuredHeight,function,None,None,None,germany code,None,2d,['roofType'],,,,"contains multipolygons, and None geoms"
-germany,buildings_bremen,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,measuredHeight,function,None,storeysAboveGround,None,germany code,None,2d,['roofType'],,,,
-germany,buildings_hamburg,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,None,None,None,numberOfFloorsAboveGround,None,None,None,2d,['dateOfRenovation|DateOfEvent|end'],,,,contains multipolygon and None
-germany,buildings_hessen,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,None,funktion,None,anzahlgs,None,None,None,2d,None,,,,"contains multipolygon, own type description"
-germany,buildings_mecklenburg_vorpommern,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,None,funktion,None,anzahlgs,None,None,None,2d,None,,,,"contains multipolygon, own type description"
-germany,buildings_niedersachsen,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,measuredHeight,function,None,None,None,None,None,2d,"['roofType']",,,,"contains None and multipolygon"
-germany,buildings_nordrhein_westfalen,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,id,None,funktion,None,anzahlgs,None,None,None,2d,None,,,,contains multipolygons
-germany,buildings_rheinland_pfalz,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,None,funktion,None,anzahlgs,None,None,None,2d,None,,,,has own type desciprtion
-germany,buildings_saarland,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,None,None,None,None,None,None,None,2d,None,,,,"has “horizontalGeometryEstimatedAccuracy” but no height column, geometry contains point geom"
-germany,buildings_sachsen,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,ID,H_Objekt,Funktion,None,Stockwerke,None,germany code,None,2d,"['Dachtyp','Zustand']",,,,"has geomtry collection and multipolygon"
-germany,buildings_sachsen_anhalt,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,measuredHeight,function,None,None,None,None,None,2d,['roofType'],,,,has multipolygon
-germany,buildings_schleswig_holstein,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,None,funktion,None,anzahlgs,None,None,None,2d,None,,,,"has own type definition, contains multipolygon"
-germany,buildings_thueringen,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,None,funktion,None,anzahlgs,None,None,None,2d,None,,,,"has own type definition, contains multipolygon"
-poland,buildings_poland,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/poland,EPSG:3035,,None,None,None,None,None,None,None,2d,None,,,,
-czechia,buildings_czechia,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/czechia,EPSG:3035,,None,None,None,None,None,None,None,2d,None,,,,
-slovakia,buildings_slovakia,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/slovakia,EPSG:3035,,None,None,None,None,None,None,None,2d,None,,,,
-austria,austria,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/austria,EPSG:3035,,None,None,None,None,None,None,None,2d,None,,,,
+country,dataset_name,extension,path_input_folder,local_crs,id,height,type_source,age,floors,footprint,type_map,bldg_elem,extra,extra_attrib,nuts_level,nuts_name,is_has_lau_nuts3
+germany,buildings_baden_wuerttenberg,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,heightAboveGround,None,None,numberOfFloorsAboveGround,None,None,None,2d,['conditionOfConstruction'],,,
+germany,buildings_bavaria,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,measuredHeight,function,None,storeysAboveGround,None,None,None,2d,None,,,
+germany,buildings_brandenburg,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,None,funktion,None,anzahlgs,None,None,None,2d,None,,,
+germany,buildings_berlin,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,measuredHeight,function,None,None,None,germany code,None,2d,['roofType'],,,
+germany,buildings_bremen,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,measuredHeight,function,None,storeysAboveGround,None,germany code,None,2d,['roofType'],,,
+germany,buildings_hamburg,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,None,None,None,numberOfFloorsAboveGround,None,None,None,2d,['dateOfRenovation|DateOfEvent|end'],,,
+germany,buildings_hessen,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,None,funktion,None,anzahlgs,None,None,None,2d,None,,,
+germany,buildings_mecklenburg_vorpommern,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,None,funktion,None,anzahlgs,None,None,None,2d,None,,,
+germany,buildings_niedersachsen,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,measuredHeight,function,None,None,None,None,None,2d,['roofType'],,,
+germany,buildings_nordrhein_westfalen,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,id,None,funktion,None,anzahlgs,None,None,None,2d,None,,,
+germany,buildings_rheinland_pfalz,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,None,funktion,None,anzahlgs,None,None,None,2d,None,,,
+germany,buildings_saarland,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,None,None,None,None,None,None,None,2d,None,,,
+germany,buildings_sachsen,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,ID,H_Objekt,Funktion,None,Stockwerke,None,germany code,None,2d,"['Dachtyp','Zustand']",,,
+germany,buildings_sachsen_anhalt,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,measuredHeight,function,None,None,None,None,None,2d,['roofType'],,,
+germany,buildings_schleswig_holstein,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,None,funktion,None,anzahlgs,None,None,None,2d,None,,,
+germany,buildings_thueringen,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,None,funktion,None,anzahlgs,None,None,None,2d,None,,,
