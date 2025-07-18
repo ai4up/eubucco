@@ -235,7 +235,10 @@ def get_file_paths(dataset_name, path_input_folder, extra, extension):
 
     elif dataset_name == 'brno-gov':
         file_paths = ['/p/projects/eubucco/data/0-raw-data/gvt-data/czechia/brno/brno-3035-raw.csv']
-
+    
+    elif path_input_folder.rsplit('/', 1)[1] == 'germany':
+        file_paths = os.path.join(path_input_folder, dataset_name + '.' + extension)
+    
     else:
         file_paths = [f for f in glob.glob(path_input_folder
                                            + "/*.{}".format(extension))]
