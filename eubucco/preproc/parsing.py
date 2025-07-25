@@ -446,6 +446,7 @@ def clean_geom(gdf, dataset_name):
     # initialise validation list
     list_geom_is_empty = []
     list_geom_is_null = []
+    print(f'Cleaning {len(gdf)} geometries...')
 
     # in case gdf contains empty geometries
     if any(gdf.geometry.isnull()) or any(gdf.geometry.is_empty):
@@ -467,12 +468,17 @@ def clean_geom(gdf, dataset_name):
         len2 = len(gdf)
         gdf = gdf.loc[~gdf.geometry.isnull()]
         len3 = len(gdf)
-        print('WARNING (2)! Removed {} buildings with empty and {} with null geoms.'.format(len1 - len2, len2 - len3))
+        print('WARNING! Removed {} buildings with empty and {} with null geoms.'.format(len1 - len2, len2 - len3))
+
+    len4 = len(gdf)
+    gdf = gdf[gdf.geometry.geom_type.isin(['Polygon', 'MultiPolygon'])]
+    if len4 != len(gdf):
+        print(f'WARNING! Removed {len4 - len(gdf)} geometries that were not type Polygon/MultiPolygon.')
 
     if dataset_name == 'spain-gov':
         gdf, count = explode_spain_multipoly(gdf)
     else:
-        gdf, count = combined_multipoly_to_poly(gdf)
+        gdf, count = combined_multipoly_to_poly(gdf,verbose=True)
 
     gdf = drop_z(gdf)
 
