@@ -110,31 +110,37 @@
 #   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
-- region: 'nordrhein_westfalen'
-  country: 'germany'
-  jobs:
-    #- 'json'
-    - 'parquet'
-  url: 'https://ogc-api.nrw.de/lika/v1/collections/gebaeude_bauwerk/items?offset='
-  count: 5000
-  params:
-    start: 0
-    stop: 12646244
-    url_postfix: '&limit=5000&f=json'
-  path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
-
-
-# - region: 'niedersachsen'
+# - region: 'nordrhein_westfalen'
 #   country: 'germany'
 #   jobs:
-#     #- 'json_w_gml'
+#     #- 'json'
 #     - 'parquet'
-#   url: 'https://arcgis-geojson.s3.eu-de.cloud-object-storage.appdomain.cloud/lod2/lgln-opengeodata-lod2.geojson'
-#   params: 
-#     file_type: 'gml'
-#     layer: 'Building'
-#     crs: 'EPSG:25832'
+#   url: 'https://ogc-api.nrw.de/lika/v1/collections/gebaeude_bauwerk/items?offset='
+#   count: 5000
+#   params:
+#     start: 0
+#     stop: 12646244
+#     url_postfix: '&limit=5000&f=json'
 #   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
+
+
+- region: 'niedersachsen'
+  country: 'germany'
+  jobs:
+    #- 'json_w_gml'
+    - 'parquet'
+  url: 'https://arcgis-geojson.s3.eu-de.cloud-object-storage.appdomain.cloud/lod2/lgln-opengeodata-lod2.geojson'
+  params: 
+    file_type: 'gml'
+    layer: 'Building'
+    crs: 'EPSG:25832'
+    ns: 
+      core: 'http://www.opengis.net/citygml/1.0'
+      bldg: 'http://www.opengis.net/citygml/building/1.0'
+      gen: 'http://www.opengis.net/citygml/generics/1.0'
+      gml: 'http://www.opengis.net/gml'
+      xal: 'urn:oasis:names:tc:ciq:xsdschema:xAL:1.0'
+  path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
 # - region: 'thueringen'
@@ -188,18 +194,24 @@
 #   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
-# - region: 'bavaria'
-#   country: 'germany'
-#   jobs:
-#     - 'download_meta4'
-#     - 'meta4'
-#     - 'parquet'
-#   params: 
-#     file_type: 'gml' # added as edge case to handle meta4 files
-#     layer: 'Building'
-#     crs: 'EPSG:25832'
-#   url: 'https://geodaten.bayern.de/odd/a/lod2/citygml/meta/metalink/09.meta4'
-#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
+- region: 'bavaria'
+  country: 'germany'
+  jobs:
+    # - 'download_meta4'
+    # - 'meta4'
+    - 'parquet'
+  params: 
+    file_type: 'gml' # added as edge case to handle meta4 files
+    layer: 'Building'
+    crs: 'EPSG:25832'
+    ns: 
+      core: 'http://www.opengis.net/citygml/1.0'
+      bldg: 'http://www.opengis.net/citygml/building/1.0'
+      gen: 'http://www.opengis.net/citygml/generics/1.0'
+      gml: 'http://www.opengis.net/gml'
+      xal: 'urn:oasis:names:tc:ciq:xsdschema:xAL:1.0'
+  url: 'https://geodaten.bayern.de/odd/a/lod2/citygml/meta/metalink/09.meta4'
+  path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
 # - region: 'berlin'

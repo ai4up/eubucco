@@ -17,6 +17,8 @@ from shapely import wkb
 import requests
 import urllib.parse
 
+from lxml import etree
+from shapely.geometry import Polygon
 
 def _get_size(url, params_tmp):
     params_tmp['resultType'] = 'hits'
@@ -241,24 +243,91 @@ def process_xml(region,
         gdf.to_parquet(os.path.join(path_data, 'raw', f'buildings_{region}_{code}_raw.pq'))
 
 
+def _extract_metadata(node, ns):
+    record = {}
+
+    # creationDate, measuredHeight, roofType
+    record["creationDate"] = node.findtext("core:creationDate", namespaces=ns)
+    record["roofType"] = node.findtext("bldg:roofType", namespaces=ns)
+    record["function"] = node.findtext("bldg:function", namespaces=ns)
+    record["storeysAboveGround"] = node.findtext("bldg:storeysAboveGround", namespaces=ns)
+
+    mh_node = node.find("bldg:measuredHeight", namespaces=ns)
+    if mh_node is not None:
+        record["measuredHeight"] = mh_node.text
+        record["measuredHeight_uom"] = mh_node.attrib.get("uom")
+
+    # Dynamically collect all generic attributes
+    for tag in ["stringAttribute", "dateAttribute", "intAttribute", "doubleAttribute"]:
+        for attr in node.findall(f"gen:{tag}", namespaces=ns):
+            key = attr.attrib.get("name")
+            val = attr.findtext("gen:value", namespaces=ns)
+            if key:
+                record[key] = val
+
+    return record
+
+
+def _extract_groundsurface_polygon(xmlnode, ns):
+    ground_surface = xmlnode.find(".//bldg:GroundSurface", namespaces=ns)
+    if ground_surface is not None:
+        poslist = ground_surface.find(".//gml:posList", namespaces=ns)
+        if poslist is not None and poslist.text:
+            coords = list(map(float, poslist.text.strip().split()))
+            coords2d = [(coords[i], coords[i+1]) for i in range(0, len(coords), 3)]
+            return Polygon(coords2d)
+    return None
+
+
+def extract_all_building_metadata_with_geometry(xml_path, crs="EPSG:25832", ns=None):
+    tree = etree.parse(xml_path)
+    buildings = tree.findall(".//bldg:Building", namespaces=ns)
+
+    records = []
+
+    for b in buildings:
+        building_id = b.attrib.get("{http://www.opengis.net/gml}id")
+        parts = b.findall(".//bldg:BuildingPart", namespaces=ns)
+
+        # CASE 1: building has parts → handle per part
+        if parts:
+            for part in parts:
+                part_id = part.attrib.get("{http://www.opengis.net/gml}id")
+                record = _extract_metadata(part, ns)
+                record["id"] = f"{building_id}_{part_id}" # newly created to support gml inlc building parts
+                record["building_id"] = building_id
+                record["part_id"] = part_id
+                record["geometry"] = _extract_groundsurface_polygon(part, ns)
+                records.append(record)
+
+        # CASE 2: building has no parts → handle as flat building
+        else:
+            record = _extract_metadata(b, ns)
+            record["id"] = f"{building_id}"
+            record["building_id"] = building_id
+            record["part_id"] = None
+            record["geometry"] = _extract_groundsurface_polygon(b, ns)
+            records.append(record)
+
+    return gpd.GeoDataFrame(records, geometry="geometry", crs=crs)
+
+
 def _read_gml_files(file, region, params):
     # some cases require layer to be specified as some gml files might be corrupted and fiona cannot find the right layer
     if "layer" in params.keys(): layer = params['layer']
     else: layer = None
     
-    # tries to read gml or xml with defaul engine = pyogrio, if it fails it tries to read with fiona
+    # parse gml with self-build parser that can handle both buildings and building parts, incl geoms and respective attributes
+    # if part geometry it creates a new id that is a combination of building_id and part_id
+    # if parser fails, fall back to geopandas read_file
     try:
-        return gpd.read_file(file, layer=layer)
+        return extract_all_building_metadata_with_geometry(file, crs=params['crs'], ns=params['ns'])
     except:
         try:
-            return gpd.read_file(file,layer=layer, engine='fiona')
+            return gpd.read_file(file, layer=layer)
         except:
-            try:
-                time.sleep(0.5) # waiting 0.5 seconds ensures creation of gfs meta file which in some cases is needed by fiona to process gml files
-                return gpd.read_file(file, layer=layer, engine='fiona')
-            except:
-                print(f'GML ERROR. Could not read: {file}')
-                return gpd.GeoDataFrame()
+            print(f'GML ERROR. Could not read: {file}')
+            return gpd.GeoDataFrame()
 
 
 def _read_geofile(file, region, params):
