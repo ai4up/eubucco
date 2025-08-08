@@ -1,3 +1,4 @@
 country,dataset_name,extension,path_input_folder,local_crs,id,height,type_source,age,floors,footprint,type_map,bldg_elem,extra,extra_attrib,nuts_level,nuts_name,is_has_lau_nuts3
-germany,buildings_bavaria,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,id,measuredHeight,function,None,storeysAboveGround,None,None,None,2d,['roofType'],,,
-germany,buildings_niedersachsen,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,id,measuredHeight,function,None,None,None,None,None,2d,['roofType'],,,
+germany,buildings_baden_wuerttenberg,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,heightAboveGround,None,None,numberOfFloorsAboveGround,None,None,None,2d,"['conditionOfConstruction']",,,
+germany,buildings_sachsen_anhalt,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,id,measuredHeight,function,None,None,None,None,None,2d,['roofType'],,,
+germany,buildings_hessen,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,None,funktion,None,anzahlgs,None,None,None,2d,None,,,
