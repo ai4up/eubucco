@@ -904,7 +904,7 @@ def clean_attributes(df,
 
     # harmonize missing values
     for col in df:
-        df[col] = ['' if item in (None, np.nan) else item for item in np.array(df[col])]
+        df[col] = ["" if pd.isna(item) else item for item in np.array(df[col])]
 
     # separate geometries and attributes (both with id) separately; return id
     # counter for datasets with no id in raw data to create unique id
