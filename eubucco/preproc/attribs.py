@@ -1,7 +1,6 @@
 import logging
 from pathlib import Path
-import re
-from typing import Dict, List
+from typing import Dict
 
 import pandas as pd
 import geopandas as gpd
@@ -66,16 +65,16 @@ def _remove_duplicates(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 
 def msft_height_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    df['height_source'] = _to_numeric(df['height'].replace(-1, np.nan))
-    df['height'] = np.nan
+    df['height'] = _to_numeric(df['height'].replace(-1, np.nan))
+    df['height'] = df['height'].replace(0, np.nan)
 
     return df
 
 
 def height_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    df = _estimate_height_from_floors(df)
     df['height'] = _to_numeric(df['height'])
     df['height'] = df['height'].replace(0, np.nan)
+    df = _estimate_height_from_floors(df)
 
     return df
 
