@@ -4,7 +4,7 @@ germany,buildings_bavaria,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,
 germany,buildings_brandenburg,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,None,funktion,None,anzahlgs,None,None,None,2d,None,nuts1,DE4,no
 germany,buildings_berlin,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,measuredHeight,function,None,None,None,germany code,None,2d,['roofType'],nuts1,DE3,no
 germany,buildings_bremen,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,measuredHeight,function,None,storeysAboveGround,None,germany code,None,2d,['roofType'],nuts1,DE5,no
-germany,buildings_hamburg,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,None,None,None,numberOfFloorsAboveGround,None,None,None,2d,['dateOfRenovation|DateOfEvent|end'],nuts1,DE6,no
+germany,buildings_hamburg,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,id,measuredHeight,function,None,storeysAboveGround,None,None,None,2d,['roofType'],nuts1,DE6,no
 germany,buildings_hessen,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,None,funktion,None,anzahlgs,None,None,None,2d,None,nuts1,DE7,no
 germany,buildings_mecklenburg_vorpommern,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,None,funktion,None,anzahlgs,None,None,None,2d,None,nuts1,DE8,no
 germany,buildings_niedersachsen,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,id,measuredHeight,function,None,None,None,None,None,2d,['roofType'],nuts1,DE9,no
