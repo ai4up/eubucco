@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 from shapely import wkb
+from shapely.geometry import Polygon, MultiPolygon
 import requests
 import urllib.parse
 
@@ -243,7 +244,7 @@ def process_xml(region,
         gdf.to_parquet(os.path.join(path_data, 'raw', f'buildings_{region}_{code}_raw.pq'))
 
 
-def _extract_metadata(node, ns):
+def _extract_ogc_metadata(node, ns):
     record = {}
 
     # creationDate, measuredHeight, roofType
@@ -268,7 +269,7 @@ def _extract_metadata(node, ns):
     return record
 
 
-def _extract_groundsurface_polygon(xmlnode, ns):
+def _extract_ogc_groundsurface_polygon(xmlnode, ns):
     ground_surface = xmlnode.find(".//bldg:GroundSurface", namespaces=ns)
     if ground_surface is not None:
         poslist = ground_surface.find(".//gml:posList", namespaces=ns)
@@ -279,51 +280,114 @@ def _extract_groundsurface_polygon(xmlnode, ns):
     return None
 
 
-def extract_all_building_metadata_with_geometry(xml_path, crs="EPSG:25832", ns=None):
-    tree = etree.parse(xml_path)
+def extract_ogc_building_and_parts(tree, crs="EPSG:25832", ns=None):
     buildings = tree.findall(".//bldg:Building", namespaces=ns)
-
     records = []
-
     for b in buildings:
         building_id = b.attrib.get("{http://www.opengis.net/gml}id")
         parts = b.findall(".//bldg:BuildingPart", namespaces=ns)
 
-        # CASE 1: building has parts → handle per part
+        # building has parts: collect parts and create one building geom out of its
         if parts:
             for part in parts:
                 part_id = part.attrib.get("{http://www.opengis.net/gml}id")
-                record = _extract_metadata(part, ns)
+                record = _extract_ogc_metadata(part, ns)
                 record["id"] = f"{building_id}_{part_id}" # newly created to support gml inlc building parts
                 record["building_id"] = building_id
                 record["part_id"] = part_id
-                record["geometry"] = _extract_groundsurface_polygon(part, ns)
+                record["geometry"] = _extract_ogc_groundsurface_polygon(part, ns)
                 records.append(record)
 
-        # CASE 2: building has no parts → handle as flat building
+        # building has no parts: handle as flat building
         else:
-            record = _extract_metadata(b, ns)
+            record = _extract_ogc_metadata(b, ns)
             record["id"] = f"{building_id}"
             record["building_id"] = building_id
             record["part_id"] = None
-            record["geometry"] = _extract_groundsurface_polygon(b, ns)
+            record["geometry"] = _extract_ogc_groundsurface_polygon(b, ns)
             records.append(record)
 
     return gpd.GeoDataFrame(records, geometry="geometry", crs=crs)
 
 
-def _read_gml_files(file, region, params):
-    # some cases require layer to be specified as some gml files might be corrupted and fiona cannot find the right layer
-    if "layer" in params.keys(): layer = params['layer']
-    else: layer = None
+def _extract_inspire_metadata(node, ns, type):
+    rec = {"type": type}
+    rec["id"] = node.attrib.get("{http://www.opengis.net/gml/3.2}id")
+    rec["gml_identifier"] = node.findtext("gml:identifier", namespaces=ns)
+    rec["beginLifespanVersion"] = node.findtext("bu-base:beginLifespanVersion", namespaces=ns)
+    rec["numberOfFloorsAboveGround"] = node.findtext("bu-base:numberOfFloorsAboveGround", namespaces=ns)
+
+    # Inspire ID
+    rec["inspire_localId"] = node.findtext("bu-base:inspireId/base:Identifier/base:localId", namespaces=ns)
+    rec["inspire_namespace"] = node.findtext("bu-base:inspireId/base:Identifier/base:namespace", namespaces=ns)
+
+    uses = node.findall("bu-base:currentUse/bu-base:CurrentUse/bu-base:currentUse", namespaces=ns)
     
+    if uses:
+        hrefs = [u.attrib.get("{http://www.w3.org/1999/xlink}href") for u in uses if u is not None]
+        hrefs = [h for h in hrefs if h is not None]  # Filter out None values
+        rec["currentUses"] = ";".join(hrefs)
+    return rec
+
+
+def _extract_inspire_geometry(node, ns):
+    """
+    Extracts 2D geometry from:
+    - gml:Polygon
+    - gml:MultiSurface (with multiple gml:surfaceMember/gml:Polygon)
+    """
+    pos_lists = node.findall(".//bu-base:geometry//gml:posList", namespaces=ns)
+    polygons = []
+
+    for poslist in pos_lists:
+        if poslist.text:
+            coords = list(map(float, poslist.text.strip().split()))
+            coords2d = [(coords[i], coords[i + 1]) for i in range(0, len(coords), 2)]
+            poly = Polygon(coords2d)
+            if poly.is_valid:
+                polygons.append(poly)
+
+    if not polygons:
+        return None
+    elif len(polygons) == 1:
+        return polygons[0]
+    else:
+        return MultiPolygon(polygons)
+
+
+def extract_inspire_building_and_parts(tree, crs="EPSG:25832", ns=None):
+    records = []
+    # found building parts: handle parts as individual building 
+    parts = tree.findall(".//bu-core2d:BuildingPart", namespaces=ns)
+    for part in parts:
+        rec = _extract_inspire_metadata(part, ns, type="BuildingPart")
+        rec["geometry"] = _extract_inspire_geometry(part, ns)
+        records.append(rec)
+
+    # found individual buildings: handle as flat building
+    buildings = tree.findall(".//bu-core2d:Building", namespaces=ns)
+    for b in buildings:
+        rec = _extract_inspire_metadata(b, ns, type="Building")
+        rec["geometry"] = _extract_inspire_geometry(b, ns)
+        records.append(rec)
+
+    return gpd.GeoDataFrame(records, geometry="geometry", crs=crs)
+
+
+def _read_gml_files(file, region, params):
     # parse gml with self-build parser that can handle both buildings and building parts, incl geoms and respective attributes
-    # if part geometry it creates a new id that is a combination of building_id and part_id
     # if parser fails, fall back to geopandas read_file
-    try:
-        return extract_all_building_metadata_with_geometry(file, crs=params['crs'], ns=params['ns'])
-    except:
+    if "city_gml_type" in params.keys():
+        tree = etree.parse(file)
+        if params['city_gml_type'] == 'inspire':
+            return extract_inspire_building_and_parts(tree, crs=params['crs'], ns=params['namespaces'])
+        else:
+            return extract_ogc_building_and_parts(tree, crs=params['crs'], ns=params['namespaces'])
+    else:
         try:
+            # some cases require layer to be specified as some gml files might be corrupted and fiona cannot find the right layer
+            if "layer" in params.keys(): layer = params['layer']
+            else: layer = None
             return gpd.read_file(file, layer=layer)
         except:
             print(f'GML ERROR. Could not read: {file}')

@@ -124,23 +124,24 @@
 #   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
-- region: 'niedersachsen'
-  country: 'germany'
-  jobs:
-    #- 'json_w_gml'
-    - 'parquet'
-  url: 'https://arcgis-geojson.s3.eu-de.cloud-object-storage.appdomain.cloud/lod2/lgln-opengeodata-lod2.geojson'
-  params: 
-    file_type: 'gml'
-    layer: 'Building'
-    crs: 'EPSG:25832'
-    ns: 
-      core: 'http://www.opengis.net/citygml/1.0'
-      bldg: 'http://www.opengis.net/citygml/building/1.0'
-      gen: 'http://www.opengis.net/citygml/generics/1.0'
-      gml: 'http://www.opengis.net/gml'
-      xal: 'urn:oasis:names:tc:ciq:xsdschema:xAL:1.0'
-  path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
+# - region: 'niedersachsen'
+#   country: 'germany'
+#   jobs:
+#     #- 'json_w_gml'
+#     - 'parquet'
+#   url: 'https://arcgis-geojson.s3.eu-de.cloud-object-storage.appdomain.cloud/lod2/lgln-opengeodata-lod2.geojson'
+#   params: 
+#     city_gml_type: ogc
+#     file_type: 'gml'
+#     layer: 'Building'
+#     crs: 'EPSG:25832'
+#     ns: 
+#       core: 'http://www.opengis.net/citygml/1.0'
+#       bldg: 'http://www.opengis.net/citygml/building/1.0'
+#       gen: 'http://www.opengis.net/citygml/generics/1.0'
+#       gml: 'http://www.opengis.net/gml'
+#       xal: 'urn:oasis:names:tc:ciq:xsdschema:xAL:1.0'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
 # - region: 'thueringen'
@@ -160,26 +161,27 @@
 #   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
-- region: 'sachsen_anhalt'
-  country: 'germany'
-  jobs:
-    #- 'zip'
-    - 'parquet'
-  url: 
-    - 'https://www.geodatenportal.sachsen-anhalt.de/gfds_webshare/download/LVermGeo/Geodatenportal/Online-Bereitstellung-LVermGeo/3D/LoD2-1.zip'
-    - 'https://www.geodatenportal.sachsen-anhalt.de/gfds_webshare/download/LVermGeo/Geodatenportal/Online-Bereitstellung-LVermGeo/3D/LoD2-2.zip'
-    - 'https://www.geodatenportal.sachsen-anhalt.de/gfds_webshare/download/LVermGeo/Geodatenportal/Online-Bereitstellung-LVermGeo/3D/LoD2-3.zip'
-    - 'https://www.geodatenportal.sachsen-anhalt.de/gfds_webshare/download/LVermGeo/Geodatenportal/Online-Bereitstellung-LVermGeo/3D/LoD2-4.zip'
-  params:
-    file_type: 'gml' # added as edge case to handle zip files
-    crs: 'EPSG:25832'
-    ns: 
-      core: 'http://www.opengis.net/citygml/1.0'
-      bldg: 'http://www.opengis.net/citygml/building/1.0'
-      gen: 'http://www.opengis.net/citygml/generics/1.0'
-      gml: 'http://www.opengis.net/gml'
-      xal: 'urn:oasis:names:tc:ciq:xsdschema:xAL:1.0'
-  path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
+# - region: 'sachsen_anhalt'
+#   country: 'germany'
+#   jobs:
+#     #- 'zip'
+#     - 'parquet'
+#   url: 
+#     - 'https://www.geodatenportal.sachsen-anhalt.de/gfds_webshare/download/LVermGeo/Geodatenportal/Online-Bereitstellung-LVermGeo/3D/LoD2-1.zip'
+#     - 'https://www.geodatenportal.sachsen-anhalt.de/gfds_webshare/download/LVermGeo/Geodatenportal/Online-Bereitstellung-LVermGeo/3D/LoD2-2.zip'
+#     - 'https://www.geodatenportal.sachsen-anhalt.de/gfds_webshare/download/LVermGeo/Geodatenportal/Online-Bereitstellung-LVermGeo/3D/LoD2-3.zip'
+#     - 'https://www.geodatenportal.sachsen-anhalt.de/gfds_webshare/download/LVermGeo/Geodatenportal/Online-Bereitstellung-LVermGeo/3D/LoD2-4.zip'
+#   params:
+#     city_gml_type: ogc
+#     file_type: 'gml' # added as edge case to handle zip files
+#     crs: 'EPSG:25832'
+#     ns: 
+#       core: 'http://www.opengis.net/citygml/1.0'
+#       bldg: 'http://www.opengis.net/citygml/building/1.0'
+#       gen: 'http://www.opengis.net/citygml/generics/1.0'
+#       gml: 'http://www.opengis.net/gml'
+#       xal: 'urn:oasis:names:tc:ciq:xsdschema:xAL:1.0'
+#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
   
 # - region: schleswig_holstein
@@ -207,6 +209,7 @@
 #     # - 'meta4'
 #     - 'parquet'
 #   params: 
+#     city_gml_type: ogc
 #     file_type: 'gml' # added as edge case to handle meta4 files
 #     layer: 'Building'
 #     crs: 'EPSG:25832'
@@ -227,6 +230,7 @@
 #     - 'parquet'
 #   url: null # edge case for Berlin where zip links first have to be extracted from feed url
 #   params:
+#    city_gml_type: ogc
 #     feed_url: 'https://fbinter.stadt-berlin.de/fb/feed/senstadt/a_lod2/0'
 #     namespaces:
 #       atom: 'http://www.w3.org/2005/Atom'
@@ -237,17 +241,24 @@
 #   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
-# - region: 'hamburg'
-#   country: 'germany'
-#   jobs:
-#     - 'zip'
-#     - 'parquet'
-#   url: 'https://daten-hamburg.de/inspire/hh_inspire_gebaeude_2d_alkis/INSPIRE_HH_Gebaeude_2D_ALKIS_2020-07-15.zip'
-#   params:
-#     file_type: 'gml' # added as edge case to handle zip files
-#     layer: 'building'
-#     crs: 'EPSG:25832'
-#   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
+- region: 'hamburg'
+  country: 'germany'
+  jobs:
+    #- 'zip'
+    - 'parquet'
+  url: 'https://daten-hamburg.de/inspire/hh_inspire_gebaeude_2d_alkis/INSPIRE_HH_Gebaeude_2D_ALKIS_2020-07-15.zip'
+  params:
+    city_gml_type: inspire
+    namespaces:
+      wfs: 'http://www.opengis.net/wfs/2.0'
+      gml: 'http://www.opengis.net/gml/3.2'
+      bu-core2d: 'http://inspire.ec.europa.eu/schemas/bu-core2d/4.0'
+      bu-base: 'http://inspire.ec.europa.eu/schemas/bu-base/4.0'
+      base: 'http://inspire.ec.europa.eu/schemas/base/3.3'
+      xlink: 'http://www.w3.org/1999/xlink'
+    file_type: 'gml' # added as edge case to handle zip files
+    crs: 'EPSG:25832'
+  path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
 
 
 # - region: 'bremen'
