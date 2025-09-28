@@ -1,2 +1,2 @@
 country,dataset_name,extension,path_input_folder,local_crs,id,height,type_source,age,floors,footprint,type_map,bldg_elem,extra,extra_attrib,nuts_level,nuts_name,is_has_lau_nuts3
-germany,buildings_nordrhein_westfalen,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,id,None,funktion,None,anzahlgs,None,None,None,2d,None,nuts1,DEA,no
+germany,buildings_hamburg,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,id,None,currentUses,None,numberOfFloorsAboveGround,None,None,None,2d,None,nuts1,DE6,no
