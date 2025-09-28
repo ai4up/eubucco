@@ -135,7 +135,7 @@
 #     file_type: 'gml'
 #     layer: 'Building'
 #     crs: 'EPSG:25832'
-#     ns: 
+#     namespaces: 
 #       core: 'http://www.opengis.net/citygml/1.0'
 #       bldg: 'http://www.opengis.net/citygml/building/1.0'
 #       gen: 'http://www.opengis.net/citygml/generics/1.0'
@@ -213,7 +213,7 @@
 #     file_type: 'gml' # added as edge case to handle meta4 files
 #     layer: 'Building'
 #     crs: 'EPSG:25832'
-#     ns: 
+#     namespaces: 
 #       core: 'http://www.opengis.net/citygml/1.0'
 #       bldg: 'http://www.opengis.net/citygml/building/1.0'
 #       gen: 'http://www.opengis.net/citygml/generics/1.0'
@@ -244,22 +244,22 @@
 - region: 'hamburg'
   country: 'germany'
   jobs:
-    #- 'zip'
+    - 'zip'
     - 'parquet'
-  url: 'https://daten-hamburg.de/inspire/hh_inspire_gebaeude_2d_alkis/INSPIRE_HH_Gebaeude_2D_ALKIS_2020-07-15.zip'
-  params:
-    city_gml_type: inspire
-    namespaces:
-      wfs: 'http://www.opengis.net/wfs/2.0'
-      gml: 'http://www.opengis.net/gml/3.2'
-      bu-core2d: 'http://inspire.ec.europa.eu/schemas/bu-core2d/4.0'
-      bu-base: 'http://inspire.ec.europa.eu/schemas/bu-base/4.0'
-      base: 'http://inspire.ec.europa.eu/schemas/base/3.3'
-      xlink: 'http://www.w3.org/1999/xlink'
-    file_type: 'gml' # added as edge case to handle zip files
+  url: 'https://daten-hamburg.de/opendata/3d_stadtmodell_lod2/LoD2-DE_HH_2025-03-14.zip'
+  params: 
+    city_gml_type: ogc
+    file_type: 'xml'
+    layer: 'Building'
     crs: 'EPSG:25832'
+    namespaces: 
+      core: 'http://www.opengis.net/citygml/1.0'
+      bldg: 'http://www.opengis.net/citygml/building/1.0'
+      gen: 'http://www.opengis.net/citygml/generics/1.0'
+      gml: 'http://www.opengis.net/gml'
+      xal: 'urn:oasis:names:tc:ciq:xsdschema:xAL:1.0'
   path_dir: '/p/projects/eubucco/data/0-raw-data-v1/gov/'
-
+  
 
 # - region: 'bremen'
 #   country: 'germany'
