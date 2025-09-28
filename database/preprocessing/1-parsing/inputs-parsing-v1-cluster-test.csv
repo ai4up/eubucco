@@ -1,2 +1,0 @@
-country,dataset_name,extension,path_input_folder,local_crs,id,height,type_source,age,floors,footprint,type_map,bldg_elem,extra,extra_attrib,nuts_level,nuts_name,is_has_lau_nuts3
-germany,buildings_bremen,pq,/p/projects/eubucco/data/0-raw-data-v1/gov/germany,EPSG:3035,gml_id,measuredHeight,function,None,storeysAboveGround,None,None,None,2d,['roofType'],,,
