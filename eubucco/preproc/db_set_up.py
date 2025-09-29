@@ -127,7 +127,8 @@ def merge_per_nuts(country,path_root_folder):
                 tmp = pd.read_csv(f'{lau}_geom.csv')
                 tmp = pd.merge(tmp,pd.read_csv(f'{lau}_attrib.csv',),on='id')
                 df_nuts3 = pd.concat([df_nuts3,tmp])
-            except:
+            except Exception as e:
+                print(e)
                 print(f'{lau} missing')
                 list_missing_laus.append(lau)
 
@@ -137,11 +138,12 @@ def merge_per_nuts(country,path_root_folder):
                                 crs=3035)
             df_nuts3.to_file(f'{nuts_folder_path}.gpkg')
         
-        except:
+            if os.path.exists(nuts_folder_path): shutil.rmtree(nuts_folder_path)
+        except Exception as e:
+            print(e)
             list_missing_nuts.append(n)
             print(f'WARNING: NUTS {n} missing')        
 
-        if os.path.exists(nuts_folder_path): shutil.rmtree(nuts_folder_path)
 
     print('================')
     print('All files merged')
