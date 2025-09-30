@@ -45,6 +45,7 @@ def attrib_cleaning(data_dir: str, out_dir: str, dataset_type: str, type_mapping
                 df = floors_cleaning(df)
 
             df = _remove_duplicates(df)
+            df = _remove_non_building_structures(df)
             df = _encode_missing_in_string_columns(df)
             df.to_parquet(out_path)
 
@@ -75,6 +76,22 @@ def _add_source_dataset_col(df: gpd.GeoDataFrame, source_mapping_path: str, data
             source_file_mapping = {v: k for k, vs in region_mapping.items() for v in vs}
 
         df['source_dataset'] = 'gov-' + df['source_file'].map(source_file_mapping)
+
+    return df
+
+
+def _remove_non_building_structures(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    '''Remove non-building structures based on type_source column'''
+    non_bldg_types = [
+        'Tiefgarage',
+        'Gebäude zur Versorgung;Tiefgarage',
+        '31001_2465',
+    ]
+
+    len1 = len(df)
+    df = df[~df['type_source'].isin(non_bldg_types)]
+    len2 = len(df)
+    logger.info(f'Removed {len1-len2} non-building structures based on type_source column.')
 
     return df
 
