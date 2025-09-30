@@ -1,4 +1,5 @@
 import logging
+import json
 from pathlib import Path
 from typing import Dict
 
@@ -19,7 +20,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def attrib_cleaning(data_dir: str, out_dir: str, dataset_type: str = None, type_mapping_path: str = None, file_pattern: str = None) -> None:
+def attrib_cleaning(data_dir: str, out_dir: str, dataset_type: str, type_mapping_path: str = None, source_mapping_path: str = None, file_pattern: str = None) -> None:
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -33,6 +34,7 @@ def attrib_cleaning(data_dir: str, out_dir: str, dataset_type: str = None, type_
 
             logger.info(f'Cleaning attributes for {f.name}...')
             df = _read_geodata(f)
+            df = _add_source_dataset_col(df, source_mapping_path, dataset_type)
 
             if dataset_type == 'msft':
                 df = msft_height_cleaning(df)
@@ -60,6 +62,19 @@ def _remove_duplicates(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     df = df.drop_duplicates(subset=['geometry'], keep='first')
 
     df = df.drop(columns=['attr_nan_count'])
+
+    return df
+
+
+def _add_source_dataset_col(df: gpd.GeoDataFrame, source_mapping_path: str, dataset_type: str) -> gpd.GeoDataFrame:
+    if dataset_type in ['osm', 'msft']:
+        df['source_dataset'] = dataset_type
+    else:
+        with open(source_mapping_path, 'r') as f:
+            region_mapping = json.load(f)
+            source_file_mapping = {v: k for k, vs in region_mapping.items() for v in vs}
+
+        df['source_dataset'] = 'gov-' + df['source_file'].map(source_file_mapping)
 
     return df
 
