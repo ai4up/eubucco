@@ -110,8 +110,10 @@ def age_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 def type_mapping(df: gpd.GeoDataFrame, type_mapping_path: str) -> gpd.GeoDataFrame:
     bldg_types = pd.read_csv(type_mapping_path)
-    type_mapping = bldg_types.set_index('type_source')['type'].to_dict()
-    res_type_mapping = bldg_types.set_index('type_source')['residential_type'].to_dict()
+    regional_types = bldg_types[bldg_types['source_datasets'].apply(lambda x: bool(set(x.split(',')) & set(df['source_dataset'].unique())))]
+
+    type_mapping = regional_types.set_index('type_source')['type'].to_dict()
+    res_type_mapping = regional_types.set_index('type_source')['residential_type'].to_dict()
 
     df['type'] = _harmonize_type(df['type_source'], type_mapping)
     df['residential_type'] = _harmonize_type(df['type_source'], res_type_mapping)
