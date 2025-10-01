@@ -158,7 +158,7 @@ def _estimate_height_from_floors(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 def _harmonize_type(source_type: pd.Series, type_mapping: Dict[str, str]) -> pd.Series:
     '''Maps buildings types from the source dataset to harmonized types for each building in a city.'''
     types = set(type_mapping.values())
-    types.remove(np.nan)
+    types.discard(np.nan)
     harm_type = source_type.map(type_mapping).astype(CategoricalDtype(categories=types))
 
     return harm_type
