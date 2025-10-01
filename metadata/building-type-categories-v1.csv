@@ -247,7 +247,7 @@ slovenia,4.0,public,non-residential,,Space for mass use,gov-slovenia
 slovenia,5.0,industrial,non-residential,,Production space,gov-slovenia
 slovenia,6.0,others,non-residential,,Garage,gov-slovenia
 slovenia,7.0,others,non-residential,,Parking space,gov-slovenia
-slovenia,8.0,,non-residential,,"Pantry, dryer, laundry",gov-slovenia
+slovenia,8.0,commercial,non-residential,,"Pantry, dryer, laundry",gov-slovenia
 slovenia,9.0,others,non-residential,,Basement,gov-slovenia
 slovenia,10.0,others,non-residential,,"Open terrace, balcony, loggia",gov-slovenia
 slovenia,11.0,others,non-residential,,"Enclosed terrace, balcony, loggia",gov-slovenia
