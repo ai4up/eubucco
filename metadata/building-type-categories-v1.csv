@@ -240,25 +240,25 @@ italy,702,commercial,non-residential,,headquarters of a shopping center,"gov-ita
 italy,904,agricultural,non-residential,,farm,"gov-italy-veneto,gov-italy-valle-d-aosta,gov-italy-toscana,gov-italy-piemonte,italy-lazio,italy-emilia-romagna,italy-calabria,italy-basilicata"
 italy,100104,public,non-residential,,museo,"gov-italy-veneto,gov-italy-valle-d-aosta,gov-italy-toscana,gov-italy-piemonte,italy-lazio,italy-emilia-romagna,italy-calabria,italy-basilicata"
 italy,102,,unknown,,unknown,"gov-italy-veneto,gov-italy-valle-d-aosta,gov-italy-toscana,gov-italy-piemonte,italy-lazio,italy-emilia-romagna,italy-calabria,italy-basilicata"
-slovenia,1,residential,residential,,Living space,gov-slovenia
-slovenia,2,commercial,non-residential,,"Shop, shop",gov-slovenia
-slovenia,3,commercial,non-residential,,Office,gov-slovenia
-slovenia,4,public,non-residential,,Space for mass use,gov-slovenia
-slovenia,5,industrial,non-residential,,Production space,gov-slovenia
-slovenia,6,others,non-residential,,Garage,gov-slovenia
-slovenia,7,others,non-residential,,Parking space,gov-slovenia
-slovenia,8,,non-residential,,"Pantry, dryer, laundry",gov-slovenia
-slovenia,9,others,non-residential,,Basement,gov-slovenia
-slovenia,10,others,non-residential,,"Open terrace, balcony, loggia",gov-slovenia
-slovenia,11,others,non-residential,,"Enclosed terrace, balcony, loggia",gov-slovenia
-slovenia,12,agricultural,non-residential,,Agricultural space,gov-slovenia
-slovenia,13,public,non-residential,,Common communication space,gov-slovenia
-slovenia,14,industrial,non-residential,,Technical space,gov-slovenia
-slovenia,15,public,non-residential,,Shared toilets,gov-slovenia
-slovenia,16,others,non-residential,,Space with limited use,gov-slovenia
-slovenia,17,others,non-residential,,Unfinished space,gov-slovenia
-slovenia,18,others,non-residential,,Ruin,gov-slovenia
-slovenia,99,,unknown,,Unallocated space,gov-slovenia
+slovenia,1.0,residential,residential,,Living space,gov-slovenia
+slovenia,2.0,commercial,non-residential,,"Shop, shop",gov-slovenia
+slovenia,3.0,commercial,non-residential,,Office,gov-slovenia
+slovenia,4.0,public,non-residential,,Space for mass use,gov-slovenia
+slovenia,5.0,industrial,non-residential,,Production space,gov-slovenia
+slovenia,6.0,others,non-residential,,Garage,gov-slovenia
+slovenia,7.0,others,non-residential,,Parking space,gov-slovenia
+slovenia,8.0,,non-residential,,"Pantry, dryer, laundry",gov-slovenia
+slovenia,9.0,others,non-residential,,Basement,gov-slovenia
+slovenia,10.0,others,non-residential,,"Open terrace, balcony, loggia",gov-slovenia
+slovenia,11.0,others,non-residential,,"Enclosed terrace, balcony, loggia",gov-slovenia
+slovenia,12.0,agricultural,non-residential,,Agricultural space,gov-slovenia
+slovenia,13.0,public,non-residential,,Common communication space,gov-slovenia
+slovenia,14.0,industrial,non-residential,,Technical space,gov-slovenia
+slovenia,15.0,public,non-residential,,Shared toilets,gov-slovenia
+slovenia,16.0,others,non-residential,,Space with limited use,gov-slovenia
+slovenia,17.0,others,non-residential,,Unfinished space,gov-slovenia
+slovenia,18.0,others,non-residential,,Ruin,gov-slovenia
+slovenia,99.0,,unknown,,Unallocated space,gov-slovenia
 slovakia,ancillary,others,non-residential,,ancillary,gov-slovakia
 slovakia,public services,public,non-residential,,public services,gov-slovakia
 slovakia,office,commercial,non-residential,,office,gov-slovakia

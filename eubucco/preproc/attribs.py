@@ -39,6 +39,7 @@ def attrib_cleaning(data_dir: str, out_dir: str, dataset_type: str, type_mapping
             if dataset_type == 'msft':
                 df = msft_height_cleaning(df)
             else:
+                df = type_cleaning(df)
                 df = type_mapping(df, type_mapping_path)
                 df = age_cleaning(df)
                 df = height_cleaning(df)
@@ -126,8 +127,15 @@ def age_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return df
 
 
+def type_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    df['type_source'] = df['type_source'].astype('string')
+
+    return df
+
+
 def type_mapping(df: gpd.GeoDataFrame, type_mapping_path: str) -> gpd.GeoDataFrame:
     bldg_types = pd.read_csv(type_mapping_path)
+    bldg_types['type_source'] = bldg_types['type_source'].astype('string')
     regional_types = bldg_types[bldg_types['source_datasets'].apply(lambda x: bool(set(x.split(',')) & set(df['source_dataset'].unique())))]
 
     type_mapping = regional_types.set_index('type_source')['type'].to_dict()
