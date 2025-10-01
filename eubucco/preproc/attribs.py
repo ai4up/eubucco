@@ -136,13 +136,16 @@ def type_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 def type_mapping(df: gpd.GeoDataFrame, type_mapping_path: str) -> gpd.GeoDataFrame:
     bldg_types = pd.read_csv(type_mapping_path)
     bldg_types['type_source'] = bldg_types['type_source'].astype('string')
-    regional_types = bldg_types[bldg_types['source_datasets'].apply(lambda x: bool(set(x.split(',')) & set(df['source_dataset'].unique())))]
 
+    type_categories = set(bldg_types['type'].unique())
+    res_type_categories = set(bldg_types['residential_type'].unique())
+
+    regional_types = bldg_types[bldg_types['source_datasets'].apply(lambda x: bool(set(x.split(',')) & set(df['source_dataset'].unique())))]
     type_mapping = regional_types.set_index('type_source')['type'].to_dict()
     res_type_mapping = regional_types.set_index('type_source')['residential_type'].to_dict()
 
-    df['type'] = _harmonize_type(df['type_source'], type_mapping)
-    df['residential_type'] = _harmonize_type(df['type_source'], res_type_mapping)
+    df['type'] = _harmonize_type(df['type_source'], type_mapping, type_categories)
+    df['residential_type'] = _harmonize_type(df['type_source'], res_type_mapping, res_type_categories)
 
     return df
 
@@ -164,11 +167,10 @@ def _estimate_height_from_floors(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return df
 
 
-def _harmonize_type(source_type: pd.Series, type_mapping: Dict[str, str]) -> pd.Series:
+def _harmonize_type(source_type: pd.Series, type_mapping: Dict[str, str], type_categories: set) -> pd.Series:
     '''Maps buildings types from the source dataset to harmonized types for each building in a city.'''
-    types = set(type_mapping.values())
-    types.discard(np.nan)
-    harm_type = source_type.map(type_mapping).astype(CategoricalDtype(categories=types))
+    type_categories.discard(np.nan)
+    harm_type = source_type.map(type_mapping).astype(CategoricalDtype(categories=type_categories))
 
     return harm_type
 
