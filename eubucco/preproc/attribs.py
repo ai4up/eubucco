@@ -91,7 +91,7 @@ def _remove_non_building_structures(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
     len1 = len(df)
     df = df[~df['type_source'].isin(non_bldg_types)]
-    df = df[~df['type_source'].str.startswith('5300')]  # German ALKIS Code for traffic areas
+    df = df[~df['type_source'].str.startswith('5300', na=False)]  # German ALKIS Code for traffic areas
     len2 = len(df)
     logger.info(f'Removed {len1-len2} non-building structures based on type_source column.')
 
