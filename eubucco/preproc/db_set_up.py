@@ -127,7 +127,8 @@ def merge_per_nuts(country,path_root_folder):
                 tmp = pd.read_csv(f'{lau}_geom.csv')
                 tmp = pd.merge(tmp,pd.read_csv(f'{lau}_attrib.csv',),on='id')
                 df_nuts3 = pd.concat([df_nuts3,tmp])
-            except:
+            except Exception as e:
+                print(e)
                 print(f'{lau} missing')
                 list_missing_laus.append(lau)
 
@@ -137,11 +138,12 @@ def merge_per_nuts(country,path_root_folder):
                                 crs=3035)
             df_nuts3.to_file(f'{nuts_folder_path}.gpkg')
         
-        except:
+            if os.path.exists(nuts_folder_path): shutil.rmtree(nuts_folder_path)
+        except Exception as e:
+            print(e)
             list_missing_nuts.append(n)
             print(f'WARNING: NUTS {n} missing')        
 
-        if os.path.exists(nuts_folder_path): shutil.rmtree(nuts_folder_path)
 
     print('================')
     print('All files merged')
@@ -625,7 +627,7 @@ def merge_parts(path):
         if len(paths_ending) > 1:
             df = pd.DataFrame()
             for p in paths_ending:
-                df = df.append(pd.read_csv(p))
+                df = pd.concat([df, pd.read_csv(p)])
             # save appended files
             df.to_csv(path + ending[:-1] + '.csv', index=False)
             # remove all part files
@@ -672,7 +674,7 @@ def merge(list_saved_paths, country, path_db_folder='/p/projects/eubucco/data/2-
 
 def db_set_up(country,
             dataset_name,
-            path_db_folder,
+            path_db_folder='/p/projects/eubucco/data/2-database-nuts-level-v1-gov',
             chunksize=int(5E5),
             path_stats='/p/projects/eubucco/stats/2-db-set-up',
             path_inputs_parsing='/p/projects/eubucco/git-eubucco/database/preprocessing/1-parsing/inputs-parsing.csv',

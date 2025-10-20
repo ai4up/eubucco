@@ -1,7 +1,7 @@
 import logging
+import json
 from pathlib import Path
-import re
-from typing import Dict, List
+from typing import Dict
 
 import pandas as pd
 import geopandas as gpd
@@ -20,7 +20,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def attrib_cleaning(data_dir: str, out_dir: str, dataset_type: str = None, type_mapping_path: str = None, file_pattern: str = None) -> None:
+def attrib_cleaning(data_dir: str, out_dir: str, dataset_type: str, type_mapping_path: str = None, source_mapping_path: str = None, file_pattern: str = None) -> None:
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -34,16 +34,19 @@ def attrib_cleaning(data_dir: str, out_dir: str, dataset_type: str = None, type_
 
             logger.info(f'Cleaning attributes for {f.name}...')
             df = _read_geodata(f)
+            df = _add_source_dataset_col(df, source_mapping_path, dataset_type)
 
             if dataset_type == 'msft':
                 df = msft_height_cleaning(df)
             else:
+                df = type_cleaning(df)
                 df = type_mapping(df, type_mapping_path)
                 df = age_cleaning(df)
                 df = height_cleaning(df)
                 df = floors_cleaning(df)
 
             df = _remove_duplicates(df)
+            df = _remove_non_building_structures(df)
             df = _encode_missing_in_string_columns(df)
             df.to_parquet(out_path)
 
@@ -65,17 +68,47 @@ def _remove_duplicates(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return df
 
 
+def _add_source_dataset_col(df: gpd.GeoDataFrame, source_mapping_path: str, dataset_type: str) -> gpd.GeoDataFrame:
+    if dataset_type in ['osm', 'msft']:
+        df['source_dataset'] = dataset_type
+    else:
+        with open(source_mapping_path, 'r') as f:
+            region_mapping = json.load(f)
+            source_file_mapping = {v: k for k, vs in region_mapping.items() for v in vs}
+
+        df['source_dataset'] = 'gov-' + df['source_file'].map(source_file_mapping)
+
+    return df
+
+
+def _remove_non_building_structures(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    '''Remove non-building structures based on type_source column'''
+    non_bldg_types = [
+        'Tiefgarage',
+        'Gebäude zur Versorgung;Tiefgarage',
+        '31001_2465',
+    ]
+
+    len1 = len(df)
+    df = df[~df['type_source'].isin(non_bldg_types)]
+    df = df[~df['type_source'].str.startswith('5300', na=False)]  # German ALKIS Code for traffic areas
+    len2 = len(df)
+    logger.info(f'Removed {len1-len2} non-building structures based on type_source column.')
+
+    return df
+
+
 def msft_height_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    df['height_source'] = _to_numeric(df['height'].replace(-1, np.nan))
-    df['height'] = np.nan
+    df['height'] = _to_numeric(df['height'].replace(-1, np.nan))
+    df['height'] = df['height'].replace(0, np.nan)
 
     return df
 
 
 def height_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    df = _estimate_height_from_floors(df)
     df['height'] = _to_numeric(df['height'])
     df['height'] = df['height'].replace(0, np.nan)
+    df = _estimate_height_from_floors(df)
 
     return df
 
@@ -94,13 +127,25 @@ def age_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return df
 
 
+def type_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    df['type_source'] = df['type_source'].astype('string')
+
+    return df
+
+
 def type_mapping(df: gpd.GeoDataFrame, type_mapping_path: str) -> gpd.GeoDataFrame:
     bldg_types = pd.read_csv(type_mapping_path)
-    type_mapping = bldg_types.set_index('type_source')['type'].to_dict()
-    res_type_mapping = bldg_types.set_index('type_source')['residential_type'].to_dict()
+    bldg_types['type_source'] = bldg_types['type_source'].astype('string')
 
-    df['type'] = _harmonize_type(df['type_source'], type_mapping)
-    df['residential_type'] = _harmonize_type(df['type_source'], res_type_mapping)
+    type_categories = set(bldg_types['type'].unique())
+    res_type_categories = set(bldg_types['residential_type'].unique())
+
+    regional_types = bldg_types[bldg_types['source_datasets'].apply(lambda x: bool(set(x.split(',')) & set(df['source_dataset'].unique())))]
+    type_mapping = regional_types.set_index('type_source')['type'].to_dict()
+    res_type_mapping = regional_types.set_index('type_source')['residential_type'].to_dict()
+
+    df['type'] = _harmonize_type(df['type_source'], type_mapping, type_categories)
+    df['residential_type'] = _harmonize_type(df['type_source'], res_type_mapping, res_type_categories)
 
     return df
 
@@ -122,11 +167,10 @@ def _estimate_height_from_floors(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return df
 
 
-def _harmonize_type(source_type: pd.Series, type_mapping: Dict[str, str]) -> pd.Series:
+def _harmonize_type(source_type: pd.Series, type_mapping: Dict[str, str], type_categories: set) -> pd.Series:
     '''Maps buildings types from the source dataset to harmonized types for each building in a city.'''
-    types = set(type_mapping.values())
-    types.remove(np.nan)
-    harm_type = source_type.map(type_mapping).astype(CategoricalDtype(categories=types))
+    type_categories.discard(np.nan)
+    harm_type = source_type.map(type_mapping).astype(CategoricalDtype(categories=type_categories))
 
     return harm_type
 
