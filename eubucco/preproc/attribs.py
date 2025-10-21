@@ -46,7 +46,7 @@ def attrib_cleaning(data_dir: str, out_dir: str, dataset_type: str, type_mapping
                 df = floors_cleaning(df)
 
             df = _remove_duplicates(df)
-            df = _remove_non_building_structures(df)
+            df = _remove_non_building_structures(df, type_mapping_path)
             df = _encode_missing_in_string_columns(df)
             df.to_parquet(out_path)
 
@@ -81,16 +81,14 @@ def _add_source_dataset_col(df: gpd.GeoDataFrame, source_mapping_path: str, data
     return df
 
 
-def _remove_non_building_structures(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def _remove_non_building_structures(df: gpd.GeoDataFrame, type_mapping_path: str) -> gpd.GeoDataFrame:
     '''Remove non-building structures based on type_source column'''
-    non_bldg_types = [
-        'Tiefgarage',
-        'Gebäude zur Versorgung;Tiefgarage',
-        '31001_2465',
-    ]
+    bldg_types = pd.read_csv(type_mapping_path)
+    regional_types = bldg_types[bldg_types['source_datasets'].apply(lambda x: bool(set(x.split(',')) & set(df['source_dataset'].unique())))]
+    types_to_be_removed = regional_types[regional_types['remove']]['type_source'].unique().tolist()
 
     len1 = len(df)
-    df = df[~df['type_source'].isin(non_bldg_types)]
+    df = df[~df['type_source'].isin(types_to_be_removed)]
     df = df[~df['type_source'].str.startswith('5300', na=False)]  # German ALKIS Code for traffic areas
     len2 = len(df)
     logger.info(f'Removed {len1-len2} non-building structures based on type_source column.')
