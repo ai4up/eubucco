@@ -34,7 +34,7 @@ def attrib_cleaning(data_dir: str, out_dir: str, dataset_type: str, type_mapping
 
             logger.info(f'Cleaning attributes for {f.name}...')
             df = _read_geodata(f)
-            df = _add_source_dataset_col(df, source_mapping_path, dataset_type)
+            df = _add_source_dataset_col(df, dataset_type, source_mapping_path)
 
             if dataset_type == 'msft':
                 df = msft_height_cleaning(df)
@@ -68,7 +68,7 @@ def _remove_duplicates(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return df
 
 
-def _add_source_dataset_col(df: gpd.GeoDataFrame, source_mapping_path: str, dataset_type: str) -> gpd.GeoDataFrame:
+def _add_source_dataset_col(df: gpd.GeoDataFrame, dataset_type: str, source_mapping_path: str = None) -> gpd.GeoDataFrame:
     if dataset_type in ['osm', 'msft']:
         df['source_dataset'] = dataset_type
     else:
