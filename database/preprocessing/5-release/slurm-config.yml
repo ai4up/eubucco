@@ -7,6 +7,22 @@ jobs:
       cpus: 4
       time: "12:00:00"
 
+  - name: create-example-cities
+    script: /p/projects/eubucco/git-eubucco/database/preprocessing/5-release/create_example_cities.py.py
+    param_files: [/p/projects/eubucco/git-eubucco/database/preprocessing/5-release/params_example_cities.yml]
+    log_dir: /p/projects/eubucco/logs/v1_0-db/release
+    resources:
+      cpus: 4
+      time: "12:00:00"
+
+  - name: create-release
+    script: /p/projects/eubucco/git-eubucco/database/preprocessing/5-release/run_create_submission.py
+    param_files: [/p/projects/eubucco/git-eubucco/database/preprocessing/5-release/params_release.yml]
+    log_dir: /p/projects/eubucco/logs/v1_0-db/release
+    resources:
+      cpus: 4
+      time: "12:00:00"
+
 properties:
   conda_env: eubucco-features
   account: eubucco

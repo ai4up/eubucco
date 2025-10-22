@@ -1,0 +1,47 @@
+jobs:
+  - name: db-set-up-gov
+    script: /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/db-set-up.py
+    param_files:
+      - /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/params-gov.csv
+    log_dir: /p/projects/eubucco/logs/v1_0-db/2-db-set-up-gov
+    resources:
+      cpus: 1
+      time: "03:00:00"
+
+  - name: db-set-up-osm
+    script: /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/db-set-up.py
+    param_files:
+      - /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/params-osm.csv
+    log_dir: /p/projects/eubucco/logs/v1_0-db/2-db-set-up-osm
+    resources:
+      cpus: 1
+      time: "03:00:00"
+
+  - name: db-set-up-msft
+    script: /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/db-set-up.py
+    param_files:
+      - /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/params-msft.csv
+    log_dir: /p/projects/eubucco/logs/v1_0-db/2-db-set-up-msft
+    resources:
+      cpus: 1
+      time: "03:00:00"
+
+  - name: db-set-up-merge
+    script: /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/db-set-up.py
+    param_files:
+      - /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/params-merge.csv
+    log_dir: /p/projects/eubucco/logs/v1_0-db/2-db-set-up-merge
+    resources:
+      cpus: 1
+      time: "03:00:00"
+
+properties:
+  conda_env: "/home/felixwa/.conda/envs/eubucco-download"
+  account: eubucco
+  log_level: INFO
+  exp_backoff_factor: 2
+  max_retries: 1
+  poll_interval: 30
+  slack:
+    channel: "#test-slurm-bot"
+    token: <to-be-added>

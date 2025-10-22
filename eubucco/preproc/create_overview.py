@@ -8,8 +8,7 @@ import geopandas as gpd
 import ast
 from pathlib import Path
 
-from ufo_map.Utils.helpers import get_all_paths, arg_parser
-from preproc.parsing import get_params
+from ufo_map.Utils.helpers import get_all_paths
 from utils.load import all_files
 
 # Declare global variables

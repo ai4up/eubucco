@@ -1,227 +1,92 @@
 jobs:
-  # - name: db-set-up
-  #   script: /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/db-set-up.py
-  #   param_files:
-  #     - /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/params.csv
-  #   log_dir: /p/projects/eubucco/logs/v0_1-db/db-set-up
-  #   resources:
-  #     cpus: 4
-  #     time: "06:00:00"
-  #   special_cases:
-  #     - name: small-files
-  #       files:
-  #         path: "/p/projects/eubucco/data/1-intermediary-outputs/{{country}}/{{dataset_name}}-3035_geoms.csv"
-  #         size_min: 10000000
-  #         size_max: 20000000
-  #       resources:
-  #         time: "03:00:00"
+  - name: 2-db-set-up
+    script: /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/db-set-up.py
+    param_files:
+      - /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/params-gov.csv
+      - /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/params-osm.csv
+      - /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/params-msft.csv
+    log_dir: /p/projects/eubucco/logs/v1_0-db/2-db-set-up
+    resources:
+      cpus: 1
+      time: "03:00:00"
 
-  # - name: validate-ids
-  #   script: /p/projects/eubucco/git-eubucco/database/validation/validate-ids.py
-  #   param_files:
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/austria/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/belgium/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/bulgaria/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/croatia/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/cyprus/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/czechia/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/denmark/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/estonia/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/finland/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/france/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/germany/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/greece/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/hungary/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/ireland/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/italy/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/latvia/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/lithuania/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/luxembourg/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/malta/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/netherlands/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/poland/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/portugal/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/romania/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/slovakia/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/slovenia/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/spain/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/sweden/params.csv
-  #     - /p/projects/eubucco/data/2-database-city-level-v0_1/switzerland/params.csv
-  #   log_dir: /p/projects/eubucco/logs/v0_1-db/validate-ids
-  #   resources:
-  #     cpus: 2
-  #     time: "03:00:00"
-  #   special_cases:
-  #     - name: small-cities
-  #       files:
-  #         path: "{{city_path}}_geom.csv"
-  #         size_max: 20000000
-  #       resources:
-  #         cpus: 1
-  #         time: "01:00:00"
-  #     - name: large-cities
-  #       files:
-  #         path: "{{city_path}}_geom.csv"
-  #         size_min: 100000000
-  #       resources:
-  #         cpus: 8
-  #         time: "06:00:00"
+  - name: 2-db-set-up-merge
+    script: /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/db-set-up.py
+    param_files:
+      - /p/projects/eubucco/git-eubucco/database/preprocessing/2-db-set-up/params-merge.csv
+    log_dir: /p/projects/eubucco/logs/v1_0-db/2-db-set-up-merge
+    resources:
+      cpus: 1
+      time: "03:00:00"
 
+  - name: 3-attrib-cleaning
+    script: /p/projects/eubucco/git-eubucco/database/preprocessing/3-attrib-cleaning/attrib_cleaning.py
+    param_files: [/p/projects/eubucco/git-eubucco/database/preprocessing/3-attrib-cleaning/params.yml]
+    log_dir: /p/projects/eubucco/logs/v1_0-db/attrib-cleaning
+    resources:
+      cpus: 16
+      time: "7-00:00:00"
 
-  # - name: create-example-cities
-  #   script: /p/projects/eubucco/git-eubucco/database/preprocessing/5-release/create_example_cities.py
-  #   param_files:
-  #     - /p/projects/eubucco/git-eubucco/database/preprocessing/5-release/params_example_cities.yml
-  #   log_dir: /p/projects/eubucco/logs/v0_1-db/release
-  #   resources:
-  #     cpus: 2
-  #     time: "01:00:00"
+  - name: 4-conflation
+    script: /p/projects/eubucco/eubucco-conflation/slurm-pipeline/conflate.py
+    param_generator_file: /p/projects/eubucco/eubucco-conflation/slurm-pipeline/params-conflation.yml
+    log_dir: /p/projects/eubucco/logs/v1_0-db/conflation
+    resources:
+      cpus: 16
+      mem: 100000
+      time: "7-00:00:00"
+    special_cases:
+      - name: large-regions
+        files:
+          path: "/p/projects/eubucco/data/3-attrib-cleaning-v1-osm/{{region_id}}.parquet"
+          size_min: 100000000
+        resources:
+          mem: 100000
 
-  # - name: create-release
-  #   script: /p/projects/eubucco/git-eubucco/database/preprocessing/5-release/run_create_submission.py
-  #   param_files:
-  #     - /p/projects/eubucco/git-eubucco/database/preprocessing/5-release/params.yml
-  #   log_dir: /p/projects/eubucco/logs/v0_1-db/release
-  #   resources:
-  #     cpus: 2
-  #     time: "01:00:00"
+  - name: 5-download-streets
+    script: /p/projects/eubucco/eubucco-features/slurm/download_streets.py
+    param_files:
+      - /p/projects/eubucco/eubucco-features/slurm/params-download-streets.yml
+    log_dir: /p/projects/eubucco/logs/v1_0-db/download-streets
+    resources:
+      cpus: 1
+      partition: io
+      mem: 8000
+    properties:
+      exp_backoff_factor: 2
+      max_retries: 1
 
-  # - name: download-streets
-  #   script: /p/projects/eubucco/git-eubucco/database/preprocessing/6-streets/downloading-streets.py
-  #   param_generator_file: /p/projects/eubucco/git-eubucco/database/preprocessing/6-streets/params.yml
-  #   log_dir: /p/projects/eubucco/logs/v0_1-db/download-streets
-  #   resources:
-  #     cpus: 1
-  #     partition: io
-  #     mem: 8000
-  #   properties:
-  #     exp_backoff_factor: 2
-  #     max_retries: 1
+  - name: 5-download-pois
+    script: /p/projects/eubucco/eubucco-features/slurm/download_pois.py
+    param_files:
+      - /p/projects/eubucco/eubucco-features/slurm/params-download-pois.yml
+    log_dir: /p/projects/eubucco/logs/v1_0-db/download-pois
+    resources:
+      cpus: 1
+      partition: io
+      mem: 8000
+    properties:
+      exp_backoff_factor: 2
+      max_retries: 1
 
-  #- name: preprocess-streets
-  #  script: /p/projects/eubucco/git-eubucco/database/preprocessing/6-streets/parsing-streets-inter-sbb.py
-  #  param_files:
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/austria/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/belgium/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/bulgaria/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/croatia/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/cyprus/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/czechia/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/denmark/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/estonia/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/finland/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/france/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/germany/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/greece/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/hungary/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/ireland/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/italy/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/latvia/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/lithuania/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/luxembourg/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/malta/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/netherlands/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/poland/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/portugal/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/romania/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/slovakia/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/slovenia/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/spain/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/sweden/region-params.csv
-  #    - /p/projects/eubucco/data/2-database-city-level-v0_1/switzerland/region-params.csv
-  #  log_dir: /p/projects/eubucco/logs/v0_1-db/preprocess-streets
-  #  resources:
-  #    cpus: 1
-  #    time: "24:00:00"
-  #  special_cases:
-  #    - name: large-cities
-  #      files:
-  #        path: "{{city_path}}_geom.csv"
-  #        path: "{{data_dir}}/{{country}}/{{region}}"
-  #        size_min: 5000000000
-  #      resources:
-  #        cpus: 4
-  #        time: "7-00:00:00"
-
-   - name: feature-engineering
-     script: /p/projects/eubucco/git-eubucco/database/feature-engineering/fts_eng.py
-     param_files:
-     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/austria/params.csv
-     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/belgium/params.csv
-     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/bulgaria/params.csv
-     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/croatia/params.csv
-     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/cyprus/params.csv
-       - /p/projects/eubucco/data/2-database-city-level-v0_1/czechia/params.csv
-     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/denmark/params.csv
-     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/estonia/params.csv
-     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/finland/params.csv
-     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/france/params.csv
-       - /p/projects/eubucco/data/2-database-city-level-v0_1/germany/params.csv
-     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/greece/params.csv
-     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/hungary/params.csv
-       - /p/projects/eubucco/data/2-database-city-level-v0_1/ireland/params.csv
-     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/italy/params.csv
-     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/latvia/params.csv
-     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/lithuania/params.csv
-     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/luxembourg/params.csv
-     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/malta/params.csv
-     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/netherlands/params.csv
-     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/poland/params.csv
-     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/portugal/params.csv
-     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/romania/params.csv
-       - /p/projects/eubucco/data/2-database-city-level-v0_1/slovakia/params.csv
-     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/slovenia/params.csv
-     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/spain/params.csv
-     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/sweden/params.csv
-     #  - /p/projects/eubucco/data/2-database-city-level-v0_1/switzerland/params.csv
-     log_dir: /p/projects/eubucco/logs/v0_1-db/feature-engineering
-     resources:
-       cpus: 4
-       time: "12:00:00"
-     special_cases:
-       - name: small-cities
-         files:
-           path: "{{city_path}}_geom.csv"
-           size_max: 20000000
-         resources:
-           cpus: 1
-           time: "03:00:00"
-       - name: large-cities
-         files:
-           path: "{{city_path}}_geom.csv"
-           size_min: 100000000
-         resources:
-           cpus: 8
-           mem: 60000
-           time: "24:00:00"
-
-  # - name: create-training-dataset
-  #   script: /p/projects/eubucco/git-eubucco/database/feature-engineering/fts_concat.py
-  #   param_files:
-  #     - /p/projects/eubucco/git-eubucco/database/feature-engineering/params.yml
-  #   log_dir: /p/projects/eubucco/logs/v0_1-db/create-training-dataset
-  #   resources:
-  #     cpus: 8
-  #     mem: 62000
-  #     time: "12:00:00"
-  #   special_cases:
-  #     - name: small-countries
-  #       files:
-  #         path: "{{data_dir}}/{{country}}"
-  #         size_max: 10000000000
-  #       resources:
-  #         cpus: 4
-  #         mem: 30000
-  #     - name: large-countries
-  #       files:
-  #         path: "{{data_dir}}/{{country}}"
-  #         size_min: 50000000000
-  #       resources:
-  #         cpus: 8
-  #         mem: 126000
+  - name: 5-feature-engineering
+    script: /p/projects/eubucco/eubucco-features/slurm/ft-eng.py
+    param_generator_file: /p/projects/eubucco/eubucco-features/slurm/params-ft-eng.yml
+    log_dir: /p/projects/eubucco/logs/v1_0-db/feature-engineering
+    resources:
+      cpus: 8
+      mem: 100000
+      time: "7-00:00:00"
+    special_cases:
+      - name: large-regions
+        files:
+          path: "{{bldgs_dir}}/**/{{region_id}}.parquet"
+          size_min: 100000000
+        resources:
+          mem: 100000
 
 properties:
-  conda_env: "/home/nikolami/.conda/envs/ox112"
+  conda_env: eubucco-features
   account: eubucco
   log_level: INFO
   exp_backoff_factor: 4

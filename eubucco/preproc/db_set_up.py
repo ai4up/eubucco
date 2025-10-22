@@ -12,7 +12,6 @@ import shutil
 
 import ufo_map.Utils.helpers as ufo_helpers
 from ufo_map.Feature_engineering.urban_atlas import building_in_ua
-from utils.extra_cases import average_flanders_dupls
 
 # declare global var
 CRS_UNI = 'EPSG:3035'
