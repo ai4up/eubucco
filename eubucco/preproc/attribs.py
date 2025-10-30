@@ -113,6 +113,7 @@ def height_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 def floors_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     df['floors'] = _to_numeric(df['floors'])
+    df['floors'] = df['floors'].clip(lower=0)
     df['floors'] = df['floors'].replace(0, np.nan)
 
     return df
