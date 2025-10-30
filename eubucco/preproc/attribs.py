@@ -99,6 +99,7 @@ def _remove_non_building_structures(df: gpd.GeoDataFrame, type_mapping_path: str
 def msft_height_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     df['height'] = _to_numeric(df['height'].replace(-1, np.nan))
     df['height'] = df['height'].replace(0, np.nan)
+    df['height_source'] = df['height']
 
     return df
 
@@ -106,6 +107,7 @@ def msft_height_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 def height_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     df['height'] = _to_numeric(df['height'])
     df['height'] = df['height'].replace(0, np.nan)
+    df['height_source'] = df['height']
     df = _estimate_height_from_floors(df)
 
     return df
@@ -159,8 +161,7 @@ def _read_geodata(path: Path) -> gpd.GeoDataFrame:
 
 
 def _estimate_height_from_floors(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    df['height_source'] = df['height']
-    df['height_source'] = df['height_source'].fillna('floors')
+    df.loc[df['floors'].notna(), 'height_source'] = df['height_source'].fillna('floors')
     df['height'] = df['height'].fillna(df['floors'] * FLOOR_HEIGHT)
 
     return df
