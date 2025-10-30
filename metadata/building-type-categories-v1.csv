@@ -1727,9 +1727,9 @@ vantaa,varastorakennus,industrial,non-residential,,False,warehouse building,gov-
 ,historic,public,,,False,historic,osm
 ,hospital,public,,,False,hospital,osm
 ,hotel,commercial,,,False,hotel,osm
-,house,residential,,detached single-family house,False,house,osm
+,house,residential,,,False,house,osm
 ,houseboat,residential,,,False,houseboat,osm
-,hut,residential,,,False,hut,osm
+,hut,residential,,detached single-family house,False,hut,osm
 ,industrial,industrial,,,False,industrial,osm
 ,kiln,industrial,,,False,kiln,osm
 ,kindergarten,public,,,False,kindergarten,osm
