@@ -55,6 +55,50 @@ def attrib_cleaning(data_dir: str, out_dir: str, dataset_type: str, type_mapping
                 f'Exception occurred while cleaning attributes for file {f.name}. Skipping {f.name} and continuing...')
 
 
+def attrib_cleaning_post_conflation(data_dir: str, out_dir: str, type_mapping_path: str = None, source_mapping_path: str = None, file_pattern: str = None) -> None:
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    for f in all_files(data_dir, file_pattern):
+        try:
+            out_path = out_dir / f"{f.stem}.parquet"
+            osm_path = Path("/p/projects/eubucco/data/3-attrib-cleaning-v1-osm") / f"{f.stem}.parquet"
+
+            if out_path.is_file():
+                logger.info(f'Attributes already cleaned for {f.name}...')
+                continue
+
+            logger.info(f'Cleaning attributes for {f.name}...')
+            df = _read_geodata(f)
+            df = _add_source_dataset_col(df, source_mapping_path)
+            df = type_cleaning(df)
+            df = type_mapping(df, type_mapping_path)
+            df = floors_cleaning(df)
+            df = _remove_non_building_structures(df, type_mapping_path)
+
+            if "gov" in df["dataset"].unique() or "osm" in df["dataset"].unique():
+                df = _reverse_height_estimation_from_floors(df)
+
+            if "gov" in df["dataset"].unique() and osm_path.is_file():
+                osm = _read_geodata(osm_path)
+                osm = type_mapping(osm, type_mapping_path, "osm")
+                osm = _reverse_height_estimation_from_floors(osm)
+                osm = _remove_non_building_structures(osm, type_mapping_path)
+
+                df = merge_weighted_source_values(df, osm, attr='floors', source_id='osm_height_source_ids') # must run before height
+                df = merge_weighted_source_values(df, osm, attr='height', source_id='osm_height_source_ids')
+                df = merge_weighted_source_values(df, osm, attr='age', source_id='osm_age_source_ids')
+                df = merge_source_type(df, osm, attr='type', agg_binary=True)
+                df = merge_source_type(df, osm, attr='residential_type')
+
+            df = _encode_missing_in_string_columns(df)
+            df.to_parquet(out_path)
+
+        except Exception:
+            logger.exception(
+                f'Exception occurred while cleaning attributes for file {f.name}. Skipping {f.name} and continuing...')
+
+
 def _remove_duplicates(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     '''Drop duplicates, keeping the row with the least NaN values'''
     df['attr_nan_count'] = df[['height', 'type', 'age']].isna().sum(axis=1)
@@ -68,15 +112,14 @@ def _remove_duplicates(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return df
 
 
-def _add_source_dataset_col(df: gpd.GeoDataFrame, dataset_type: str, source_mapping_path: str = None) -> gpd.GeoDataFrame:
-    if dataset_type in ['osm', 'msft']:
-        df['source_dataset'] = dataset_type
-    else:
-        with open(source_mapping_path, 'r') as f:
-            region_mapping = json.load(f)
-            source_file_mapping = {v: k for k, vs in region_mapping.items() for v in vs}
+def _add_source_dataset_col(df: gpd.GeoDataFrame, source_mapping_path: str = None) -> gpd.GeoDataFrame:
+    df['source_dataset'] = df['dataset']
+    with open(source_mapping_path, 'r') as f:
+        region_mapping = json.load(f)
+        source_file_mapping = {v: k for k, vs in region_mapping.items() for v in vs}
 
-        df['source_dataset'] = 'gov-' + df['source_file'].map(source_file_mapping)
+    mask = df['dataset'] == 'gov'
+    df.loc[mask, 'source_dataset'] = 'gov-' + df[mask]['source_file'].map(source_file_mapping)
 
     return df
 
@@ -134,12 +177,14 @@ def type_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return df
 
 
-def type_mapping(df: gpd.GeoDataFrame, type_mapping_path: str) -> gpd.GeoDataFrame:
+def type_mapping(df: gpd.GeoDataFrame, type_mapping_path: str, source_dataset: str = None) -> gpd.GeoDataFrame:
     bldg_types = pd.read_csv(type_mapping_path)
     bldg_types['type_source'] = bldg_types['type_source'].astype('string')
 
     type_categories = set(bldg_types['type'].unique())
     res_type_categories = set(bldg_types['residential_type'].unique())
+    if "source_dataset" not in df.columns:
+        df['source_dataset'] = source_dataset
 
     regional_types = bldg_types[bldg_types['source_datasets'].apply(lambda x: bool(set(x.split(',')) & set(df['source_dataset'].unique())))]
     type_mapping = regional_types.set_index('type_source')['type'].to_dict()
@@ -163,6 +208,14 @@ def _read_geodata(path: Path) -> gpd.GeoDataFrame:
 def _estimate_height_from_floors(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     df.loc[df['floors'].notna(), 'height_source'] = df['height_source'].fillna('floors')
     df['height'] = df['height'].fillna(df['floors'] * FLOOR_HEIGHT)
+
+    return df
+
+
+def _reverse_height_estimation_from_floors(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    mask = df['height_source'] == 'floors'
+    df.loc[mask, 'height_source'] = np.nan
+    df.loc[mask, 'height'] = np.nan
 
     return df
 
@@ -206,3 +259,103 @@ def _encode_missing_in_string_columns(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
             df[col] = df[col].replace(np.nan, None).astype('string')
 
     return df
+
+
+def merge_source_values(gdf: gpd.GeoDataFrame, osm: gpd.GeoDataFrame, attr: str):
+    source_id = f"osm_{attr}_source_ids"
+    df_exp = (
+        gdf[["id", source_id]]
+        .dropna()
+        .explode(source_id, ignore_index=True)
+        .merge(osm[["id", attr]].dropna().rename(columns={"id": source_id}), on=source_id, how="inner")
+    )
+    df_heights = (
+        df_exp.groupby("id", sort=False, as_index=False)
+        .agg({attr: list, source_id: list})
+        .rename(columns={attr: f"osm_{attr}_source_values"})
+    )
+    gdf = gdf.drop(columns=[source_id, f"osm_{attr}_source_values"], errors="ignore").merge(df_heights[["id", source_id, f"osm_{attr}_source_values"]], on="id", how="left")
+
+    return gdf
+
+
+def merge_weighted_source_values(gdf: gpd.GeoDataFrame, osm: gpd.GeoDataFrame, attr: str, source_id: str):
+    gdf1_small = gdf[["id", source_id, "geometry"]].dropna(subset=[source_id])
+    gdf2_small = osm[["id", attr, "geometry"]].dropna(subset=[attr]).rename(columns={"id": source_id})
+
+    gdf1_exp = gdf1_small.explode(source_id, ignore_index=True)
+
+    merged = gpd.GeoDataFrame(gdf1_exp.merge(gdf2_small, left_on=source_id, right_on=source_id, how="inner"))
+    merged["area_int"] = merged.geometry_x.intersection(merged.geometry_y).area
+
+    merged["int_weight"] = merged["area_int"] / merged.groupby("id")["area_int"].transform("sum")
+    merged["int_weight"] = merged["int_weight"].fillna(merged.groupby("id")["id"].transform("size"))
+    merged["attr_weight"] = merged[attr] * merged["int_weight"]
+
+    merged["overlap_ratio"] = merged["area_int"] / merged.geometry_x.area
+
+    weighted_attr = (
+        merged.groupby("id", as_index=False)[["attr_weight", "overlap_ratio"]]
+        .sum(min_count=1)
+        .rename(columns={"attr_weight": f"osm_{attr}_merged", "overlap_ratio": f"osm_{attr}_confidence"})
+    )
+    gdf = gdf.drop(columns=[f"osm_{attr}_merged", f"osm_{attr}_confidence"], errors="ignore").merge(weighted_attr, on="id", how="left")
+
+    source_lists = (
+        merged.groupby("id", as_index=False)
+        .agg({attr: list, source_id: list})
+        .rename(columns={attr: f"osm_{attr}_source_values", source_id: f"osm_{attr}_source_ids"})
+    )
+    gdf = gdf.drop(columns=[f"osm_{attr}_source_ids", f"osm_{attr}_source_values"], errors="ignore").merge(source_lists, on="id", how="left")
+
+    return gdf
+
+
+def merge_source_type(gdf: gpd.GeoDataFrame, osm: gpd.GeoDataFrame, attr: str, agg_binary=False):
+    source_id = f"osm_{attr}_source_ids"
+    if attr == "residential_type":
+        gdf1_small = gdf[gdf["osm_type_merged"] == "residential"][["id", source_id, "geometry"]].dropna(subset=[source_id])
+    else:
+        gdf1_small = gdf[["id", source_id, "geometry"]].dropna(subset=[source_id])
+    gdf2_small = osm[["id", attr, "geometry"]].rename(columns={"id": source_id})
+
+    gdf1_exp = gdf1_small.explode(source_id, ignore_index=True)
+
+    merged = gdf1_exp.merge(gdf2_small, left_on=source_id, right_on=source_id, how="left")
+    merged = gpd.GeoDataFrame(gdf1_exp.merge(gdf2_small, left_on=source_id, right_on=source_id, how="left"))
+
+    merged["area_target"] = merged.geometry_x.area
+    merged["area_int"] = merged.geometry_x.intersection(merged.geometry_y).area
+
+    area_by_type = (
+        merged.groupby(["id", attr], observed=True)
+        .agg({"area_int": "sum", "area_target": "first", source_id: list, attr: list})
+        .rename(columns={attr: f"osm_{attr}_source_values"})
+        .reset_index()
+    )
+    area_by_type["overlap_ratio"] = area_by_type["area_int"] / area_by_type["area_target"]
+    dominant_type = area_by_type.sort_values(by="overlap_ratio", ascending=False).drop_duplicates(subset=["id"], keep="first")
+    dominant_type[f"osm_{attr}_confidence"] = dominant_type["overlap_ratio"].clip(0, 1)
+
+    gdf = (
+        gdf.drop(columns=[source_id, f"osm_{attr}_merged", f"osm_{attr}_source_values", f"osm_{attr}_confidence"], errors="ignore")
+        .merge(
+            dominant_type[["id", source_id, attr, f"osm_{attr}_source_values", f"osm_{attr}_confidence"]]
+            .rename(columns={attr: f"osm_{attr}_merged"}
+                    ), on="id", how="left"
+        )
+    )
+
+    if agg_binary:
+        area_by_type["osm_binary_type_merged"] = np.where(area_by_type[attr] == "residential", "residential", "non-residential")
+        area_by_binary_type = area_by_type.groupby(["id", "osm_binary_type_merged"], observed=True, as_index=False)["overlap_ratio"].sum()
+        dominant_binary_type = area_by_binary_type.sort_values(by="overlap_ratio", ascending=False).drop_duplicates(subset=["id"], keep="first")
+        dominant_binary_type["osm_binary_type_confidence"] = dominant_binary_type["overlap_ratio"].clip(0, 1)
+
+        gdf = gdf.merge(
+            dominant_binary_type[["id", "osm_binary_type_merged", "osm_binary_type_confidence"]],
+            on="id",
+            how="left",
+        )
+
+    return gdf
