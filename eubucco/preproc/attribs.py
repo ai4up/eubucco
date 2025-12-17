@@ -141,6 +141,7 @@ def _remove_non_building_structures(df: gpd.GeoDataFrame, type_mapping_path: str
 
 def msft_height_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     df['height'] = _to_numeric(df['height'].replace(-1, np.nan))
+    df['height'] = df['height'].clip(lower=0)
     df['height'] = df['height'].replace(0, np.nan)
     df['height_source'] = df['height']
 
@@ -149,6 +150,7 @@ def msft_height_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 def height_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     df['height'] = _to_numeric(df['height'])
+    df['height'] = df['height'].clip(lower=0)
     df['height'] = df['height'].replace(0, np.nan)
     df['height_source'] = df['height']
     df = _estimate_height_from_floors(df)
@@ -166,6 +168,7 @@ def floors_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 def age_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     df['age'] = df['age'].dropna().astype(str).apply(_extract_year)
+    df['age'] = df['age'].clip(lower=0)
     df['age'] = df['age'].replace(0, np.nan)
 
     return df
