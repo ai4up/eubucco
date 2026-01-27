@@ -81,7 +81,11 @@ def create_release(regions: list, data_dir: str, prediction_data_dir: str, out_d
 
 
 def _load_conflated_datasets(region: str, data_dir: str) -> gpd.GeoDataFrame:
-    return _read_geoparquets(f"{data_dir}/{region}*.parquet").set_index("id")
+    files = Path(data_dir).glob(f"{region}*.parquet")
+    return gpd.GeoDataFrame(pd.concat([
+        gpd.read_parquet(f).assign(region_id=f.stem)
+        for f in files
+    ])).set_index("id")
 
 
 def _load_predictions(region: str, data_dir: str) -> pd.DataFrame:
@@ -217,7 +221,7 @@ def _convert_to_release_schema(df: pd.DataFrame, source_mapping_path: str) -> gp
         "id": df["block_id"] + "-" + df.groupby("block_id").cumcount().astype(int).astype(str),
         "block_id": df["block_id"],
         "city_id": df["LAU_ID"],
-        "region_id": df["region"],
+        "region_id": df["region_id"],
         "last_changed": "v0.2",
 
         "geometry": df["geometry"],
@@ -256,13 +260,6 @@ def _read_parquets(path_pattern: str) -> pd.DataFrame:
     return pd.concat(
         [pd.read_parquet(f) for f in files]
     )
-
-
-def _read_geoparquets(path_pattern: str) -> gpd.GeoDataFrame:
-    files = glob.glob(path_pattern)
-    return gpd.GeoDataFrame(pd.concat(
-        [gpd.read_parquet(f) for f in files]
-    ))
 
 
 def map_with_precedence(
