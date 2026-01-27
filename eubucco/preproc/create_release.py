@@ -75,7 +75,7 @@ def create_release(regions: list, data_dir: str, prediction_data_dir: str, out_d
         pq.write_table(
             release_dataset,
             Path(out_dir) / f"{region}.parquet",
-            compression="gzip",
+            compression="zstd",
             row_group_size=10_000
         )
 
