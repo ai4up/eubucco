@@ -61,6 +61,11 @@ def create_release(regions: list, data_dir: str, prediction_data_dir: str, out_d
     and converting to the release schema.
     """
     for region in regions:
+        out_path = Path(out_dir) / f"{region}.parquet"
+        if out_path.is_file():
+            print(f"Release dataset already exists for region {region}. Skipping...")
+            continue
+
         print(f"Creating release dataset for region {region}...")
         conflated = _load_conflated_datasets(region, data_dir)
         conflated = _preprocess_merging_uncertainties(conflated)
@@ -73,7 +78,7 @@ def create_release(regions: list, data_dir: str, prediction_data_dir: str, out_d
 
         pq.write_table(
             release_dataset,
-            Path(out_dir) / f"{region}.parquet",
+            out_path,
             compression="zstd",
             row_group_size=10_000
         )
