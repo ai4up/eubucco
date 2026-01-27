@@ -28,6 +28,7 @@ def create_release(regions: list, data_dir: str, prediction_data_dir: str, out_d
             .sort_values(by=["geometry_source", "city_id"])
             .to_parquet(
                 path=Path(out_dir) / f"{region}.parquet",
+                index=False,
                 compression="gzip",
                 write_covering_bbox=True,
                 row_group_size=10_000,
