@@ -214,7 +214,7 @@ def _convert_to_release_schema(df: pd.DataFrame, source_mapping_path: str) -> gp
         "construction_year_confidence_upper": age_hi.astype(float).round(0),
         "construction_year_source_ids": age_ids,
 
-        "id": df["block_id"] + "-" + df.groupby("block_id").cumcount().astype(str),
+        "id": df["block_id"] + "-" + df.groupby("block_id").cumcount().astype(int).astype(str),
         "block_id": df["block_id"],
         "city_id": df["LAU_ID"],
         "region_id": df["region"],
