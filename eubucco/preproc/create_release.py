@@ -139,9 +139,6 @@ def _convert_to_release_schema(df: pd.DataFrame, source_mapping_path: str) -> gp
 
     source_datasets = ["osm", "msft", "estimated"] + ["gov-" + s for s in gov_datasets]
 
-    # --- Microsoft height ---
-    microsoft_heights = np.where(df["source_dataset"] == "msft", df["height"], df["msft_height_merged"])
-
     # --- Combine ---
     df_converted = pd.DataFrame({
         "type": type_val,
@@ -178,7 +175,6 @@ def _convert_to_release_schema(df: pd.DataFrame, source_mapping_path: str) -> gp
         "city_id": df["LAU_ID"],
         "region_id": df["region"],
         "last_changed": "v0.2",
-        "microsoft_height": microsoft_heights.astype(float).round(1),
 
         "geometry": df["geometry"],
         "geometry_source": pd.Categorical(df["source_dataset"], categories=source_datasets),
@@ -193,7 +189,6 @@ def _convert_to_release_schema(df: pd.DataFrame, source_mapping_path: str) -> gp
             "type_confidence", "subtype_confidence", "height_confidence_lower", "height_confidence_upper", "floors_confidence_lower", "floors_confidence_upper", "construction_year_confidence_lower", "construction_year_confidence_upper",
             "geometry_source", "type_source", "subtype_source", "height_source", "floors_source", "construction_year_source",
             "geometry_source_id", "type_source_ids", "subtype_source_ids", "height_source_ids", "floors_source_ids", "construction_year_source_ids",
-            "microsoft_height",
             "subtype_raw",
             "last_changed",
             "geometry",
