@@ -86,10 +86,9 @@ def create_release(regions: list, data_dir: str, prediction_data_dir: str, out_d
 
 def _load_conflated_datasets(region: str, data_dir: str) -> gpd.GeoDataFrame:
     files = Path(data_dir).glob(f"{region}*.parquet")
-    return gpd.GeoDataFrame(pd.concat([
-        gpd.read_parquet(f).assign(region_id=f.stem)
-        for f in files
-    ])).set_index("id")
+    return gpd.GeoDataFrame(pd.concat((
+        gpd.read_parquet(f).assign(region_id=f.stem) for f in files
+    ))).set_index("id")
 
 
 def _load_predictions(region: str, data_dir: str) -> pd.DataFrame:
