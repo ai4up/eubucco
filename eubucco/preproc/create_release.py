@@ -7,6 +7,53 @@ import pandas as pd
 import numpy as np
 import geopandas as gpd
 import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
+from geopandas.io.arrow import _geopandas_to_arrow
+
+SCHEMA = pa.schema([
+    ("id", pa.string()),
+    ("region_id", pa.string()),
+    ("city_id", pa.string()),
+    ("type", pa.dictionary(pa.int16(), pa.string())),
+    ("subtype", pa.dictionary(pa.int16(), pa.string())),
+    ("height", pa.decimal128(4, 1)),
+    ("floors", pa.decimal128(4, 1)),
+    ("construction_year", pa.int16()),
+
+    ("type_confidence", pa.decimal128(3, 2)),
+    ("subtype_confidence", pa.decimal128(3, 2)),
+    ("height_confidence_lower", pa.decimal128(4, 1)),
+    ("height_confidence_upper", pa.decimal128(4, 1)),
+    ("floors_confidence_lower", pa.decimal128(4, 1)),
+    ("floors_confidence_upper", pa.decimal128(4, 1)),
+    ("construction_year_confidence_lower", pa.int16()),
+    ("construction_year_confidence_upper", pa.int16()),
+
+    ("geometry_source", pa.dictionary(pa.int16(), pa.string())),
+    ("type_source", pa.dictionary(pa.int16(), pa.string())),
+    ("subtype_source", pa.dictionary(pa.int16(), pa.string())),
+    ("height_source", pa.dictionary(pa.int16(), pa.string())),
+    ("floors_source", pa.dictionary(pa.int16(), pa.string())),
+    ("construction_year_source", pa.dictionary(pa.int16(), pa.string())),
+
+    ("geometry_source_id", pa.string()),
+    ("type_source_ids", pa.list_(pa.string())),
+    ("subtype_source_ids", pa.list_(pa.string())),
+    ("height_source_ids", pa.list_(pa.string())),
+    ("floors_source_ids", pa.list_(pa.string())),
+    ("construction_year_source_ids", pa.list_(pa.string())),
+
+    ("subtype_raw", pa.string()),
+    ("last_changed", pa.string()),
+    ("geometry", pa.binary()),
+    ("bbox", pa.struct([
+        ("xmin", pa.float64()),
+        ("ymin", pa.float64()),
+        ("xmax", pa.float64()),
+        ("ymax", pa.float64()),
+    ])),
+])
 
 
 def create_release(regions: list, data_dir: str, prediction_data_dir: str, out_dir: str, source_mapping_path: str) -> None:
@@ -21,19 +68,15 @@ def create_release(regions: list, data_dir: str, prediction_data_dir: str, out_d
         predictions = _load_predictions(region, prediction_data_dir)
 
         combined = pd.concat([conflated, predictions], axis=1)
-        release_dataset = _convert_to_release_schema(combined, source_mapping_path)
+        release_df = _convert_to_release_schema(combined, source_mapping_path)
+        release_df = _optimize_dataset_sorting(release_df)
+        release_dataset = _convert_to_pyarrow_schema(release_df)
 
-        (
-            release_dataset
-            .sort_values(by=["geometry_source", "city_id"])
-            .to_parquet(
-                path=Path(out_dir) / f"{region}.parquet",
-                index=False,
-                compression="gzip",
-                write_covering_bbox=True,
-                row_group_size=10_000,
-                schema_version="1.1.0"
-            )
+        pq.write_table(
+            release_dataset,
+            Path(out_dir) / f"{region}.parquet",
+            compression="gzip",
+            row_group_size=10_000
         )
 
 
@@ -71,10 +114,10 @@ def _convert_to_release_schema(df: pd.DataFrame, source_mapping_path: str) -> gp
     ]
     height_specials = [
         {
-            "when": df["height_source"] == "msft", 
-            "then_value": df["height_pred"], 
-            "then_source": "estimated", 
-            "then_conf_lo": df["height_confidence_lower"], 
+            "when": df["height_source"] == "msft",
+            "then_value": df["height_pred"],
+            "then_source": "estimated",
+            "then_conf_lo": df["height_confidence_lower"],
             "then_conf_hi": df["height_confidence_upper"]
         },
     ]
@@ -140,7 +183,8 @@ def _convert_to_release_schema(df: pd.DataFrame, source_mapping_path: str) -> gp
     source_datasets = ["osm", "msft", "estimated"] + ["gov-" + s for s in gov_datasets]
 
     # --- Combine ---
-    df_converted = pd.DataFrame({
+    cols_order = SCHEMA.names[:-1]  # exclude bbox column
+    return gpd.GeoDataFrame({
         "type": type_val,
         "type_source": pd.Categorical(type_src, categories=source_datasets),
         "type_confidence": type_conf.astype(float).round(2),
@@ -180,20 +224,31 @@ def _convert_to_release_schema(df: pd.DataFrame, source_mapping_path: str) -> gp
         "geometry_source": pd.Categorical(df["source_dataset"], categories=source_datasets),
         "geometry_source_id": df["id_source"],
 
-    }).reset_index(drop=True)
+    })[cols_order].reset_index(drop=True)
 
-    return gpd.GeoDataFrame(df_converted[
-        [
-            "id", "region_id", "city_id",
-            "type", "subtype", "height", "floors", "construction_year",
-            "type_confidence", "subtype_confidence", "height_confidence_lower", "height_confidence_upper", "floors_confidence_lower", "floors_confidence_upper", "construction_year_confidence_lower", "construction_year_confidence_upper",
-            "geometry_source", "type_source", "subtype_source", "height_source", "floors_source", "construction_year_source",
-            "geometry_source_id", "type_source_ids", "subtype_source_ids", "height_source_ids", "floors_source_ids", "construction_year_source_ids",
-            "subtype_raw",
-            "last_changed",
-            "geometry",
-        ]
-    ])
+
+def _optimize_dataset_sorting(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """Sort GeoDataFrame for optimized predicate pushdown queries."""
+    return gdf.sort_values(by=["geometry_source", "city_id"])
+
+
+def _convert_to_pyarrow_schema(gdf: gpd.GeoDataFrame) -> pa.Table:
+    """Convert GeoDataFrame to PyArrow Table with predefined schema, geo metadata, and covering bbox."""
+
+    # Use GeoPandas to determine schema geo metadata and covering bbox
+    table = _geopandas_to_arrow(
+        gdf,
+        index=False,
+        schema_version="1.1.0",
+        write_covering_bbox=True
+    )
+
+    # Use predefined schema (instead of GeoPandas-inferred schema)
+    geo_metadata = {b"geo": table.schema.metadata[b"geo"]}
+    schema_with_geo_meta = SCHEMA.with_metadata(geo_metadata)
+    table = table.cast(schema_with_geo_meta)
+
+    return table
 
 
 def _read_parquets(path_pattern: str) -> pd.DataFrame:
@@ -211,8 +266,8 @@ def _read_geoparquets(path_pattern: str) -> gpd.GeoDataFrame:
 
 
 def map_with_precedence(
-    df: pd.DataFrame, 
-    precedence: List[tuple], 
+    df: pd.DataFrame,
+    precedence: List[tuple],
     special_cases: List[dict] = None
 ) -> Tuple[pd.Series, pd.Series, pd.Series, pd.Series, pd.Series]:
     """
@@ -224,7 +279,7 @@ def map_with_precedence(
             ("pred", "h_pred", "conf", "conf", None)
         ]
         specials = [{"when": df["type"] == "shed", "then_value": 2.5, "then_conf_lo": 1.0}]
-        
+
         val, src, lo, hi, ids = map_with_precedence(df, precedence, specials)
 
     Args:
@@ -258,7 +313,7 @@ def map_with_precedence(
             src.loc[mask] = source_name(df).loc[mask]
 
         val.loc[mask] = df.loc[mask, value_col]
-        
+
         if conf_col_lo and conf_col_lo in df.columns:
             conf_lo.loc[mask] = df.loc[mask, conf_col_lo]
         if conf_col_hi and conf_col_hi in df.columns:
