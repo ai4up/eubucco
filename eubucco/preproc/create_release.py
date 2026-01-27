@@ -45,7 +45,6 @@ SCHEMA = pa.schema([
     ("construction_year_source_ids", pa.list_(pa.string())),
 
     ("subtype_raw", pa.string()),
-    ("last_changed", pa.string()),
     ("geometry", pa.binary()),
     ("bbox", pa.struct([
         ("xmin", pa.float64()),
@@ -222,7 +221,6 @@ def _convert_to_release_schema(df: pd.DataFrame, source_mapping_path: str) -> gp
         "block_id": df["block_id"],
         "city_id": df["LAU_ID"],
         "region_id": df["region_id"],
-        "last_changed": "v0.2",
 
         "geometry": df["geometry"],
         "geometry_source": pd.Categorical(df["source_dataset"], categories=source_datasets),
