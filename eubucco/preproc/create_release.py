@@ -335,6 +335,9 @@ def map_with_precedence(
 
 def _discard_unrealistic_floors_n_heights(df: pd.DataFrame) -> pd.DataFrame:
     for floors, height in [("floors", "height"), ("osm_floors_merged", "osm_height_merged")]:
+        if height not in df.columns:
+            continue
+
         unreal_heights = (df[height] <= 0) | (df[height] > 350)
         unreal_floors = (df[floors] <= 0) | (df[floors] > 100)
         unreal_floor_height_ratio = (df['floors'] > df['height'] / 1.5) # assuming min floor height of 1.5m
@@ -347,6 +350,9 @@ def _discard_unrealistic_floors_n_heights(df: pd.DataFrame) -> pd.DataFrame:
 
 def _age_cleaning(df: pd.DataFrame) -> pd.DataFrame:
     for age in ["age", "osm_age_merged"]:
+        if age not in df.columns:
+            continue
+
         df[age] = df[age].dropna().astype(str).apply(_extract_year).astype(float)
         df[age] = df[age].clip(lower=0, upper=2030)
         df[age] = df[age].replace(0, np.nan)
@@ -357,6 +363,9 @@ def _age_cleaning(df: pd.DataFrame) -> pd.DataFrame:
 
 def _floors_cleaning(df: pd.DataFrame) -> pd.DataFrame:
     for floors in ["floors", "osm_floors_merged"]:
+        if floors not in df.columns:
+            continue
+
         df[floors] = df[floors].clip(lower=1)
     return df
 
