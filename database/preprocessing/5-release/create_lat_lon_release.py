@@ -25,6 +25,7 @@ COPY (
         height::DECIMAL(4,1) as height,
         floors::DECIMAL(4,1) as floors,
         construction_year::SMALLINT as construction_year,
+        ST_Area(geometry)::DOUBLE AS footprint_area,
         
         type_confidence::DECIMAL(3,2) as type_confidence,
         subtype_confidence::DECIMAL(3,2) as subtype_confidence,
