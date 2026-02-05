@@ -8,15 +8,15 @@ from sklearn import metrics
 from utils.load import all_files
 
 
-def create_eval_metrics_file(pred_dir: str, release_dir: str, aux_dir: str, out_dir: str, nuts_geometry_path: str, regions: list):
+def create_eval_metrics_file(pred_dir: str, aux_dir: str, out_dir: str, nuts_geometry_path: str, regions: list):
     stats = []
     for r in regions:
-        stats.append(_calculate_regional_eval_metrics(Path(pred_dir), Path(release_dir), Path(aux_dir), r))
+        stats.append(_calculate_regional_eval_metrics(Path(pred_dir), Path(aux_dir), r))
 
     df_stats = pd.concat(stats, ignore_index=True).set_index('region_id')
     gdf_stats = _add_nuts_geometry(df_stats, nuts_geometry_path)
 
-    out_path = Path(out_dir) / 'eval-metrics-NUTS2.parquet'
+    out_path = Path(out_dir) / 'prediction-eval-metrics-NUTS2.parquet'
     gdf_stats.to_parquet(out_path, index=False)
 
 
@@ -38,11 +38,10 @@ def create_city_overview_file(data_dir: str, out_dir: str, lau_geometry_path: st
     gdf_nuts_stats.to_parquet(out_path, index=False)
 
 
-def _calculate_regional_eval_metrics(pred_dir: Path, release_dir: Path, aux_dir: Path, region: str) -> pd.DataFrame:
+def _calculate_regional_eval_metrics(pred_dir: Path, aux_dir: Path, region: str) -> pd.DataFrame:
     pred = _read_parquets(pred_dir, region).reset_index()
-    aux = _read_parquets(aux_dir, region, columns=['id', 'id_source', 'bldg_msft_height', 'validation'])
-    release = _read_parquets(release_dir, region, columns=['geometry_source_id', 'geometry_source', 'type_source', 'subtype_source', 'height_source', 'floors_source', 'construction_year_source'])
-    gdf = pred.merge(aux, on='id').merge(release, left_on='id_source', right_on='geometry_source_id')
+    aux = _read_parquets(aux_dir, region, columns=['id', 'bldg_msft_height', 'validation'])
+    gdf = pred.merge(aux, on='id')
 
     gdf['binary_type_true'] = np.where(gdf["type_true"] == "residential", "residential", "non-residential")
     gdf['binary_type_true'] = pd.Categorical(gdf['binary_type_true'], categories=["residential", "non-residential"])
@@ -53,23 +52,11 @@ def _calculate_regional_eval_metrics(pred_dir: Path, release_dir: Path, aux_dir:
         'region_id': region,
         'country': region[:2],
         'n': len(gdf),
-        'n_gov': (gdf['geometry_source'].str.contains('gov')).sum(),
-        'n_osm': gdf['geometry_source'].eq('osm').sum(),
-        'n_msft': gdf['geometry_source'].eq('msft').sum(),
-        'n_gt_type': (gdf['type_source'] == gdf['geometry_source']).sum(),
-        'n_gt_subtype': (gdf['subtype_source'] == gdf['geometry_source']).sum(),
-        'n_gt_height': (gdf['height_source'] == gdf['geometry_source']).sum(),
-        'n_gt_floors': (gdf['floors_source'] == gdf['geometry_source']).sum(),
-        'n_gt_construction_year': (gdf['construction_year_source'] == gdf['geometry_source']).sum(),
-        'n_merged_type': (gdf['type_source'].ne(gdf['geometry_source']) & gdf['type_source'].ne('estimated')).sum(),
-        'n_merged_subtype': (gdf['subtype_source'].ne(gdf['geometry_source']) & gdf['subtype_source'].ne('estimated')).sum(),
-        'n_merged_height': (gdf['height_source'].ne(gdf['geometry_source']) & gdf['height_source'].ne('estimated')).sum(),
-        'n_merged_floors': (gdf['floors_source'].ne(gdf['geometry_source']) & gdf['floors_source'].ne('estimated')).sum(),
-        'n_merged_construction_year': (gdf['construction_year_source'].ne(gdf['geometry_source']) & gdf['construction_year_source'].ne('estimated')).sum(),
-        'n_estimated_type': gdf['type_source'].eq('estimated').sum(),
-        'n_estimated_subtype': gdf['subtype_source'].eq('estimated').sum(),
-        'n_estimated_height': gdf['height_source'].eq('estimated').sum(),
-        'n_estimated_floors': gdf['floors_source'].eq('estimated').sum(),
+        'n_gt_binary_type': (gdf['binary_type_true'].notna()).sum(),
+        'n_gt_type': (gdf['type_true'].notna()).sum(),
+        'n_gt_residential_type': (gdf['residential_type_true'].notna()).sum(),
+        'n_gt_height': (gdf['height_true'].notna()).sum(),
+        'n_gt_floors': (gdf['floors_true'].notna()).sum(),
     }
 
     for var, bins in [('height', [0, 5, 10, 20, np.inf]), ('msft_height', [0, 5, 10, 20, np.inf]), ('floors', [0, 3, 6, np.inf])]:

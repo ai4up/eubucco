@@ -1,5 +1,4 @@
 - pred_dir: /p/projects/eubucco/data/6-prediction
-  release_dir: /p/projects/eubucco/data/7-release
   aux_dir: /p/projects/eubucco/data/5-feature-engineering
   out_dir: /p/projects/eubucco/data/8-additional-files
   nuts_geometry_path: /p/projects/eubucco/data/8-additional-files/NUTS-regions-2016.parquet
