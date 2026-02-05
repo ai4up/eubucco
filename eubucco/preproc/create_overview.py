@@ -16,7 +16,7 @@ def create_eval_metrics_file(pred_dir: str, aux_dir: str, out_dir: str, nuts_geo
     df_stats = pd.concat(stats, ignore_index=True).set_index('region_id')
     gdf_stats = _add_nuts_geometry(df_stats, nuts_geometry_path)
 
-    out_path = Path(out_dir) / 'prediction-eval-metrics-NUTS2.parquet'
+    out_path = Path(out_dir) / 'prediction-eval-metrics.parquet'
     gdf_stats.to_parquet(out_path, index=False)
 
 
