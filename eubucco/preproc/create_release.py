@@ -235,7 +235,7 @@ def _convert_to_release_schema(df: pd.DataFrame, source_mapping_path: str) -> gp
 
 def _optimize_dataset_sorting(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """Sort GeoDataFrame for optimized predicate pushdown queries."""
-    return gdf.sort_values(by=["geometry_source", "region_id", "city_id"])
+    return gdf.sort_values(by=["geometry_source", "region_id", "city_id", "id"])
 
 
 def _convert_to_pyarrow_schema(gdf: gpd.GeoDataFrame) -> pa.Table:
