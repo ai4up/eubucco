@@ -115,7 +115,7 @@ def _convert_to_release_schema(df: pd.DataFrame, source_mapping_path: str) -> gp
 
     # --- Height ---
     height_precedence = [
-        (df["source_dataset"], "height", None, None, None),
+        (df["source_dataset"], "height", None, None, "id_source"),
         ("osm", "osm_height_merged", "osm_height_confidence_lower", "osm_height_confidence_upper", "osm_height_source_ids"),
         ("estimated", "height_pred", "height_confidence_lower", "height_confidence_upper", None),
     ]
@@ -130,29 +130,29 @@ def _convert_to_release_schema(df: pd.DataFrame, source_mapping_path: str) -> gp
     ]
     # --- Floors ---
     floors_precedence = [
-        (df["source_dataset"], "floors", None, None, None),
+        (df["source_dataset"], "floors", None, None, "id_source"),
         ("osm", "osm_floors_merged", "osm_floors_confidence_lower", "osm_floors_confidence_upper", "osm_floors_source_ids"),
         ("estimated", "floors_pred", "floors_confidence_lower", "floors_confidence_upper", None),
     ]
     # --- Age ---
     age_precedence = [
-        (df["source_dataset"], "age", None, None, None),
+        (df["source_dataset"], "age", None, None, "id_source"),
         ("osm", "osm_age_merged", "osm_construction_year_confidence_lower", "osm_construction_year_confidence_upper", "osm_age_source_ids"),
     ]
     # --- Type ---
     type_precedence = [
-        (df["source_dataset"], "type", None, None, None),
+        (df["source_dataset"], "type", None, None, "id_source"),
         ("osm", "osm_type_merged", "osm_binary_type_confidence", None, "osm_type_source_ids"),
         ("estimated", "type_pred", "binary_type_confidence", None, None),
     ]
     # --- Subtype ---
     subtype_precedence = [
-        (df["source_dataset"], "type", None, None, None),
+        (df["source_dataset"], "type", None, None, "id_source"),
         ("osm", "osm_type_merged", "osm_type_confidence", None, "osm_type_source_ids"),
         ("estimated", "type_pred", "type_confidence", None, None),
     ]
     res_type_precedence = [
-        (df["source_dataset"], "residential_type", None, None, None),
+        (df["source_dataset"], "residential_type", None, None, "id_source"),
         ("osm", "osm_residential_type_merged", "osm_residential_type_confidence", None, "osm_residential_type_source_ids"),
         ("estimated", "residential_type_pred", "residential_type_confidence", None, None),
     ]
