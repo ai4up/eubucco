@@ -309,7 +309,7 @@ def map_with_precedence(
         elif isinstance(source_name, pd.Series):
             src.loc[mask] = source_name.loc[mask]
         else:
-            src.loc[mask] = source_name(df).loc[mask]
+            raise ValueError(f"Unsupported source_name type: {type(source_name)}")
 
         val.loc[mask] = df.loc[mask, value_col]
 
@@ -318,7 +318,7 @@ def map_with_precedence(
         if conf_col_hi and conf_col_hi in df.columns:
             conf_hi.loc[mask] = df.loc[mask, conf_col_hi]
         if ids_col and ids_col in df.columns:
-            src_ids.loc[mask] = df.loc[mask, ids_col]
+            src_ids.loc[mask] = df.loc[mask, ids_col].apply(lambda x: x if isinstance(x, (list, np.ndarray)) else [x])
 
     # Special-case overrides
     if special_cases:
