@@ -1,0 +1,3 @@
+- data_dir: /p/projects/eubucco/data/7-release
+  output_path: /p/projects/eubucco/data/8-additional-files/eubucco_lat_lon.parquet
+  tmp_dir: /p/projects/eubucco/data/tmp/duckdb_temp

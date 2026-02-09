@@ -8,6 +8,15 @@ jobs:
       mem: 16000
       time: "01:00:00"
 
+  - name: create-lat-lon-release
+    script: /p/projects/eubucco/git-eubucco/database/preprocessing/5-release/run_create_lat_lon_release.py
+    param_files: [/p/projects/eubucco/git-eubucco/database/preprocessing/5-release/params_lat_lon_release.yml]
+    log_dir: /p/projects/eubucco/logs/v1_0-db/release
+    resources:
+      cpus: 16
+      mem: 100000
+      time: "03:00:00"
+
   - name: create-overview-file
     script: /p/projects/eubucco/git-eubucco/database/preprocessing/5-release/run_overview.py
     param_files: [/p/projects/eubucco/git-eubucco/database/preprocessing/5-release/params_overview.yml]
