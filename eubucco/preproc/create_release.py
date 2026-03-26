@@ -137,8 +137,8 @@ def create_lat_lon_release(data_dir: str, output_path: str, tmp_dir: str):
             subtype_raw::VARCHAR as subtype_raw,
 
             -- Calculated Lat/Lon
-            ST_Y(ST_Transform(ST_Centroid(geometry), 'EPSG:3035', 'EPSG:4326'))::DOUBLE AS lat,
-            ST_X(ST_Transform(ST_Centroid(geometry), 'EPSG:3035', 'EPSG:4326'))::DOUBLE AS lon
+            ST_Y(ST_Transform(ST_Centroid(geometry), 'EPSG:3035', 'EPSG:4326', always_xy := true))::DOUBLE AS lat,
+            ST_X(ST_Transform(ST_Centroid(geometry), 'EPSG:3035', 'EPSG:4326', always_xy := true))::DOUBLE AS lon
 
         FROM read_parquet('{input_pattern}')
         ORDER BY geometry_source, region_id, city_id, id
