@@ -184,7 +184,7 @@ def _convert_to_release_schema(df: pd.DataFrame, source_mapping_path: str) -> gp
         ("osm", "osm_height_merged", "osm_height_confidence_lower", "osm_height_confidence_upper", "osm_height_source_ids"),
         ("estimated", "height_pred", "height_confidence_lower", "height_confidence_upper", None),
     ]
-    height_specials = [
+    special_case_override_msft = [
         {
             "when": df["height_source"] == "msft",
             "then_value": df["height_pred"],
@@ -216,17 +216,26 @@ def _convert_to_release_schema(df: pd.DataFrame, source_mapping_path: str) -> gp
         ("osm", "osm_type_merged", "osm_type_confidence", None, "osm_type_source_ids"),
         ("estimated", "type_pred", "type_confidence", None, None),
     ]
+    special_case_germany_missing_agricultural = [
+        {
+            "when": (df["type_source"] == "31001_2000") & (df["subtype_pred"].isin(["agricultural", "industrial"])),
+            "then_value": df["subtype_pred"],
+            "then_source": "estimated",
+            "then_conf_lo": df["subtype_confidence"],
+        },
+    ]
+
     res_type_precedence = [
         (df["source_dataset"], "residential_type", None, None, "id_source"),
         ("osm", "osm_residential_type_merged", "osm_residential_type_confidence", None, "osm_residential_type_source_ids"),
         ("estimated", "residential_type_pred", "residential_type_confidence", None, None),
     ]
 
-    height_val, height_src, height_lo, height_hi, height_ids = map_with_precedence(df, height_precedence, height_specials)
+    height_val, height_src, height_lo, height_hi, height_ids = map_with_precedence(df, height_precedence, special_case_override_msft)
     floors_val, floors_src, floors_lo, floors_hi, floors_ids = map_with_precedence(df, floors_precedence)
     age_val, age_src, age_lo, age_hi, age_ids = map_with_precedence(df, age_precedence)
     type_val, type_src, type_conf, _, type_ids = map_with_precedence(df, type_precedence)
-    subtype_val, subtype_src, subtype_conf, _, subtype_ids = map_with_precedence(df, subtype_precedence)
+    subtype_val, subtype_src, subtype_conf, _, subtype_ids = map_with_precedence(df, subtype_precedence, special_case_germany_missing_agricultural)
     res_type_val, res_type_src, res_type_conf, _, res_type_ids = map_with_precedence(df, res_type_precedence)
 
     # merge residential type into subtype
