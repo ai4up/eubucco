@@ -153,7 +153,6 @@ def height_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     df['height'] = df['height'].clip(lower=0)
     df['height'] = df['height'].replace(0, np.nan)
     df['height_source'] = df['height']
-    df = _estimate_height_from_floors(df)
 
     return df
 
@@ -206,13 +205,6 @@ def _read_geodata(path: Path) -> gpd.GeoDataFrame:
         return gpd.read_file(path)
     else:
         raise ValueError(f'Unsupported file format: {path.suffix}')
-
-
-def _estimate_height_from_floors(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    df.loc[df['floors'].notna(), 'height_source'] = df['height_source'].fillna('floors')
-    df['height'] = df['height'].fillna(df['floors'] * FLOOR_HEIGHT)
-
-    return df
 
 
 def _reverse_height_estimation_from_floors(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
