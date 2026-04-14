@@ -154,6 +154,9 @@ def height_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     df['height'] = df['height'].replace(0, np.nan)
     df['height_source'] = df['height']
 
+    unrealistic_height_mask = (df['floors'] > df['height'] / 1.5) & (df['floors'] < 30)  # assuming min floor height of 1.5m
+    df.loc[unrealistic_height_mask, 'height'] = np.nan
+
     return df
 
 
@@ -166,7 +169,7 @@ def floors_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 
 def age_cleaning(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    df['age'] = df['age'].dropna().astype(str).apply(_extract_year)
+    df['age'] = df['age'].dropna().astype(str).apply(_extract_year).astype(float)
     df['age'] = df['age'].clip(lower=0)
     df['age'] = df['age'].replace(0, np.nan)
 
