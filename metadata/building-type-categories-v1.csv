@@ -1618,8 +1618,8 @@ trentino,Casello/Staz,commercial,non-residential,,False,Toll booth / Staz,gov-it
 trentino,Cavedio,others,non-residential,,False,Cavedio,gov-italy-trentino-alto-adige
 trentino,Centrale-Cabina,residential,non-residential,detached single-family house,False,Central-Cabin,gov-italy-trentino-alto-adige
 trentino,Cimitero,industrial,non-residential,,False,Cemetery,gov-italy-trentino-alto-adige
-trentino,Civile,public,unknown,,False,Civil,gov-italy-trentino-alto-adige
-trentino,Civile1,public,unknown,,False,Civil 1,gov-italy-trentino-alto-adige
+trentino,Civile,,unknown,,False,Civil,gov-italy-trentino-alto-adige
+trentino,Civile1,,unknown,,False,Civil 1,gov-italy-trentino-alto-adige
 trentino,Depuratore,industrial,non-residential,,False,Purifier,gov-italy-trentino-alto-adige
 trentino,EdificioCulto,public,non-residential,,False,BuildingCult,gov-italy-trentino-alto-adige
 trentino,Edificioculto,public,non-residential,,False,Cult building,gov-italy-trentino-alto-adige

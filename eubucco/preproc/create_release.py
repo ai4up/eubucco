@@ -175,6 +175,7 @@ def _preprocess_merging_uncertainties(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame
 def _convert_to_release_schema(df: pd.DataFrame, source_mapping_path: str) -> gpd.GeoDataFrame:
     """Build harmonized dataframe using flexible precedence with per-row sources."""
     df = _discard_unrealistic_floors_n_heights(df)
+    df = _discard_ambigious_subtypes(df)
     df = _age_cleaning(df)
     df = _floors_cleaning(df)
 
@@ -454,3 +455,9 @@ def _extract_year(s: str) -> float:
 
     except Exception:
         return np.nan
+
+
+def _discard_ambigious_subtypes(df: pd.DataFrame) -> pd.DataFrame:
+    df.loc[df["type_source"].isin(["Civile", "Civile1"]) & (df["source_dataset"] == "gov-italy-trentino-alto-adige"), "type"] = np.nan
+
+    return df
