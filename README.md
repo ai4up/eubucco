@@ -8,6 +8,7 @@
 
 - **Website**: [eubucco.com](https://eubucco.com) - Interactive map explorer and data download interface
 - **Docs**: [docs.eubucco.com](https://docs.eubucco.com) - Documentation of data schema, data access, and data usage
+- **Notebook**: [getting-started.ipynb](./tutorials/getting-started.ipynb) - Getting-started notebook with data downloading and usage examples
 - **Zenodo**: [10.5281/zenodo.6524780](https://doi.org/10.5281/zenodo.6524780) - Archivied data dumps with DOI
 
 ## About
