@@ -203,7 +203,7 @@ def _convert_to_release_schema(df: pd.DataFrame, source_mapping_path: str) -> gp
     # --- Age ---
     age_precedence = [
         (df["source_dataset"], "age", None, None, "id_source"),
-        ("osm", "osm_age_merged", "osm_construction_year_confidence_lower", "osm_construction_year_confidence_upper", "osm_age_source_ids"),
+        ("osm", "osm_age_merged", "osm_age_confidence_lower", "osm_age_confidence_upper", "osm_age_source_ids"),
     ]
     # --- Type ---
     type_precedence = [
