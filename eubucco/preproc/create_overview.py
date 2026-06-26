@@ -153,7 +153,7 @@ def _calculate_city_stats(f: Path):
     # Merged Values
     for col in ['type', 'subtype', 'height', 'floors', 'construction_year']:
         src = f'{col}_source'
-        gdf[f'is_merged_{col}'] = (gdf[src] != gdf['geometry_source']) & (gdf[src] != 'estimated')
+        gdf[f'is_merged_{col}'] = (gdf[col].notna()) & (gdf[src] != gdf['geometry_source']) & (gdf[src] != 'estimated')
 
     # Bins
     gdf['h_0_5'] = (gdf['height'] > 0) & (gdf['height'] <= 5)
