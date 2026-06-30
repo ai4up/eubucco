@@ -156,26 +156,26 @@ def _calculate_city_stats(f: Path):
         gdf[f'is_merged_{col}'] = (gdf[col].notna()) & (gdf[src] != gdf['geometry_source']) & (gdf[src] != 'estimated')
 
     # Bins
-    gdf['h_0_5'] = (gdf['height'] > 0) & (gdf['height'] <= 5)
-    gdf['h_5_10'] = (gdf['height'] > 5) & (gdf['height'] <= 10)
-    gdf['h_10_20'] = (gdf['height'] > 10) & (gdf['height'] <= 20)
-    gdf['h_20_50'] = (gdf['height'] > 20) & (gdf['height'] <= 50)
-    gdf['h_50_inf'] = (gdf['height'] > 50)
+    gdf['h_0_5'] = (gdf['height'] >= 0) & (gdf['height'] < 5)
+    gdf['h_5_10'] = (gdf['height'] >= 5) & (gdf['height'] < 10)
+    gdf['h_10_20'] = (gdf['height'] >= 10) & (gdf['height'] < 20)
+    gdf['h_20_50'] = (gdf['height'] >= 20) & (gdf['height'] < 50)
+    gdf['h_50_inf'] = (gdf['height'] >= 50)
 
-    gdf['f_0_1'] = (gdf['floors'] > 0) & (gdf['floors'] <= 1)
-    gdf['f_1_3'] = (gdf['floors'] > 1) & (gdf['floors'] <= 3)
-    gdf['f_4_6'] = (gdf['floors'] > 3) & (gdf['floors'] <= 6)
-    gdf['f_7_inf'] = (gdf['floors'] > 6)
+    gdf['f_0_2'] = (gdf['floors'] >= 0) & (gdf['floors'] < 2)
+    gdf['f_2_4'] = (gdf['floors'] >= 2) & (gdf['floors'] < 4)
+    gdf['f_4_7'] = (gdf['floors'] >= 4) & (gdf['floors'] < 7)
+    gdf['f_7_inf'] = (gdf['floors'] >= 7)
 
-    gdf['yr_0_1900'] = gdf['construction_year'] <= 1900
-    gdf['yr_1901_1970'] = (gdf['construction_year'] > 1900) & (gdf['construction_year'] <= 1970)
-    gdf['yr_1971_2000'] = (gdf['construction_year'] > 1970) & (gdf['construction_year'] <= 2000)
-    gdf['yr_2001_inf'] = gdf['construction_year'] > 2000
+    gdf['yr_0_1900'] = gdf['construction_year'] < 1900
+    gdf['yr_1900_1970'] = (gdf['construction_year'] >= 1900) & (gdf['construction_year'] < 1970)
+    gdf['yr_1970_2000'] = (gdf['construction_year'] >= 1970) & (gdf['construction_year'] < 2000)
+    gdf['yr_2000_inf'] = gdf['construction_year'] >= 2000
 
-    gdf['a_0_25'] = gdf['area'] <= 25
-    gdf['a_25_100'] = (gdf['area'] > 25) & (gdf['area'] <= 100)
-    gdf['a_100_500'] = (gdf['area'] > 100) & (gdf['area'] <= 500)
-    gdf['a_500_inf'] = gdf['area'] > 500
+    gdf['a_0_25'] = gdf['area'] < 25
+    gdf['a_25_100'] = (gdf['area'] >= 25) & (gdf['area'] < 100)
+    gdf['a_100_500'] = (gdf['area'] >= 100) & (gdf['area'] < 500)
+    gdf['a_500_inf'] = gdf['area'] >= 500
 
     # Type/Subtype category counts
     types = ['residential', 'non-residential']
@@ -241,14 +241,14 @@ def _calculate_city_stats(f: Path):
         n_height_10_20=('h_10_20', 'sum'),
         n_height_20_50=('h_20_50', 'sum'),
         n_height_50_inf=('h_50_inf', 'sum'),
-        n_floors_0_1=('f_0_1', 'sum'),
-        n_floors_2_3=('f_2_3', 'sum'),
-        n_floors_4_6=('f_4_6', 'sum'),
+        n_floors_0_2=('f_0_2', 'sum'),
+        n_floors_2_4=('f_2_4', 'sum'),
+        n_floors_4_7=('f_4_7', 'sum'),
         n_floors_7_inf=('f_7_inf', 'sum'),
         n_construction_year_0_1900=('yr_0_1900', 'sum'),
-        n_construction_year_1901_1970=('yr_1901_1970', 'sum'),
-        n_construction_year_1971_2000=('yr_1971_2000', 'sum'),
-        n_construction_year_2001_inf=('yr_2001_inf', 'sum'),
+        n_construction_year_1900_1970=('yr_1900_1970', 'sum'),
+        n_construction_year_1970_2000=('yr_1970_2000', 'sum'),
+        n_construction_year_2000_inf=('yr_2000_inf', 'sum'),
         n_area_0_25=('a_0_25', 'sum'),
         n_area_25_100=('a_25_100', 'sum'),
         n_area_100_500=('a_100_500', 'sum'),
