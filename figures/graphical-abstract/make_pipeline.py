@@ -5,6 +5,7 @@ Six numbered stages, flat/typographic, with schematic footprint illustrations
 of conflation + rubbersheeting (illus.py).
 """
 import illus
+import mathsvg  # NEW: LaTeX->SVG math rendering
 
 # --------------------------------------------------------------------------- #
 W = 1680
@@ -159,6 +160,36 @@ def formula(x, y, w, s, color, size=12.5):
     txt(x + w / 2, y, s, size, color, "bold", anchor="middle", family=MONO)
 
 
+# NEW: drop-in math version of formula(); renders LaTeX, returns consumed height.
+MATH_SCALE = 0.6
+
+
+def mathformula(x, y, w, latex, color, scale=MATH_SCALE, anchor="middle"):
+    """Place LaTeX math; y is the TOP of the box. Returns its pixel height.
+    `latex` may be a list of strings -> stacked lines (small gap)."""
+    if isinstance(latex, (list, tuple)):
+        cy, gap, tot = y, 5, 0
+        for ln in latex:
+            m = mathsvg.make(ln, color=color, scale=scale)
+            cx = x + w / 2 if anchor == "middle" else (x + w if anchor == "end" else x)
+            S.append(m.place(cx, cy, anchor))
+            cy += m.h + gap
+            tot += m.h + gap
+        return tot - gap
+    m = mathsvg.make(latex, color=color, scale=scale)
+    cx = x + w / 2 if anchor == "middle" else (x + w if anchor == "end" else x)
+    S.append(m.place(cx, y, anchor))
+    return m.h
+
+
+def math_h(latex, color, scale=MATH_SCALE):
+    """Height of a math block (str or list) without drawing."""
+    if isinstance(latex, (list, tuple)):
+        hs = [mathsvg.make(ln, color=color, scale=scale).h for ln in latex]
+        return sum(hs) + 5 * (len(hs) - 1)
+    return mathsvg.make(latex, color=color, scale=scale).h
+
+
 # --------------------------------------------------------------------------- #
 MX, HEAD = 56, 48
 CW = W - 2 * MX
@@ -216,18 +247,18 @@ srcs = [
     (C_GOV, "Governmental registries", "authoritative",
      ["47 datasets for EU-27 + NO, CH, UK",
       "bulk download, WFS, OGC API, FTP, or direct provision",
-      "type · height · floors · construction year"]),
+      "type \u00b7 height \u00b7 floors \u00b7 construction year"]),
     (C_OSM, "OpenStreetMap", "volunteered",
      ["Geofabrik .pbf, retrieved with Pyrosm",
       "wildcard filter  building = *",
-      "type (building, building:use, amenity) · height · floors (building:levels) · construction year (start_date)"]),
+      "type (building, building:use, amenity) \u00b7 height (height) \u00b7 floors (building:levels) \u00b7 construction year (start_date)"]),
     (C_MS, "Microsoft GlobalMLBuildingFootprints", "aerial & satellite imagery",
      ["ML footprints over the full study area",
       "height estimates only"]),
 ]
 cwd = (IW - 2 * 22) / 3
 mb = [m_bul(items, F_BODY, cwd - 36) for *_, items in srcs]
-ch = max(90 + m for m in mb) + 12
+ch = max(90 + m for m in mb) + 4
 P1H = ch + 108
 top = stage(cur, P1H, 1, C_RET, "Data retrieval", "Collect building footprints from multiple sources.")
 cy = top + 18
@@ -250,83 +281,100 @@ cur += P1H + 46
 #  STAGE 2 — PREPROCESSING
 # =========================================================================== #
 steps2 = [
-    ("Geometry cleaning",
+    ("Geometry harmonization",
      ["convert 3D / 2.5D to 2D footprints",
       "split multipolygons into parts",
       "reproject to ETRS89 (EPSG:3035)",
       "repair or remove invalid geometries"], None),
     ("Deduplication",
      ["remove redundant intra-source footprints",
-      "duplicate if IoSA > 0.25",
+      "considered duplicate if IoSA > 0.25",
       "discard the smaller (sub-part) footprint"],
-     "IoSA = |a ∩ b| / min(|a|,|b|)"),
+     r"\mathrm{IoSA} = \dfrac{|a \cap b|}{\min(|a|,\,|b|)}"),
+    ("Rubbersheeting",
+     ["correct systematic spatial misalignments of source datasets",
+      "determine affine shift per H3 res-9 cell using reciprocal-NN landmark pairs"], None),
+    ("Attribute harmonization",
+     ["__CROSSWALK__",
+      "taxonomy of harmonized use-type: binary type and detailed subtype",
+      "range filters on height, floors, year",
+      "drop non-building tags"], None),
     ("Admin-region mapping",
      ["centroid join with Eurostat 2016 boundaries",
       "assign NUTS3 code as region_id",
       "assign LAU code as city_id"], None),
-    ("Attribute harmonization",
-     ["__CROSSWALK__",
-      "use-type taxonomy: binary type and detailed subtype",
-      "range filters on height, floors, year",
-      "drop non-building tags"], None),
-    ("Rubbersheeting",
-     ["correct systematic spatial misalignments of source datasets",
-      "determine affine shift per H3 res-9 cell using reciprocal-NN landmark pairs"], None),
 ]
 n, gap = 5, 22
 bw = (IW - (n - 1) * gap) / n
-RUB_H = 72
 admin_assign = ["assign NUTS3 code as region_id", "assign LAU code as city_id"]
+M = tint(C_PRE, 0.2)
+FM_COL = mix(C_PRE, "#000", 0.2)
+ILL_H = 66
+PREP_ILL = {
+    0: (illus.geom_clean, illus.GEOM_VW, illus.GEOM_VH, "flatten & repair geometries"),
+    1: (illus.dedup, illus.DEDUP_VW, illus.DEDUP_VH, "discard smaller duplicate"),
+    2: (illus.rubber, illus.RVW, illus.RVH, "same affine shift per H3 cell"),
+    4: (illus.admin, illus.ADMIN_VW, illus.ADMIN_VH, "centroid → NUTS3 / LAU"),
+}
+
+
+def _text_h2(i, items, fm):
+    if i == 1:   # IoSA definition sits inline, under the 2nd bullet
+        return (m_bul(items[:2], F_BODY, bw - 28) + 8 + math_h(fm, FM_COL)
+                + 12 + m_bul(items[2:], F_BODY, bw - 28))
+    if i == 4:
+        return 68 + m_bul(admin_assign, F_BODY, bw - 28)
+    if i == 3:
+        return 36 + m_bul(items[1:], F_BODY, bw - 28)
+    return m_bul(items, F_BODY, bw - 28)
 
 
 def _ch2(i, items, fm):
-    if i == 2:
-        return 53 + m_bul(admin_assign, F_BODY, bw - 28)
-    if i == 3:
-        return 53 + m_bul(items[1:], F_BODY, bw - 28)
-    base = m_bul(items, F_BODY, bw - 28)
-    if fm:
-        base += 46
-    if i == 4:
-        base += 24 + RUB_H + 13
+    base = _text_h2(i, items, fm)
+    if i in PREP_ILL:
+        base += 8 + ILL_H + 13
     return base
 
 
 chs2 = [_ch2(i, items, fm) for i, (_, items, fm) in enumerate(steps2)]
-bh = max(60 + c for c in chs2) 
+bh = max(63 + c for c in chs2) + 8
 P2H = HEAD + 18 + bh + 14
 top = stage(cur, P2H, 2, C_PRE, "Preprocessing", "Clean, harmonize, and spatially align source datasets.")
 by = top + 18
-M = tint(C_PRE, 0.2)
 for i, (title, items, fm) in enumerate(steps2):
     bx = IX + i * (bw + gap)
-    vo = voff_for(bh, chs2[i])
-    tx, ty = cell(bx, by, bw, bh, C_PRE, chr(97 + i), title, vo)
-    if i == 2:
+    tx, ty = cell(bx, by, bw, bh, C_PRE, chr(97 + i), title)
+    # --- text ---
+    if i == 1:   # deduplication: IoSA definition directly under its bullet
+        yb = bullets(tx, ty, items[:2], F_BODY, bw - 28, M)
+        mh = mathformula(tx + 20, yb, 0, fm, FM_COL, anchor="start")
+        yb = bullets(tx, yb + 8 + mh + 12, items[2:], F_BODY, bw - 28, M)
+    elif i == 4:
         rrect(tx, ty - 9, 4, 4, r=0.7, fill=M)
         txt(tx + 12, ty, "join building centroids with", F_BODY, SUB)
         txt(tx + 12, ty + 16, "Eurostat 2016 boundaries:", F_BODY, SUB)
-        txt(tx + 12, ty + 31, "NUTS-regions-2016.parquet", 11.5, mix(C_PRE, "#000", .15), "bold", family=MONO)
-        txt(tx + 12, ty + 46, "LAU-cities-2016.parquet", 11.5, mix(C_PRE, "#000", .15), "bold", family=MONO)
-        bullets(tx, ty + 68, admin_assign, F_BODY, bw - 28, M)
+        txt(tx + 12, ty + 31, "NUTS-regions-2016.parquet", 11.5, FM_COL, "bold", family=MONO)
+        txt(tx + 12, ty + 46, "LAU-cities-2016.parquet", 11.5, FM_COL, "bold", family=MONO)
+        yb = bullets(tx, ty + 68, admin_assign, F_BODY, bw - 28, M)
     elif i == 3:
         rrect(tx, ty - 9, 4, 4, r=0.7, fill=M)
         txt(tx + 12, ty, "map use types via crosswalk", F_BODY, SUB)
-        txt(tx + 12, ty + 16, "building-type-harmonization.csv", 11.5, mix(C_PRE, "#000", .15), "bold", family=MONO)
-        bullets(tx, ty + 36, items[1:], F_BODY, bw - 28, M)
+        txt(tx + 12, ty + 16, "building-type-harmonization.csv", 11.5, FM_COL, "bold", family=MONO)
+        yb = bullets(tx, ty + 36, items[1:], F_BODY, bw - 28, M)
     else:
         yb = bullets(tx, ty, items, F_BODY, bw - 28, M)
-        if fm:
-            line(bx + 16, yb + 13, bx + bw - 16, yb + 13, HAIR, 1.0)
-            formula(bx + 16, yb + 34, bw - 32, fm, mix(C_PRE, "#000", 0.2), 12)
-        if i == 4:
-            rds = RUB_H / illus.RVH
-            rw = illus.RVW * rds
-            rox = bx + (bw - rw) / 2
-            roy = yb - 4
-            S.extend(illus.rubber(rox, roy, rds))
-            txt(bx + bw / 2, roy + RUB_H + 13, "same affine shift per H3 cell",
-                9.5, FAINT, italic=True, anchor="middle")
+    # --- illustration + grey caption ---
+    if i in PREP_ILL:
+        fn, vw, vh, cap = PREP_ILL[i]
+        ids = ILL_H / vh
+        iox = bx + (bw - vw * ids) / 2
+        iy = yb
+        if i == 0 or i == 1:
+            iy -= 12
+        if i == 2:
+            iy += 6
+        S.extend(fn(iox, iy, ids))
+        txt(bx + bw / 2, iy + ILL_H + 13, cap, 9.5, FAINT, italic=True, anchor="middle")
     if i < n - 1:
         chevron(bx + bw + gap / 2, by + bh / 2, tint(C_PRE, 0.3))
 vconnect(W / 2, cur + P2H, cur + P2H + 46)
@@ -338,12 +386,12 @@ cur += P2H + 46
 steps3 = ["candidate", "matching", "geometry", "attribute"]
 titles3 = {"candidate": "Candidate pairs", "matching": "Pairwise matching",
            "geometry": "Geometry merge", "attribute": "Attribute merge"}
-cand_b = ["k-NN search (k = 3)", "≤ 10 m bounding-box threshold",
+cand_b = ["k-NN search (k = 3)", "\u2264 10 m bounding-box threshold",
           "symmetric search to capture many-to-many (m : n) links comprehensively"]
 match_b = ["binary ML classifier (XGBoost)", "geometric + contextual features:"]
 geom_b = ["block-level selection by priority", "keep footprints of highest priority"]
 attr_lead = "Merge attributes between matching buildings across sources:"
-attr_b = ["numeric → area-weighted mean", "categorical → dominant by area"]
+attr_b = ["numeric \u2192 area-weighted mean", "categorical \u2192 dominant by area"]
 n, gap = 4, 22
 bw = (IW - (n - 1) * gap) / n
 ill_w = 104
@@ -352,12 +400,15 @@ ill_h = illus.SVH * ds
 tW = bw - (ill_w + 14) - 20
 M = tint(C_CONF, 0.25)
 sub_c = mix(C_CONF, "#000", 0.1)
+ATTR_FM = r"\mathcal{S}_a^{*} = \arg\max_{\mathcal{S}\subseteq\mathcal{B}_a}\ \mathrm{IoU}(a,\mathcal{S})"
+attr_sub = "source subset Sₐ* chosen by maximum overlap with target a:"
 # measure cell content heights (extent from first baseline)
 ch3 = {
     "candidate": max(m_bul(cand_b, F_BODY, tW), ill_h),
     "matching": max(m_bul(match_b, F_BODY, tW, vgap=7) + 16 + 4 * 17 + 6 + F_BODY, ill_h),
     "geometry": max(m_bul(geom_b, F_BODY, tW), ill_h),
-    "attribute": max(m_txt(attr_lead, F_BODY, tW) + 22 + m_bul(attr_b, F_BODY, tW) + 60 + 12.5, ill_h),
+    "attribute": max(m_txt(attr_lead, F_BODY, tW) + 22 + m_bul(attr_b, F_BODY, tW)
+                     + 20 + m_txt(attr_sub, 11, tW) + 14 + math_h(ATTR_FM, INK), ill_h),
 }
 bh = max(63 + ch3[m] for m in steps3) + 12
 P3H = HEAD + 150 + bh + 16
@@ -415,24 +466,23 @@ for i, mode in enumerate(steps3):
         bullets(tX, ty, cand_b, F_BODY, tW, M)
     elif mode == "matching":
         yb = bullets(tX, ty, match_b, F_BODY, tW, M, vgap=7)
-        subs = ["intersection: IoU, IoSA, overlap",
-                "shape: area, convexity, orient.",
-                "similarity: walls, centroids",
-                "context: neighbour counts 5–50 m"]
+        subs = ["intersection: IoU, IoSA, IoU, overlap",
+                "shape: area, convexity, orientation",
+                "similarity: walls, shape, distance",
+                "context: shared walls, buffer counts"]
         sy = yb + 4
         for s in subs:
             line(tX + 12, sy - 4, tX + 19, sy - 4, sub_c, 1.8)
             txt(tX + 25, sy, s, 11, SUB)
             sy += 17
-        bullets(tX, sy + 6, ["SBFS · Optuna tuning"], F_BODY, tW, M)
+        bullets(tX, sy + 6, ["SBFS \u00b7 Optuna tuning"], F_BODY, tW, M)
     elif mode == "geometry":
         bullets(tX, ty, geom_b, F_BODY, tW, M)
     elif mode == "attribute":
         y2 = mtext(tX, ty, attr_lead, F_BODY, tW, INK)
         yb = bullets(tX, y2 + 22, attr_b, F_BODY, tW, M)
-        mtext(tX, yb + 20, "source subset Sₐ* chosen by maximum overlap with target a:",
-              11, tW, FAINT)
-        formula(tX - 6, yb + 60, tW + 12, "Sₐ* = argmax IoU(a, S)", mix(C_CONF, "#000", 0.2), 12.5)
+        ysub = mtext(tX, yb + 20, attr_sub, 11, tW, FAINT)
+        mathformula(tX - 6, ysub + 14, tW + 12, ATTR_FM, mix(C_CONF, "#000", 0.2))
     if i < n - 1:
         chevron(bx + bw + gap / 2, by + bh / 2, tint(C_CONF, 0.3))
 
@@ -453,9 +503,9 @@ cur += P3H + 46
 n, gap = 3, 22
 bw = (IW - (n - 1) * gap) / n
 groups = ["building, block, and neighborhood morphology (EUBUCCO)",
-          "street · address · POI (OSM · Overture)",
-          "land use & built-up (CORINE · GHS)",
-          "topography · climate · population (GMTED · Oxford · GHS-POP)",
+          "street \u00b7 address \u00b7 POI (OSM \u00b7 Overture)",
+          "land use & built-up (CORINE \u00b7 GHS)",
+          "topography \u00b7 climate \u00b7 population (GMTED \u00b7 Oxford \u00b7 GHS-POP)",
           "location embeddings (SatCLIP)"]
 model_b = ["gradient-boosted tree ensembles (XGBoost)",
            "ground truth from governmental and OSM sources",
@@ -465,11 +515,11 @@ model_b = ["gradient-boosted tree ensembles (XGBoost)",
            ]
 targets = [("Height", "regression", ""), ("Floors", "regression", ""),
            ("Use type", "6-class", "residential as single class"),
-           ("Residential subtype", "4-class · sequential", "")]
+           ("Residential subtype", "4-class \u00b7 sequential", "")]
 ch_feat = 24 + 5 * 18
 ch_model = m_bul(model_b, F_BODY, bw - 100)
 ch_tgt = (len(targets) - 1) * 22 + 13
-bh = max(63 + c for c in (ch_feat, ch_model, ch_tgt)) + 12
+bh = max(45 + c for c in (ch_feat, ch_model, ch_tgt)) + 12
 P4H = HEAD + 18 + bh + 14
 top = stage(cur, P4H, 4, C_PRED, "Attribute prediction",
             "Impute missing building attributes using machine learning.")
@@ -489,7 +539,7 @@ for nm, tg, note in targets:
 bx = IX + (bw + gap)
 tx, ty = cell(bx, by, bw, bh, C_PRED, "b", "Feature engineering", voff_for(bh, ch_feat))
 txt(tx, ty, "Per-building predictors from conflated + auxiliary data:", 11.8, SUB)
-yy = ty + 24
+yy = ty + 18
 for g in groups:
     rrect(tx, yy - 7, 3.6, 3.6, r=0.6, fill=tint(C_PRED, 0.25))
     txt(tx + 13, yy, g, 12, SUB)
@@ -515,32 +565,35 @@ prov = [("ground truth", "direct from provider, confidence = NaN", SUB),
 prov_intro = ("The way uncertainty is measured depends on the attribute provenance. Attributes are one of three kinds:")
 confbox = [
     ("Uncertainty of merged attributes", C_CONF2, [
-        ("categorical (type, subtype): overlap of target a with the sources bᵢ that share the dominant category",
-         "Conf = |a ∩ ∪ bᵢ| / |a|"),
-        ("numeric (height, floors, construction year): bounds of source values",
-         "Conf_lower = minᵢ vᵢ ,  Conf_upper = maxᵢ vᵢ"),
+        ("categorical (type, subtype): overlap of target with the sources sharing the dominant category",
+         r"\mathrm{Conf} = \frac{|\,a \cap\!\! \bigcup_{i\in\mathcal{S}_a^{\ast}(c^{\ast})}\!\! b_i\,|}{|a|}", 0.7),
+        ("numeric (height, floors, construction year): lower / upper bound over source values",
+         r"\mathrm{Conf}_{\mathrm{lower}} = \min_i\; v_i,\quad \mathrm{Conf}_{\mathrm{upper}} = \max_i\; v_i"),
     ]),
     ("Uncertainty of predicted attributes", C_PRED, [
         ("categorical: isotonic-calibrated class probability",
-         "Conf = P_cal(class)"),
-        ("numeric: seed-ensemble mean ± 95% confidence interval",
-         "Conf = ȳ ± t₀.₉₇₅,₉ · s/√n"),
+         r"\mathrm{Conf} = P_{\mathrm{cal}}(\mathrm{class})"),
+        ("numeric: seed-ensemble mean \u00b1 95% confidence interval",
+         r"\mathrm{Conf} = \bar{y} \pm t_{0.975,\,9}\cdot \dfrac{s}{\sqrt{n}}"),
     ]),
 ]
 
-def _confh(rows):
+
+def _confh(rows, col):
     yy = 62
-    for body, fm in rows:
+    for row in rows:
+        body, fm = row[0], row[1]
+        sc = row[2] if len(row) > 2 else MATH_SCALE
         L = max(1, len(wrap(body, cwd - 52, 11.8)))
         yy += (L - 1) * 11.8 * 1.32 + 17
         if fm:
-            yy += 21
+            yy += math_h(fm, mix(col, "#000", 0.25), sc) + 18
     return yy - 4
 
 
 prov_h = 100 + len(prov) * 18 - 6
-heights = [prov_h] + [_confh(r) for _, _, r in confbox]
-cch = max(heights) + 10
+heights = [prov_h] + [_confh(r, c) for _, c, r in confbox]
+cch = max(heights) - 35
 P5H = HEAD + 16 + cch + 14
 top = stage(cur, P5H, 5, C_CONF2, "Uncertainty estimation",
             "Quantify uncertainty of merged and predicted attributes via confidence scores.")
@@ -557,7 +610,7 @@ yy = cyy + 100 + vo
 for kind, desc, kc in prov:
     rrect(cx + 18, yy - 8, 4, 4, r=0.7, fill=tint(kc, 0.15))
     txt(cx + 30, yy, kind, 11.8, mix(kc, "#000", 0.2), "bold")
-    txt(cx + 30 + _tw(kind, 11.8, "bold") + 7, yy, "— " + desc, 11, SUB)
+    txt(cx + 30 + _tw(kind, 11.8, "bold") + 7, yy, "\u2014 " + desc, 11, SUB)
     yy += 18
 
 for j, (nm, col, rows) in enumerate(confbox):
@@ -566,13 +619,17 @@ for j, (nm, col, rows) in enumerate(confbox):
     txt(cx + 18, cyy + 29, nm, F_CELLTITLE, INK, "bold")
     line(cx + 16, cyy + 41, cx + cwd - 16, cyy + 41, HAIR, 1.0)
     yy = cyy + 62
-    for body, fm in rows:
+    for row in rows:
+        body, fm = row[0], row[1]
+        sc = row[2] if len(row) > 2 else MATH_SCALE
         rrect(cx + 18, yy - 7, 4, 4, r=0.7, fill=tint(col, 0.2))
         e = mtext(cx + 32, yy, body, 11.8, cwd - 52, SUB)
-        yy = e + 17
+        yy = e 
+        if nm == "Uncertainty of predicted attributes":
+            yy += 17
         if fm:
-            formula(cx + 32, yy, cwd - 64, fm, mix(col, "#000", 0.25), 12)
-            yy += 21
+            h = mathformula(cx + 32, yy, cwd - 64, fm, mix(col, "#000", 0.25), sc)
+            yy += h + 18
 vconnect(W / 2, cur + P5H, cur + P5H + 46)
 cur += P5H + 46
 
@@ -580,19 +637,18 @@ cur += P5H + 46
 #  STAGE 6 — RELEASE PREPARATION
 # =========================================================================== #
 steps6 = [
-    ("Provenance & schema assembly",
+    ("Attribute assembly & provenance",
      ["record data provenance per building (source dataset & source id)",
       "combine use type + residential subtype",
       "aggregate use type to binary type (residential / non-residential)",
-    #   "round precision; dictionary-encode categorical columns",
       ]),
     ("ID generation",
      ["assign block-based IDs with sequential building indices",
       "adjacency recoverable without spatial queries"]),
     ("Partitioning & serialization",
-     ["Parquet files with WKB geometry (EPSG:3035)",
-      "NUTS2 Hive partitions · ZSTD · 10k row groups",
-      "sorted by source, region, city; bbox stats for pushdown",
+     ["Parquet files with WKB-encoded geometry and bbox (EPSG:3035)",
+      "NUTS2 Hive partitions \u00b7 ZSTD \u00b7 10k row groups",
+      "sorted by source, region, city for efficient access",
       ]),
 ]
 n, gap = 3, 22
@@ -623,7 +679,6 @@ S.append(f'<path d="M{dcx},{aby+21} a13,9 0 0 1 0,18 a13,9 0 0 1 0,-18" fill="no
 smallcaps(IX + 46, aby + 21, "S3 object storage", mix(C_REL, "#000", 0.15), 10.5)
 txt(IX + 46, aby + 40, "https://s3.eubucco.com/eubucco/v1.0/buildings/parquet/nuts_id=<ID>/<ID>.parquet",
     12, INK, family=MONO)
-# txt(IX + 46, aby + 54, "S3 endpoint  s3.eubucco.com", 11.5, SUB, family=MONO)
 
 rrect(IX + ahw + 22, aby, ahw, 60, r=8, fill=tint(C_REL, 0.95), stroke=tint(C_REL, 0.5))
 gx = IX + ahw + 22 + 26
@@ -642,7 +697,7 @@ files = [
     ("eubucco_lat_lon.parquet", "centroids + footprint area"),
     ("city-stats.parquet", "LAU building-stock statistics"),
     ("region-stats.parquet", "NUTS3 building-stock statistics"),
-    ("prediction-eval-metrics.parquet", "NUTS2 ML evaluation metrics: MAE · RMSE · R² · F1 · κ"),
+    ("prediction-eval-metrics.parquet", "NUTS2 ML evaluation metrics: MAE \u00b7 RMSE \u00b7 R\u00b2 \u00b7 F1 \u00b7 \u03ba"),
 ]
 fwd = (IW - 3 * 18) / 4
 fyy = ayl + 16
@@ -664,3 +719,13 @@ bg = f'<rect x="0" y="0" width="{W}" height="{H}" fill="{CANVAS}"/>'
 with open("pipeline.svg", "w") as f:
     f.write(head + bg + "\n" + "\n".join(S) + "\n</svg>\n")
 print(f"wrote pipeline.svg  ({W} x {H})")
+
+# import subprocess
+
+# subprocess.run([
+#     "inkscape",
+#     "pipeline.svg",
+#     "--export-type=pdf",
+#     "--export-latex",
+# ], check=True)
+# print("wrote pipeline.pdf + pipeline.pdf_tex")

@@ -14,6 +14,11 @@ C_OK = "#3f8f55"    # accepted match            – green
 C_NO = "#c0566b"    # rejected candidate        – red
 C_CAND = "#9aa2b1"  # candidate edge            – grey
 
+# preprocessing illustration palette
+C_BLD = "#6f8aa6"   # neutral building footprint
+C_GHOST = "#b6bcc7" # removed / reference geometry
+C_ACC = "#2e857c"   # preprocessing accent (teal)
+
 # kept names for make_pipeline colour imports
 C_GOV, C_OSM, C_MS = "#2f5d86", "#4d9163", "#d2823c"
 
@@ -219,6 +224,110 @@ def rubber(ox, oy, ds):
         for da in (2.5, -2.5):
             ax = q[0] - 4 * math.cos(ang2 + da); ay = q[1] - 4 * math.sin(ang2 + da)
             S.append(f'<line x1="{q[0]:.1f}" y1="{q[1]:.1f}" x2="{ax:.1f}" y2="{ay:.1f}" stroke="{C_MOV}" stroke-width="1.4"/>')
+    return S
+
+
+# ---- preprocessing illustrations -------------------------------------------
+GEOM_VW, GEOM_VH = 172, 56
+DEDUP_VW, DEDUP_VH = 80, 56
+ADMIN_VW, ADMIN_VH = 116, 60
+
+
+def _polymaker(S, ox, oy, ds):
+    def P(pts, fill, stroke, sw=1.0, dash=None, fop=1.0):
+        d = "M" + " L".join(f"{ox+x*ds:.1f},{oy+y*ds:.1f}" for x, y in pts) + " Z"
+        a = (f'<path d="{d}" fill="{fill}" fill-opacity="{fop}" stroke="{stroke}" '
+             f'stroke-width="{sw}" stroke-linejoin="round"')
+        if dash:
+            a += f' stroke-dasharray="{dash}"'
+        S.append(a + "/>")
+    return P
+
+
+def _seg(S, ox, oy, ds, p, q, c, sw, dash=None):
+    a = (f'<line x1="{ox+p[0]*ds:.1f}" y1="{oy+p[1]*ds:.1f}" x2="{ox+q[0]*ds:.1f}" '
+         f'y2="{oy+q[1]*ds:.1f}" stroke="{c}" stroke-width="{sw}"')
+    if dash:
+        a += f' stroke-dasharray="{dash}"'
+    S.append(a + "/>")
+
+
+def _arrow(S, ox, oy, ds, x1, y1, x2, y2, color, sw=1.6, hl=6):
+    ax, ay, bx, by = ox + x1 * ds, oy + y1 * ds, ox + x2 * ds, oy + y2 * ds
+    S.append(f'<line x1="{ax:.1f}" y1="{ay:.1f}" x2="{bx:.1f}" y2="{by:.1f}" stroke="{color}" stroke-width="{sw}"/>')
+    ang = math.atan2(by - ay, bx - ax)
+    for da in (0.5, -0.5):
+        hx, hy = bx - hl * math.cos(ang + da), by - hl * math.sin(ang + da)
+        S.append(f'<line x1="{bx:.1f}" y1="{by:.1f}" x2="{hx:.1f}" y2="{hy:.1f}" stroke="{color}" stroke-width="{sw}"/>')
+
+
+def geom_clean(ox, oy, ds):
+    """Two cleaning ops: 2.5D/3D -> 2D footprint, and invalid -> repaired."""
+    S = []
+    P = _polymaker(S, ox, oy, ds)
+    
+    # 1) 2.5D / 3D building flattened to a 2D footprint
+    # Base shifted left from 24 to 12
+    base = _rect(12, 41, 29, 18, -6)
+    roof = [(x + 5, y - 14) for x, y in base]
+    P(base, C_GHOST, C_GHOST, 1.0, None, 0.10)
+    for b_, r_ in zip(base, roof):
+        _seg(S, ox, oy, ds, b_, r_, C_GHOST, 0.9)
+    P(roof, "#ffffff", C_GHOST, 1.0, None, 0.0)
+    
+    # Arrow shifted left and compressed slightly to fit the new layout
+    _arrow(S, ox, oy, ds, 34, 36, 44, 36, C_ACC, 1.5)
+    
+    # Footprint shifted left from 75 to 56
+    P(_rect(60, 37, 26, 17, -2), C_BLD, C_BLD, 1.3, None, 0.30)
+    
+    # 2) invalid self-intersecting polygon repaired to a clean footprint
+    # Bow-tie shifted left from 115 to 88
+    bow = [(92, 28), (116, 28), (92, 47), (116, 47)]   # crossing vertex order -> bow-tie
+    P(bow, "none", C_NO, 1.2, "1.8,1.5", 0.0)
+    
+    # Arrow shifted left
+    _arrow(S, ox, oy, ds, 114, 37, 124, 37, C_ACC, 1.5)
+    
+    # Final footprint shifted left from 178 to 142
+    P(_rect(140, 37, 24, 17, 3), C_BLD, C_BLD, 1.3, None, 0.30)
+    
+    return S
+
+
+def dedup(ox, oy, ds):
+    """A smaller duplicate sub-part overlapping a larger footprint is discarded."""
+    S = []
+    P = _polymaker(S, ox, oy, ds)
+    big = _rect(36, 36, 40, 28, -4)
+    P(big, C_BLD, C_BLD, 1.3, None, 0.28)
+    small = _rect(48, 30, 18, 13, 11)
+    P(small, C_NO, C_NO, 1.0, "1.6,1.4", 0.12)
+    X, Y = ox + 48 * ds, oy + 30 * ds
+    s = 4.6
+    S.append(f'<path d="M{X-s},{Y-s} L{X+s},{Y+s} M{X+s},{Y-s} L{X-s},{Y+s}" stroke="{C_NO}" stroke-width="1.6"/>')
+    return S
+
+
+def admin(ox, oy, ds):
+    """Building centroids spatially joined to nested NUTS3 / LAU boundaries."""
+    S = []
+    P = _polymaker(S, ox, oy, ds)
+    # irregular, organic-looking administrative boundaries (not boxes / hexes)
+    nuts = [(9, 27), (19, 14), (34, 10), (49, 16), (63, 8), (80, 11),
+            (97, 9), (111, 21), (105, 35), (110, 47), (92, 53), (74, 49),
+            (58, 56), (41, 51), (27, 53), (16, 43)]
+    P(nuts, C_ACC, C_ACC, 1.1, "3,2.5", 0.04)
+    lau = [(45, 24), (55, 19), (67, 21), (78, 28), (81, 38),
+           (73, 47), (60, 49), (49, 45), (42, 36), (41, 29)]
+    P(lau, C_ACC, C_ACC, 1.0, None, 0.10)
+    for cx, cy, w, h, a in [(56, 30, 12, 9, -7), (69, 38, 10, 8, 9), (52, 40, 9, 7, 4)]:
+        P(_rect(cx, cy, w, h, a), C_BLD, C_BLD, 1.0, None, 0.32)
+        S.append(f'<circle cx="{ox+cx*ds:.1f}" cy="{oy+cy*ds:.1f}" r="1.7" fill="{C_ACC}"/>')
+    S.append(f'<text x="{ox+5*ds:.1f}" y="{oy+10*ds:.1f}" font-size="7.5" fill="{C_ACC}" '
+             f'font-family="Helvetica" font-weight="bold">NUTS3</text>')
+    S.append(f'<text x="{ox+64*ds:.1f}" y="{oy+19*ds:.1f}" font-size="7" fill="#256a63" '
+             f'font-family="Helvetica" font-weight="bold">LAU</text>')
     return S
 
 
