@@ -159,9 +159,11 @@ def _calculate_city_stats(f: Path):
     gdf['h_0_5'] = (gdf['height'] > 0) & (gdf['height'] <= 5)
     gdf['h_5_10'] = (gdf['height'] > 5) & (gdf['height'] <= 10)
     gdf['h_10_20'] = (gdf['height'] > 10) & (gdf['height'] <= 20)
-    gdf['h_20_inf'] = (gdf['height'] > 20)
+    gdf['h_20_50'] = (gdf['height'] > 20) & (gdf['height'] <= 50)
+    gdf['h_50_inf'] = (gdf['height'] > 50)
 
-    gdf['f_0_3'] = (gdf['floors'] > 0) & (gdf['floors'] <= 3)
+    gdf['f_0_1'] = (gdf['floors'] > 0) & (gdf['floors'] <= 1)
+    gdf['f_1_3'] = (gdf['floors'] > 1) & (gdf['floors'] <= 3)
     gdf['f_4_6'] = (gdf['floors'] > 3) & (gdf['floors'] <= 6)
     gdf['f_7_inf'] = (gdf['floors'] > 6)
 
