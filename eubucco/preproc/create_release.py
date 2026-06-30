@@ -219,10 +219,10 @@ def _convert_to_release_schema(df: pd.DataFrame, source_mapping_path: str) -> gp
     ]
     special_case_germany_missing_agricultural = [
         {
-            "when": (df["type_source"] == "31001_2000") & (df["subtype_pred"].isin(["agricultural", "industrial"])),
-            "then_value": df["subtype_pred"],
+            "when": (df["type_source"] == "31001_2000") & (df["type_pred"].isin(["agricultural", "industrial"])),
+            "then_value": df["type_pred"],
             "then_source": "estimated",
-            "then_conf_lo": df["subtype_confidence"],
+            "then_conf_lo": df["type_confidence"],
         },
     ]
 
