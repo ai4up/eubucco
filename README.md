@@ -104,6 +104,10 @@ Creating the final release files:
 - Regional and city-level statistics calculation
 - Prediction quality metrics calculation
 
+### 9. Publication (`6-upload`)
+The release is uploaded to the EUBUCCO server for public distribution. The publication workflow is implemented in the **[eubucco.com](https://github.com/ai4up/eubucco.com)** repository. See [`create-release.md`](https://github.com/ai4up/eubucco.com/blob/main/create-release.md) for details.
+
+
 ### Pipeline Orchestration
 
 The pipeline is orchestrated on HPC Slurm clusters using the **[slurm-pipeline](https://github.com/ai4up/slurm-pipeline)** orchestrator. Pipeline configurations are defined in YAML files in `/database/preprocessing/` and can be executed either through the orchestrator or via individual execution scripts.
