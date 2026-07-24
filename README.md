@@ -92,12 +92,13 @@ Conflates datasets from multiple sources using ML-based matching. This step is i
 - Matching: ML-based building footprint matching (XGBoost model)
 - Attribute merging: Merging of attributes across multiple sources
 
-### 6. Feature Engineering (`5-feature-engineering`)
+### 6. Feature Engineering
 Engineering features for building attribute prediction. This step is implemented in the **[eubucco-features](https://github.com/ai4up/eubucco-features)** repository.
 
+### 7. Attribute Prediction
 Building attributes are predicted using models from the **[ufo-prediction](https://github.com/ai4up/ufo-prediction)** repository.
 
-### 7. Release Generation (`5-release`)
+### 8. Release Generation (`5-release`)
 Creating the final release files:
 - Final data packaging and schema enforcement
 - Regional and city-level statistics calculation
